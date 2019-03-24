@@ -22,14 +22,14 @@ namespace Kuna.Net
         {         
             if (!signed)
                 return parameters;
-            var uriObj = new Uri(uri);
+         //   var uriObj = new Uri(uri);
             parameters.Add("access_key", Credentials.Key.GetString());
             parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
             parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
 
             var paramString = parameters.CreateParamString(false);
             var signData = method + "|";        
-            signData += uriObj.AbsolutePath + "|";
+            signData += uri+ "|";
             signData += paramString;
             byte[] signBytes;
             lock (encryptLock)

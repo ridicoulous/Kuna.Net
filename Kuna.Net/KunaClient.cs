@@ -15,7 +15,7 @@ namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClient
     {
-        public KunaClient(KunaClientOptions options, AuthenticationProvider authenticationProvider) : base(options, authenticationProvider)
+        public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
             postParametersPosition = PostParameters.InUri;
             requestBodyFormat = RequestBodyFormat.Json;
@@ -99,17 +99,19 @@ namespace Kuna.Net
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
             var uriString = uri.ToString();
+            if (authProvider != null)
+                parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
             if ((method == Constants.GetMethod || method == Constants.DeleteMethod || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
                 uriString += "?" + parameters.CreateParamString(true);
             }
+
             var request = RequestFactory.Create(uriString);
             request.ContentType = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
             request.Method = method;
             //var headers = new Dictionary<string, string>();
-            if (authProvider != null)
-                parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters,  signed);
+           
 
             if ((method == Constants.PostMethod || method == Constants.PutMethod) && postParametersPosition != PostParameters.InUri)
             {
@@ -118,6 +120,7 @@ namespace Kuna.Net
                 else
                     WriteParamBody(request, "{}");
             }
+          
             return request;
         }
         protected Uri GetUrl(string endpoint, string version = null)
@@ -125,7 +128,12 @@ namespace Kuna.Net
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
         }
 
-   
+        public void SetApiCredentials(string apiKey, string apiSecret)
+        {
+            throw new NotImplementedException();
+        }
+
+
 
         #endregion
 

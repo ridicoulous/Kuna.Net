@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kuna.Net", "Kuna.Net\Kuna.Net.csproj", "{03156530-1770-4B98-8CBF-DF541B7DB393}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kuna.Net", "Kuna.Net\Kuna.Net.csproj", "{03156530-1770-4B98-8CBF-DF541B7DB393}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kuna.Net.SampleApp", "Kuna.Net.SampleApp\Kuna.Net.SampleApp.csproj", "{452B1BB2-62AC-4AC8-822B-C3AEC89BA14B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{03156530-1770-4B98-8CBF-DF541B7DB393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03156530-1770-4B98-8CBF-DF541B7DB393}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03156530-1770-4B98-8CBF-DF541B7DB393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{452B1BB2-62AC-4AC8-822B-C3AEC89BA14B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{452B1BB2-62AC-4AC8-822B-C3AEC89BA14B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{452B1BB2-62AC-4AC8-822B-C3AEC89BA14B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{452B1BB2-62AC-4AC8-822B-C3AEC89BA14B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
