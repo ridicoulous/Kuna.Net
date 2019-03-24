@@ -8,8 +8,4 @@
     <PackageReference Include="CryptoExchange.Net" Version="2.0.13" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Objects\" />
-  </ItemGroup>
-
 </Project>

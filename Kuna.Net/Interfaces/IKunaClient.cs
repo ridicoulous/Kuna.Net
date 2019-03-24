@@ -1,10 +1,20 @@
-﻿using System;
+﻿using CryptoExchange.Net.Objects;
+using Kuna.Net.Objects;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kuna.Net.Interfaces
 {
     public interface IKunaClient
     {
+        CallResult<DateTime> GetServerTime();
+        CallResult<KunaTickerInfo> GetMarketInfo(string market);
+        CallResult<KunaOrderBook> GetOrderBook(string market);
+        CallResult<List<KunaTrade>> GetTrades(string market);
+        CallResult<KunaAccountInfo> GetAccountInfo();
+        CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market);
+        CallResult<KunaPlacedOrder> CancelOrder(long orderId);
+        CallResult<List<KunaPlacedOrder>> GetActiveOrders(string market);
+        CallResult<List<KunaTrade>> GetMyTrades(string market);
     }
 }
