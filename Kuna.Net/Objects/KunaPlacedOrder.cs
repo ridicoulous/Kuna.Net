@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Kuna.Net.Converters;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,10 +11,10 @@ namespace Kuna.Net.Objects
         [JsonProperty("id")]
         public long Id { get; set; }
 
-        [JsonProperty("side")]
+        [JsonProperty("side"), JsonConverter(typeof(OrderSideConverter))]
         public OrderSide Side { get; set; }
 
-        [JsonProperty("ord_type")]
+        [JsonProperty("ord_type"), JsonConverter(typeof(OrderTypeConverter))]
         public OrderType OrderType { get; set; }
 
         [JsonProperty("price")]

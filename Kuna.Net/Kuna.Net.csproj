@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CryptoExchange.Net" Version="2.0.13" />
+    <PackageReference Include="Pusher.NetStandard" Version="0.5.2" />
   </ItemGroup>
 
 </Project>

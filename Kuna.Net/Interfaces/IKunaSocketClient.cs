@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Kuna.Net.Objects;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kuna.Net.Interfaces
 {
     public interface IKunaSocketClient
     {
+        void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent> onUpdate);
+        void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate);
+  
     }
 }
