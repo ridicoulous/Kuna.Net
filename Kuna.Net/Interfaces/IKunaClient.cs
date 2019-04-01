@@ -16,7 +16,7 @@ namespace Kuna.Net.Interfaces
         CallResult<DateTime> GetServerTime();
         CallResult<KunaTickerInfo> GetMarketInfo(string market);
         CallResult<KunaOrderBook> GetOrderBook(string market);
-        CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, int? fromId = null, int? toId = null);
+        CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit=100);
         CallResult<KunaAccountInfo> GetAccountInfo();
         CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market);
         CallResult<KunaPlacedOrder> CancelOrder(long orderId);
