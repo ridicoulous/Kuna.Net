@@ -39,10 +39,12 @@ namespace Kuna.Net.SampleApp
             DateTime from = DateTime.UtcNow.AddMonths(-3);
             while (from < DateTime.UtcNow)
             {
-                var data = _kunaClient.GetTrades(market, from);
+                var data = _kunaClient.GetTrades(market);
                 if (data.Success)
                 {
-                    from = data.Data.Max(c => c.Timestamp);
+                    from = data.Data.Max(c => c.Timestamp).AddSeconds(1);
+                    Console.WriteLine($"{from}:{data.Data.Max(c => c.Id)} {data.Data.Min(c => c.Id)}");
+
                     Console.WriteLine(from);
                     yield return data.Data;
                 }

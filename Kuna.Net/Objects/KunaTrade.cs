@@ -1,5 +1,6 @@
 ﻿using Kuna.Net.Converters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 
 namespace Kuna.Net.Objects
@@ -21,7 +22,7 @@ namespace Kuna.Net.Objects
         [JsonProperty("market")]
         public string Market { get; set; }
 
-        [JsonProperty("created_at")]
+        [JsonProperty("created_at"), JsonConverter(typeof(IsoDateTimeConverter))]
         public DateTime Timestamp { get; set; }
 
         [JsonProperty("side")]

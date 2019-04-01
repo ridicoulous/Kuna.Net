@@ -61,12 +61,22 @@ namespace Kuna.Net
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate=null, int? fromId = null, int? toId = null)
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate=null, long? fromId = null, long? toId = null, int limit=100)
         {
             var parameters = new Dictionary<string, object>() { { "market", market } };
-            parameters.AddOptionalParameter("timestamp",JsonConvert.SerializeObject(fromDate,new TimestampSecondsConverter()));
+            if (fromDate != null)
+            {
+                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
+            }
+            
             parameters.AddOptionalParameter("from", fromId);
             parameters.AddOptionalParameter("to", toId);
+            if(limit>1000)
+            {
+                limit = 1000;
+            }
+            parameters.AddOptionalParameter("limit", limit);
+
             var result = ExecuteRequest<List<KunaTrade>>(GetUrl(AllTradesEndpoint), "GET", parameters).Result;
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
