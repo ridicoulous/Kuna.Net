@@ -27,7 +27,7 @@ namespace Kuna.Net.Objects
         [JsonProperty("side")]
         public string Side { get; set; }
 
-        [JsonProperty("trend")]
+        [JsonProperty("trend"), JsonConverter(typeof(OrderSideConverter))]
         public OrderType TradeType { get; set; }
     }
 
