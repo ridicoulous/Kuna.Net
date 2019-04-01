@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Version>1.0.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>c# api wrapper for kuna.io crypto exchange</Description>
+    <Copyright>ridicoulous</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/ridicoulous/Kuna.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ridicoulous/Kuna.Net</RepositoryUrl>
+    <PackageTags>kuna.io kuna</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
