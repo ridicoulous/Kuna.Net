@@ -25,7 +25,7 @@ namespace Kuna.Net
         private const string MarketTradesChannel = "market-{}-global";
 
         #endregion
-        public void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent> onUpdate)
+        public void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent,string> onUpdate)
         {
             var _myChannel = _pusherClient.Subscribe(FillPathParameter(MarketTradesChannel, market));
             _myChannel.Bind("update", (dynamic data) =>
@@ -33,7 +33,7 @@ namespace Kuna.Net
                 string t = Convert.ToString(data);
                 Console.WriteLine(t);
                 KunaOrderBookUpdateEvent deserialized = Deserialize<KunaOrderBookUpdateEvent>(t).Data;
-                onUpdate(deserialized);
+                onUpdate(deserialized,market);
             });
 
         }

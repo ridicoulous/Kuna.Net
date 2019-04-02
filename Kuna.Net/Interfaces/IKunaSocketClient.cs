@@ -6,7 +6,7 @@ namespace Kuna.Net.Interfaces
 {
     public interface IKunaSocketClient
     {
-        void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent> onUpdate);
+        void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent, string> onUpdate);
         void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate);
   
     }
