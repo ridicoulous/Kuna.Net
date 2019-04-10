@@ -36,9 +36,9 @@ namespace Kuna.Net
                 signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
             parameters.Add("signature", ByteArrayToString(signBytes));
 
-            if (method != Constants.GetMethod)
-                foreach (var kvp in parameters)
-                    parameters.Add(kvp.Key, kvp.Value);
+            //if (method != Constants.GetMethod)
+            //    foreach (var kvp in parameters)
+            //        parameters.Add(kvp.Key, kvp.Value);
 
             return parameters;
         }

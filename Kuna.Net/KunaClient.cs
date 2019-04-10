@@ -4,11 +4,13 @@ using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Requests;
+using Kuna.Net.Converters;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Kuna.Net
@@ -25,7 +27,7 @@ namespace Kuna.Net
         private const string MarketInfoEndpoint = "tickers/{}";
         private const string OrderBookEndpoint = "depth";
         private const string AllTradesEndpoint = "trades";
-        private const string AccountInfoEndpoint= "members/me";
+        private const string AccountInfoEndpoint = "members/me";
         private const string OrdersEndpoint = "orders";
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
@@ -39,17 +41,17 @@ namespace Kuna.Net
             //if (limit > 1000 || limit < 1)
             //    return new CallResult<LiquidQuoineDefaultResponse<LiquidQuoineExecution>>(null, new ServerError("Limit should be between 1 and 1000"));
 
-            var result =  ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").Result;
+            var result = ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").Result;
             long seconds = long.Parse(result.Data);
-            var dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
 
-            return new CallResult<DateTime>(dateTime,null);
+            return new CallResult<DateTime>(dateTime, null);
         }
 
         public CallResult<KunaTickerInfo> GetMarketInfo(string market)
         {
-         //   var parameters = new Dictionary<string, object>() { { "market", market } };
-            var result = ExecuteRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint,market)), "GET").Result;
+            //   var parameters = new Dictionary<string, object>() { { "market", market } };
+            var result = ExecuteRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), "GET").Result;
             return new CallResult<KunaTickerInfo>(result.Data, result.Error);
 
         }
@@ -61,17 +63,17 @@ namespace Kuna.Net
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate=null, long? fromId = null, long? toId = null, int limit=100)
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 100)
         {
             var parameters = new Dictionary<string, object>() { { "market", market } };
             if (fromDate != null)
             {
                 parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
             }
-            
+
             parameters.AddOptionalParameter("from", fromId);
             parameters.AddOptionalParameter("to", toId);
-            if(limit>1000)
+            if (limit > 1000)
             {
                 limit = 1000;
             }
@@ -81,29 +83,49 @@ namespace Kuna.Net
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
         public CallResult<KunaAccountInfo> GetAccountInfo()
-        {      
-            var result = ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET",null,true).Result;
+        {
+            var result = ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET", null, true).Result;
             return new CallResult<KunaAccountInfo>(result.Data, result.Error);
         }
 
+
         public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market)
         {
-            throw new NotImplementedException();
+            var parameters = new Dictionary<string, object>()
+            {
+                { "side", JsonConvert.SerializeObject(side,new OrderSideConverter()) },
+                { "type", JsonConvert.SerializeObject(type,new OrderTypeConverter()) },
+                { "volume", volume },
+                { "market", market },
+                { "price", price.ToString(CultureInfo.GetCultureInfo("en-US")) }
+            };
+
+            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(OrdersEndpoint), "POST", parameters,true).Result;
+            return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
         public CallResult<KunaPlacedOrder> CancelOrder(long orderId)
         {
-            throw new NotImplementedException();
+            var parameters = new Dictionary<string, object>() { { "id", orderId } };
+
+            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(CancelOrderEndpoint), "POST", parameters,true).Result;
+            return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
         public CallResult<List<KunaPlacedOrder>> GetActiveOrders(string market)
         {
-            throw new NotImplementedException();
+            var parameters = new Dictionary<string, object>() { { "market", market } };
+
+            var result = ExecuteRequest<List<KunaPlacedOrder>>(GetUrl(OrdersEndpoint), "GET", parameters,true).Result;
+            return new CallResult<List<KunaPlacedOrder>>(result.Data, result.Error);
         }
 
         public CallResult<List<KunaTrade>> GetMyTrades(string market)
         {
-            throw new NotImplementedException();
+            var parameters = new Dictionary<string, object>() { { "market", market } };
+
+            var result = ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters,true).Result;
+            return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
 
         #region BaseMethodOverride
@@ -124,7 +146,7 @@ namespace Kuna.Net
             request.Accept = Constants.JsonContentHeader;
             request.Method = method;
             //var headers = new Dictionary<string, string>();
-           
+
 
             if ((method == Constants.PostMethod || method == Constants.PutMethod) && postParametersPosition != PostParameters.InUri)
             {
@@ -133,7 +155,7 @@ namespace Kuna.Net
                 else
                     WriteParamBody(request, "{}");
             }
-          
+
             return request;
         }
         protected Uri GetUrl(string endpoint, string version = null)
@@ -145,6 +167,8 @@ namespace Kuna.Net
         {
             throw new NotImplementedException();
         }
+
+
 
 
 
