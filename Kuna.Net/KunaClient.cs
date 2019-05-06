@@ -95,7 +95,7 @@ namespace Kuna.Net
             {
                 { "side", JsonConvert.SerializeObject(side,new OrderSideConverter()) },
                 { "type", JsonConvert.SerializeObject(type,new OrderTypeConverter()) },
-                { "volume", volume },
+                { "volume", volume.ToString(CultureInfo.GetCultureInfo("en-US")) },
                 { "market", market },
                 { "price", price.ToString(CultureInfo.GetCultureInfo("en-US")) }
             };
