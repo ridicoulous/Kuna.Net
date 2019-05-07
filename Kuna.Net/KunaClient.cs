@@ -35,12 +35,6 @@ namespace Kuna.Net
         #endregion
         public CallResult<DateTime> GetServerTime()
         {
-            //var parameters = new Dictionary<string, object>() { { "product_id", id } };
-            //parameters.AddOptionalParameter("limit", limit);
-            //parameters.AddOptionalParameter("page", page);
-            //if (limit > 1000 || limit < 1)
-            //    return new CallResult<LiquidQuoineDefaultResponse<LiquidQuoineExecution>>(null, new ServerError("Limit should be between 1 and 1000"));
-
             var result = ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").Result;
             long seconds = long.Parse(result.Data);
             var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
@@ -49,11 +43,9 @@ namespace Kuna.Net
         }
 
         public CallResult<KunaTickerInfo> GetMarketInfo(string market)
-        {
-            //   var parameters = new Dictionary<string, object>() { { "market", market } };
+        {            
             var result = ExecuteRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), "GET").Result;
             return new CallResult<KunaTickerInfo>(result.Data, result.Error);
-
         }
 
         public CallResult<KunaOrderBook> GetOrderBook(string market)
@@ -163,7 +155,7 @@ namespace Kuna.Net
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
         }
 
-        public void SetApiCredentials(string apiKey, string apiSecret)
+        public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo()
         {
             throw new NotImplementedException();
         }
