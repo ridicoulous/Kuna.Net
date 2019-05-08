@@ -23,8 +23,8 @@ namespace Kuna.Net.Objects
         [JsonProperty("avg_price")]
         public decimal AvgPrice { get; set; }
 
-        [JsonProperty("state")]
-        public string State { get; set; }
+        [JsonProperty("state"), JsonConverter(typeof(OrderStatusConverter))]
+        public OrderState State { get; set; }
 
         [JsonProperty("market")]
         public string Market { get; set; }

@@ -104,10 +104,15 @@ namespace Kuna.Net
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaPlacedOrder>> GetActiveOrders(string market)
+        public CallResult<List<KunaPlacedOrder>> GetMyOrders(string market, OrderState orderState = OrderState.Wait, int page = 1, string sort = "desc")
         {
-            var parameters = new Dictionary<string, object>() { { "market", market } };
-
+            var parameters = new Dictionary<string, object>()
+            {
+                { "market", market },
+                { "state", JsonConvert.SerializeObject(orderState, new OrderStatusConverter())},
+                { "order_by", sort },
+                { "page", page }
+            };
             var result = ExecuteRequest<List<KunaPlacedOrder>>(GetUrl(OrdersEndpoint), "GET", parameters,true).Result;
             return new CallResult<List<KunaPlacedOrder>>(result.Data, result.Error);
         }
@@ -115,7 +120,6 @@ namespace Kuna.Net
         public CallResult<List<KunaTrade>> GetMyTrades(string market)
         {
             var parameters = new Dictionary<string, object>() { { "market", market } };
-
             var result = ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters,true).Result;
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }

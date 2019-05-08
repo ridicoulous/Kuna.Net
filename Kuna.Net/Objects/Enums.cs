@@ -14,4 +14,10 @@ namespace Kuna.Net.Objects
         Limit,
         Market
     }
+    public enum OrderState
+    {
+        Wait,
+        Cancel,
+        Done
+    }
 }

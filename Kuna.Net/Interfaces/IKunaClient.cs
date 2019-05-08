@@ -14,7 +14,7 @@ namespace Kuna.Net.Interfaces
         CallResult<KunaAccountInfo> GetAccountInfo();
         CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market);
         CallResult<KunaPlacedOrder> CancelOrder(long orderId);
-        CallResult<List<KunaPlacedOrder>> GetActiveOrders(string market);
+        CallResult<List<KunaPlacedOrder>> GetMyOrders(string market, OrderState orderState=OrderState.Wait, int page = 1, string sort = "desc" );
         CallResult<List<KunaTrade>> GetMyTrades(string market);
         CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
     }
