@@ -29,6 +29,8 @@ namespace Kuna.Net
         private const string AllTradesEndpoint = "trades";
         private const string AccountInfoEndpoint = "members/me";
         private const string OrdersEndpoint = "orders";
+        private const string SingleOrderEndpoint = "order";
+
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
 
@@ -111,10 +113,23 @@ namespace Kuna.Net
                 { "market", market },
                 { "state", JsonConvert.SerializeObject(orderState, new OrderStatusConverter())},
                 { "order_by", sort },
-                { "page", page }
+                { "page", page }   
             };
+           
             var result = ExecuteRequest<List<KunaPlacedOrder>>(GetUrl(OrdersEndpoint), "GET", parameters,true).Result;
             return new CallResult<List<KunaPlacedOrder>>(result.Data, result.Error);
+        }
+        public CallResult<KunaPlacedOrder> GetOrderInfo(long orderId)
+        {
+            var parameters = new Dictionary<string, object>()
+            {
+                { "id", orderId },
+           
+
+            };
+           
+            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(SingleOrderEndpoint), "GET", parameters, true).Result;
+            return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
         public CallResult<List<KunaTrade>> GetMyTrades(string market)
@@ -165,7 +180,6 @@ namespace Kuna.Net
             var result = ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).Result;
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
         }
-
 
 
 
