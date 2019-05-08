@@ -31,7 +31,7 @@ namespace Kuna.Net
             _myChannel.Bind("update", (dynamic data) =>
             {
                 string t = Convert.ToString(data);
-                Console.WriteLine(t);
+                //Console.WriteLine(t);
                 KunaOrderBookUpdateEvent deserialized = Deserialize<KunaOrderBookUpdateEvent>(t).Data;
                 onUpdate(deserialized,market);
             });
@@ -52,7 +52,7 @@ namespace Kuna.Net
 
         protected override bool SocketReconnect(SocketSubscription subscription, TimeSpan disconnectedTime)
         {
-            return true;
+            return false;
         }
     }
 }
