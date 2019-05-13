@@ -30,8 +30,7 @@ namespace Kuna.Net
             var _myChannel = _pusherClient.Subscribe(FillPathParameter(MarketTradesChannel, market));
             _myChannel.Bind("update", (dynamic data) =>
             {
-                string t = Convert.ToString(data);
-                //Console.WriteLine(t);
+                string t = Convert.ToString(data);          
                 KunaOrderBookUpdateEvent deserialized = Deserialize<KunaOrderBookUpdateEvent>(t).Data;
                 onUpdate(deserialized,market);
             });

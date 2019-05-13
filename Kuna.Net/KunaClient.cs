@@ -62,7 +62,7 @@ namespace Kuna.Net
             var parameters = new Dictionary<string, object>() { { "market", market } };
             if (fromDate != null)
             {
-                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
+                parameters.AddOptionalParameter("created_at", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
             }
 
             parameters.AddOptionalParameter("from", fromId);
@@ -124,21 +124,30 @@ namespace Kuna.Net
             var parameters = new Dictionary<string, object>()
             {
                 { "id", orderId },
-           
-
             };
            
             var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(SingleOrderEndpoint), "GET", parameters, true).Result;
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetMyTrades(string market)
+        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="asc")
         {
-            var parameters = new Dictionary<string, object>() { { "market", market } };
+            var parameters = new Dictionary<string, object>() { { "market", market }, { "order_by", sort }, };
+            if (fromDate != null)
+            {
+                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
+            }
+
+            parameters.AddOptionalParameter("from", fromId);
+            parameters.AddOptionalParameter("to", toId);
+            if (limit > 1000)
+            {
+                limit = 1000;
+            }
+            parameters.AddOptionalParameter("limit", limit);
             var result = ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters,true).Result;
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
-
         #region BaseMethodOverride
         protected override IRequest ConstructRequest(Uri uri, string method, Dictionary<string, object> parameters, bool signed)
         {
