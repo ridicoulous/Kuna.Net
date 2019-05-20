@@ -57,12 +57,12 @@ namespace Kuna.Net
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 100)
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc")
         {
-            var parameters = new Dictionary<string, object>() { { "market", market } };
-            if (fromDate != null)
+            var parameters = new Dictionary<string, object>() { { "market", market }, {"order_by",sort } };
+            if (toDate != null)
             {
-                parameters.AddOptionalParameter("created_at", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
+                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
             }
 
             parameters.AddOptionalParameter("from", fromId);
@@ -130,12 +130,13 @@ namespace Kuna.Net
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="asc")
+        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="asc")
         {
             var parameters = new Dictionary<string, object>() { { "market", market }, { "order_by", sort }, };
-            if (fromDate != null)
-            {
-                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(fromDate, new TimestampSecondsConverter()));
+            if (toDate != null)
+            {                
+                parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
+
             }
 
             parameters.AddOptionalParameter("from", fromId);
