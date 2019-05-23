@@ -16,7 +16,7 @@ namespace Kuna.Net
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();
-
+            
         }
         #region Channels
         /// <summary>
@@ -48,7 +48,13 @@ namespace Kuna.Net
             });
 
         }
-
+        
+        public override void Dispose()
+        {            
+            _pusherClient.UnbindAll();
+            _pusherClient.Disconnect();           
+            base.Dispose();            
+        }
         protected override bool SocketReconnect(SocketSubscription subscription, TimeSpan disconnectedTime)
         {
             return false;

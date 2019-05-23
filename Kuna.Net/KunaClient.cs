@@ -189,9 +189,7 @@ namespace Kuna.Net
             string url = "https://api.kuna.io/v3/markets";
             var result = ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).Result;
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
-        }
-
-
+        }           
 
 
         #endregion
