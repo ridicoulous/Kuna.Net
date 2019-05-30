@@ -5,13 +5,14 @@ using Kuna.Net.Objects;
 using PusherClient;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Kuna.Net
 {
     /*wss://pusher.kuna.io/app/4b6a8b2c758be4e58868?protocol=7&client=js&version=3.0.0&flash=false*/
     public class KunaSocketClient : SocketClient, IKunaSocketClient
     {
-        private Pusher _pusherClient;
+        private readonly Pusher _pusherClient;
         public KunaSocketClient(KunaSocketClientOptions options):base(options,null)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
@@ -48,11 +49,13 @@ namespace Kuna.Net
             });
 
         }
-        
+        public override Task UnsubscribeAll()
+        {
+            _pusherClient.Disconnect();
+            return Task.CompletedTask;
+        }
         public override void Dispose()
-        {            
-            _pusherClient.UnbindAll();
-            _pusherClient.Disconnect();           
+        {               
             base.Dispose();            
         }
         protected override bool SocketReconnect(SocketSubscription subscription, TimeSpan disconnectedTime)
