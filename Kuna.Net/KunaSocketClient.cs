@@ -15,6 +15,10 @@ namespace Kuna.Net
     public class KunaSocketClient : SocketClient, IKunaSocketClient
     {
         private readonly Pusher _pusherClient;
+        public delegate void OnStateChanged(ConnectionState state);
+        public event OnStateChanged StateChanged;
+        public delegate void OnPusherError(PusherException ex);
+        public event OnPusherError PusherError;
         public KunaSocketClient(KunaSocketClientOptions options):base(options,null)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
@@ -22,11 +26,11 @@ namespace Kuna.Net
             _pusherClient.Error += _pusherClient_Error;
             _pusherClient.ConnectionStateChanged += _pusherClient_ConnectionStateChanged;
         }
-
+        
         private void _pusherClient_ConnectionStateChanged(object sender, ConnectionState state)
         {
             log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Pusher state is {state.ToString()}");
-
+            StateChanged(state);
             switch (state)
             {
                 case ConnectionState.Initialized:
@@ -48,7 +52,7 @@ namespace Kuna.Net
         private void _pusherClient_Error(object sender, PusherException error)
         {
             log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, error.ToString());
-
+            PusherError(error);
         }
         #region Channels
         /// <summary>
