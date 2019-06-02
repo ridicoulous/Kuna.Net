@@ -8,6 +8,6 @@ namespace Kuna.Net.Interfaces
     {
         void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent, string> onUpdate);
         void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate);
-  
+        
     }
 }
