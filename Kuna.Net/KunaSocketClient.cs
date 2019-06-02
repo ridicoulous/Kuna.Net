@@ -30,7 +30,7 @@ namespace Kuna.Net
         private void _pusherClient_ConnectionStateChanged(object sender, ConnectionState state)
         {
             log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Pusher state is {state.ToString()}");
-            StateChanged(state);
+            StateChanged?.Invoke(state);
             switch (state)
             {
                 case ConnectionState.Initialized:
@@ -52,7 +52,7 @@ namespace Kuna.Net
         private void _pusherClient_Error(object sender, PusherException error)
         {
             log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, error.ToString());
-            PusherError(error);
+            PusherError?.Invoke(error);
         }
         #region Channels
         /// <summary>
