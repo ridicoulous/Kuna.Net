@@ -179,6 +179,7 @@ namespace Kuna.Net
 
             return request;
         }
+        
         protected Uri GetUrl(string endpoint, string version = null)
         {
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
@@ -189,9 +190,37 @@ namespace Kuna.Net
             string url = "https://api.kuna.io/v3/markets";
             var result = ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).Result;
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
-        }           
+        }
 
+        public CallResult<string> Auth()
+        {
+            string authEndpoint = "https://api.kuna.io/v3/auth/me";
+            var result = ExecuteRequest<object>(new Uri(authEndpoint), "GET", null, true).Result;
+            return new CallResult<string>("",null);
+        }
 
+        /*
+         
+         const apiPath = '/v3/auth/kuna_codes/issued-by-me'
+const nonce = Date.now().toString()
+const body = {}
+let signature = `${apiPath}${nonce}${JSON.stringify(body)}`
+const sig = crypto.createHmac('sha384', apiSecret).update(signature)
+const shex = sig.digest('hex')
+const options = {
+url: `https://api.kuna.io${apiPath}`,
+headers: {
+'kun-nonce': nonce,
+'kun-apikey': apiKey,
+'kun-signature': shex
+},
+body: body,
+json: true
+}
+request.post(options, (error, response, body) => {
+console.log(body);
+})
+         */
         #endregion
 
     }

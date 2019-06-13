@@ -7,6 +7,7 @@ namespace Kuna.Net.Interfaces
 {
     public interface IKunaClient
     {
+        CallResult<string> Auth();
         CallResult<DateTime> GetServerTime();
         CallResult<KunaTickerInfo> GetMarketInfo(string market);
         CallResult<KunaOrderBook> GetOrderBook(string market);
