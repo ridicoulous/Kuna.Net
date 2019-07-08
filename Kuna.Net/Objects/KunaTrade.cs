@@ -30,6 +30,23 @@ namespace Kuna.Net.Objects
 
         [JsonProperty("trend"), JsonConverter(typeof(OrderSideConverter))]
         public OrderSide TradeType { get; set; }
+        public bool IsMaker()
+        {
+            if (String.IsNullOrEmpty(Side))
+            {
+                return false;
+            }
+            if(Side=="ask")
+            {
+                return TradeType == OrderSide.Buy;
+            }
+            if (Side == "bid")
+            {
+                return TradeType == OrderSide.Sell;
+            }
+            else return false;
+
+        }
     }
 
 }

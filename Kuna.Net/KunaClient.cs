@@ -57,7 +57,7 @@ namespace Kuna.Net
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc")
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc")
         {
             var parameters = new Dictionary<string, object>() { { "market", market }, {"order_by",sort } };
             if (toDate != null)
@@ -130,15 +130,13 @@ namespace Kuna.Net
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
 
-        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="asc")
+        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="desc")
         {
             var parameters = new Dictionary<string, object>() { { "market", market }, { "order_by", sort }, };
             if (toDate != null)
             {                
                 parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
-
             }
-
             parameters.AddOptionalParameter("from", fromId);
             parameters.AddOptionalParameter("to", toId);
             if (limit > 1000)
@@ -197,6 +195,12 @@ namespace Kuna.Net
             string authEndpoint = "https://api.kuna.io/v3/auth/me";
             var result = ExecuteRequest<object>(new Uri(authEndpoint), "GET", null, true).Result;
             return new CallResult<string>("",null);
+        }
+
+        public WebCallResult<KunaAccountInfo> GetAccountInfo2()
+        {
+            var result = ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET", null, true).Result;
+            return new WebCallResult<KunaAccountInfo>(result.ResponseStatusCode,result.ResponseHeaders,result.Data,result.Error);
         }
 
         /*

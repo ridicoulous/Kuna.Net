@@ -13,6 +13,7 @@ namespace Kuna.Net.Interfaces
         CallResult<KunaOrderBook> GetOrderBook(string market);
         CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit=1000, string sort = "asc");
         CallResult<KunaAccountInfo> GetAccountInfo();
+        WebCallResult<KunaAccountInfo> GetAccountInfo2();
         CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market);
         CallResult<KunaPlacedOrder> CancelOrder(long orderId);
         CallResult<List<KunaPlacedOrder>> GetMyOrders(string market, OrderState orderState=OrderState.Wait, int page = 1, string sort = "desc");

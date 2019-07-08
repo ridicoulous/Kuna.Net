@@ -29,45 +29,53 @@ namespace Kuna.Net
                 return new Dictionary<string, string>();
 
             var result = new Dictionary<string, string>();
-            
-            result.Add("kun-nonce", Credentials.Key.GetString());
 
-            result.Add("kun-apikey", Credentials.Key.GetString());
-            result.Add("kun-signature", Credentials.Key.GetString());
+            if (uri.Contains("v3"))
+            {
+
+                result.Add("kun-nonce", Credentials.Key.GetString());
+
+                result.Add("kun-apikey", Credentials.Key.GetString());
+                result.Add("kun-signature", Credentials.Key.GetString());
 
 
-            string jsonContent = "";
-            if (method != Constants.GetMethod && method != Constants.DeleteMethod)
-                jsonContent = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-            result.Add("Api-Content-Hash", ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(jsonContent))).ToLower());
-
+                string jsonContent = "";
+                if (method != Constants.GetMethod && method != Constants.DeleteMethod)
+                    jsonContent = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+                result.Add("Api-Content-Hash", ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(jsonContent))).ToLower());
+            }
             //uri = WebUtility.UrlDecode(uri); // Sign needs the query parameters to not be encoded
             //var sign = result["Api-Timestamp"] + uri + method + result["Api-Content-Hash"] + "";
             //result.Add("Api-Signature", ByteToString(encryptorHmac.ComputeHash(Encoding.UTF8.GetBytes(sign))));
             return result;
         }
         public override Dictionary<string, object> AddAuthenticationToParameters(string uri, string method, Dictionary<string, object> parameters, bool signed)
-        {   
+        {
             if (!signed)
                 return parameters;
-         //   var uriObj = new Uri(uri);
-            parameters.Add("access_key", Credentials.Key.GetString());
-            parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
-            parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
+            //   var uriObj = new Uri(uri);
+            if (uri.Contains("v2"))
+            {
+                parameters.Add("access_key", Credentials.Key.GetString());
+                parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
+                parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
 
-            var paramString = parameters.CreateParamString(false);
-            var signData = method + "|";        
-            signData += uri+ "|";
-            signData += paramString;
-            byte[] signBytes;
-            lock (encryptLock)
-                signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
-            parameters.Add("signature", ByteArrayToString(signBytes));
+                var paramString = parameters.CreateParamString(false);
+                var signData = method + "|";
+                signData += uri + "|";
+                signData += paramString;
+                byte[] signBytes;
+                lock (encryptLock)
+                    signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
+                parameters.Add("signature", ByteArrayToString(signBytes));
 
-            //if (method != Constants.GetMethod)
-            //    foreach (var kvp in parameters)
-            //        parameters.Add(kvp.Key, kvp.Value);
-
+                //if (method != Constants.GetMethod)
+                //    foreach (var kvp in parameters)
+                //        parameters.Add(kvp.Key, kvp.Value);
+            }
+            else if (uri.Contains("v3"))
+            {
+            }
             return parameters;
         }
 
