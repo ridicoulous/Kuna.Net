@@ -2,7 +2,7 @@
 
 namespace Kuna.Net
 {
-    public class KunaClientOptions : ClientOptions
+    public class KunaClientOptions : RestClientOptions
     {
         public KunaClientOptions()
         {
