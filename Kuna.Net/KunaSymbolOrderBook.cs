@@ -18,7 +18,7 @@ namespace Kuna.Net
         HttpClient httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
         private readonly int? _orderBookLimit;
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
-        public delegate void OrderBookUpdated(KunaSymbolOrderBook orderBook);
+        public delegate void OrderBookUpdated();
         public event OrderBookUpdated OnOrderBookUpdate;
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
@@ -69,7 +69,7 @@ namespace Kuna.Net
                 var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
                 SetInitialOrderBook(data.Timestamp, data.Asks, data.Bids);
                 LastUpdate = DateTime.UtcNow;
-                OnOrderBookUpdate?.Invoke(this);
+                OnOrderBookUpdate?.Invoke();
                 return new CallResult<bool>(true, null);
             }
             else
