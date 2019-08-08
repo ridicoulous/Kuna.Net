@@ -3,6 +3,7 @@ using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
+using CryptoExchange.Net.RateLimiter;
 using CryptoExchange.Net.Requests;
 using Kuna.Net.Converters;
 using Kuna.Net.Interfaces;
@@ -17,8 +18,12 @@ namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClient
     {
-        public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
+        public KunaClient():base(new KunaClientOptions(),null)
         {
+                
+        }
+        public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
+        {  
             postParametersPosition = PostParameters.InUri;
             requestBodyFormat = RequestBodyFormat.Json;
         }
@@ -40,7 +45,6 @@ namespace Kuna.Net
             var result = ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").Result;
             long seconds = long.Parse(result.Data);
             var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
-
             return new CallResult<DateTime>(dateTime, null);
         }
 
@@ -64,7 +68,6 @@ namespace Kuna.Net
             {
                 parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
             }
-
             parameters.AddOptionalParameter("from", fromId);
             parameters.AddOptionalParameter("to", toId);
             if (limit > 1000)
@@ -101,7 +104,6 @@ namespace Kuna.Net
         public CallResult<KunaPlacedOrder> CancelOrder(long orderId)
         {
             var parameters = new Dictionary<string, object>() { { "id", orderId } };
-
             var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(CancelOrderEndpoint), "POST", parameters,true).Result;
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
