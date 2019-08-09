@@ -23,7 +23,7 @@ namespace Kuna.Net
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
-            _orderBookLimit = options.EntriesCount ?? 1000;
+            _orderBookLimit = options.EntriesCount ?? 1000;            
           //  new Thread(Watch).Start();
            
         }
@@ -31,7 +31,7 @@ namespace Kuna.Net
 
         private void Catch(Task arg1, object arg2)
         {
-            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, arg2.ToString());
+            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, "Infinite task was canceled with status:\n"+arg2.ToString());
         }
 
         public void Run()
@@ -62,21 +62,28 @@ namespace Kuna.Net
         }
         private  CallResult<bool> GetOrderBook()
         {
-            var result =  httpClient.GetAsync($"https://kuna.io/api/v2/depth?market={Symbol}&limit={_orderBookLimit}").Result;
-            if (result.IsSuccessStatusCode)
+            try
             {
-                var ob = result.Content.ReadAsStringAsync().Result;
-                var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
-                SetInitialOrderBook(data.Timestamp, data.Asks, data.Bids);
-                LastUpdate = DateTime.UtcNow;
-                OnOrderBookUpdate?.Invoke();
-                return new CallResult<bool>(true, null);
+                var result = httpClient.GetAsync($"https://kuna.io/api/v2/depth?market={Symbol}&limit={_orderBookLimit}").Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    var ob = result.Content.ReadAsStringAsync().Result;
+                    var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
+                    SetInitialOrderBook(data.Timestamp, data.Asks, data.Bids);
+                    LastUpdate = DateTime.UtcNow;
+                    OnOrderBookUpdate?.Invoke();
+                    return new CallResult<bool>(true, null);
+                }
+                else
+                {
+                    log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
+                    return new CallResult<bool>(false, new KunaApiCallError((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
-                return new CallResult<bool>(false, new KunaApiCallError((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
-
+                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}"); 
+                return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
             }
         }
         public override void Dispose()
