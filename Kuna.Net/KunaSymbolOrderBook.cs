@@ -4,6 +4,8 @@ using CryptoExchange.Net.Sockets;
 using Kuna.Net.Objects;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,18 +65,21 @@ namespace Kuna.Net
                 Thread.Sleep(_timeOut);
             }
         }
-        DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+
+
         private CallResult<bool> GetOrderBook()
         {
             try
-            {               
+            {
                 var result = httpClient.GetAsync($"https://kuna.io/api/v2/depth?market={Symbol}&limit={_orderBookLimit}").Result;
                 if (result.IsSuccessStatusCode)
                 {
                     var ob = result.Content.ReadAsStringAsync().Result;
-                    
+
                     var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
-                    SetInitialOrderBook((long)DateTime.UtcNow.Subtract(unixEpoch).TotalMilliseconds, data.Asks, data.Bids);
+
+                    SetInitialOrderBook(DateTime.UtcNow.Ticks, data.Asks, data.Bids);
+
                     LastUpdate = DateTime.UtcNow;
                     OnOrderBookUpdate?.Invoke();
                     return new CallResult<bool>(true, null);
@@ -91,6 +96,7 @@ namespace Kuna.Net
                 return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
             }
         }
+
         public override void Dispose()
         {
             processBuffer.Clear();
