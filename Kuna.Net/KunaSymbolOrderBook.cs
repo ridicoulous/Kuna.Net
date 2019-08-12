@@ -4,10 +4,7 @@ using CryptoExchange.Net.Sockets;
 using Kuna.Net.Objects;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,22 +13,28 @@ namespace Kuna.Net
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
         HttpClient httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
-        private readonly int? _orderBookLimit;
+        private readonly int _orderBookLimit;
+        private int _timeOut;
+
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
         public event OrderBookUpdated OnOrderBookUpdate;
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
-            _orderBookLimit = options.EntriesCount ?? 1000;            
-          //  new Thread(Watch).Start();
-           
-        }
+            _orderBookLimit = options.EntriesCount ?? 1000;
+            _timeOut = options.UpdateTimeout ?? 300;
+            //  new Thread(Watch).Start();
 
+        }
+        public void SetUpdateTimeout(int ms)
+        {
+            _timeOut = ms;
+        }
 
         private void Catch(Task arg1, object arg2)
         {
-            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, "Infinite task was canceled with status:\n"+arg2.ToString());
+            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, "Infinite task was canceled with status:\n" + arg2.ToString());
         }
 
         public void Run()
@@ -53,23 +56,25 @@ namespace Kuna.Net
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                   // Dispose();
+                    // Dispose();
                     break;
                 }
                 GetOrderBook();
-                Thread.Sleep(1001);
+                Thread.Sleep(_timeOut);
             }
         }
-        private  CallResult<bool> GetOrderBook()
+        DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        private CallResult<bool> GetOrderBook()
         {
             try
-            {
+            {               
                 var result = httpClient.GetAsync($"https://kuna.io/api/v2/depth?market={Symbol}&limit={_orderBookLimit}").Result;
                 if (result.IsSuccessStatusCode)
                 {
                     var ob = result.Content.ReadAsStringAsync().Result;
+                    
                     var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
-                    SetInitialOrderBook(data.Timestamp, data.Asks, data.Bids);
+                    SetInitialOrderBook((long)DateTime.UtcNow.Subtract(unixEpoch).TotalMilliseconds, data.Asks, data.Bids);
                     LastUpdate = DateTime.UtcNow;
                     OnOrderBookUpdate?.Invoke();
                     return new CallResult<bool>(true, null);
@@ -82,7 +87,7 @@ namespace Kuna.Net
             }
             catch (Exception ex)
             {
-                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}"); 
+                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
                 return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
             }
         }
