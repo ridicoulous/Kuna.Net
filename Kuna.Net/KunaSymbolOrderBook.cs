@@ -14,9 +14,11 @@ namespace Kuna.Net
 {
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
-        HttpClient httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
+        private readonly HttpClient httpClient;
         private readonly int _orderBookLimit;
         private int _timeOut;
+        private int _responseTimeout;
+
 
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
@@ -24,8 +26,13 @@ namespace Kuna.Net
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
-            _orderBookLimit = options.EntriesCount ?? 1000;
-            _timeOut = options.UpdateTimeout ?? 300;
+            _responseTimeout = options.ResponseTimeout;
+            _orderBookLimit = options.EntriesCount;
+            _timeOut = options.UpdateTimeout;
+            httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
+       
             //  new Thread(Watch).Start();
 
         }
