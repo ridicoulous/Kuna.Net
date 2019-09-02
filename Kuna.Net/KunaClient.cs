@@ -159,7 +159,7 @@ namespace Kuna.Net
                 parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
             if ((method == Constants.GetMethod || method == Constants.DeleteMethod || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
-                uriString += "?" + parameters.CreateParamString(true);
+                uriString += "?" + parameters.CreateParamString(true,ArrayParametersSerialization.MultipleValues);
             }
 
             var request = RequestFactory.Create(uriString);
