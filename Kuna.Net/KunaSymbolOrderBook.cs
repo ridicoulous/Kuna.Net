@@ -118,11 +118,13 @@ namespace Kuna.Net
 
             //return GetOrderBook();
         }
-
-        protected override Task<CallResult<UpdateSubscription>> DoStart()
+        
+        protected override  async Task<CallResult<UpdateSubscription>> DoStart()
         {
             //Status = OrderBookStatus.Syncing;
             throw new NotImplementedException();
+           // CallResult<UpdateSubscription> subResult = new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new So)));
+           // return new CallResult<UpdateSubscription>(subResult.Data, null); 
             //return new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new KunaSocketClient()),new SocketSubscription()),null)
         }
 
