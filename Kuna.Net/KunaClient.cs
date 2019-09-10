@@ -13,17 +13,18 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClient
     {
-        public KunaClient():base(new KunaClientOptions(),null)
+        public KunaClient() : base(new KunaClientOptions(), null)
         {
-                
+
         }
         public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
-        {  
+        {
             postParametersPosition = PostParameters.InUri;
             requestBodyFormat = RequestBodyFormat.Json;
         }
@@ -40,30 +41,32 @@ namespace Kuna.Net
         private const string MyTradesEndpoint = "trades/my";
 
         #endregion
-        public CallResult<DateTime> GetServerTime()
+        public CallResult<DateTime> GetServerTime() => GetServerTimeAsync().Result;
+        public async Task<CallResult<DateTime>> GetServerTimeAsync()
         {
-            var result = ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").Result;
+            var result = await ExecuteRequest<string>(GetUrl(ServerTimeEndpoint), "GET").ConfigureAwait(false);
             long seconds = long.Parse(result.Data);
             var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
             return new CallResult<DateTime>(dateTime, null);
         }
-
-        public CallResult<KunaTickerInfo> GetMarketInfo(string market)
-        {            
-            var result = ExecuteRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), "GET").Result;
+        public CallResult<KunaTickerInfo> GetMarketInfo(string market) => GetMarketInfoAsync(market).Result;
+        public async Task<CallResult<KunaTickerInfo>> GetMarketInfoAsync(string market)
+        {
+            var result = await ExecuteRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), "GET").ConfigureAwait(false);
             return new CallResult<KunaTickerInfo>(result.Data, result.Error);
         }
-
-        public CallResult<KunaOrderBook> GetOrderBook(string market)
+        public CallResult<KunaOrderBook> GetOrderBook(string market) => GetOrderBookAsync(market).Result;
+        public async Task<CallResult<KunaOrderBook>> GetOrderBookAsync(string market)
         {
             var parameters = new Dictionary<string, object>() { { "market", market } };
-            var result = ExecuteRequest<KunaOrderBook>(GetUrl(OrderBookEndpoint), "GET", parameters).Result;
+            var result = await ExecuteRequest<KunaOrderBook>(GetUrl(OrderBookEndpoint), "GET", parameters).ConfigureAwait(false);
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc") =>GetTradesAsync(market, toDate, fromId, toId, limit, sort).Result;
 
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc")
+        public async Task<CallResult<List<KunaTrade>>> GetTradesAsync(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc")
         {
-            var parameters = new Dictionary<string, object>() { { "market", market }, {"order_by",sort } };
+            var parameters = new Dictionary<string, object>() { { "market", market }, { "order_by", sort } };
             if (toDate != null)
             {
                 parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
@@ -76,17 +79,20 @@ namespace Kuna.Net
             }
             parameters.AddOptionalParameter("limit", limit);
 
-            var result = ExecuteRequest<List<KunaTrade>>(GetUrl(AllTradesEndpoint), "GET", parameters).Result;
+            var result = await ExecuteRequest<List<KunaTrade>>(GetUrl(AllTradesEndpoint), "GET", parameters).ConfigureAwait(false);
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
-        public CallResult<KunaAccountInfo> GetAccountInfo()
+        public CallResult<KunaAccountInfo> GetAccountInfo() => GetAccountInfoAsync().Result;
+
+        public async Task<CallResult<KunaAccountInfo>> GetAccountInfoAsync()
         {
-            var result = ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET", null, true).Result;
+            var result = await ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET", null, true).ConfigureAwait(false);
             return new CallResult<KunaAccountInfo>(result.Data, result.Error);
         }
 
+        public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market) => PlaceOrderAsync(type,side,volume,price,market).Result;
 
-        public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market)
+        public async Task<CallResult<KunaPlacedOrder>> PlaceOrderAsync(OrderType type, OrderSide side, decimal volume, decimal price, string market)
         {
             var parameters = new Dictionary<string, object>()
             {
@@ -97,46 +103,51 @@ namespace Kuna.Net
                 { "price", price.ToString(CultureInfo.GetCultureInfo("en-US")) }
             };
 
-            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(OrdersEndpoint), "POST", parameters,true).Result;
+            var result = await ExecuteRequest<KunaPlacedOrder>(GetUrl(OrdersEndpoint), "POST", parameters, true).ConfigureAwait(false);
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
+        public CallResult<KunaPlacedOrder> CancelOrder(long orderId) => CancelOrderAsync(orderId).Result;
 
-        public CallResult<KunaPlacedOrder> CancelOrder(long orderId)
+        public async Task<CallResult<KunaPlacedOrder>> CancelOrderAsync(long orderId)
         {
             var parameters = new Dictionary<string, object>() { { "id", orderId } };
-            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(CancelOrderEndpoint), "POST", parameters,true).Result;
+            var result = await ExecuteRequest<KunaPlacedOrder>(GetUrl(CancelOrderEndpoint), "POST", parameters, true).ConfigureAwait(false);
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
+        public CallResult<List<KunaPlacedOrder>> GetMyOrders(string market, OrderState orderState = OrderState.Wait, int page = 1, string sort = "desc") => GetMyOrdersAsync(market, orderState, page, sort).Result;
 
-        public CallResult<List<KunaPlacedOrder>> GetMyOrders(string market, OrderState orderState = OrderState.Wait, int page = 1, string sort = "desc")
+        public async Task<CallResult<List<KunaPlacedOrder>>> GetMyOrdersAsync(string market, OrderState orderState = OrderState.Wait, int page = 1, string sort = "desc")
         {
             var parameters = new Dictionary<string, object>()
             {
                 { "market", market },
                 { "state", JsonConvert.SerializeObject(orderState, new OrderStatusConverter())},
                 { "order_by", sort },
-                { "page", page }   
+                { "page", page }
             };
-           
-            var result = ExecuteRequest<List<KunaPlacedOrder>>(GetUrl(OrdersEndpoint), "GET", parameters,true).Result;
+
+            var result = await ExecuteRequest<List<KunaPlacedOrder>>(GetUrl(OrdersEndpoint), "GET", parameters, true).ConfigureAwait(false);
             return new CallResult<List<KunaPlacedOrder>>(result.Data, result.Error);
         }
-        public CallResult<KunaPlacedOrder> GetOrderInfo(long orderId)
+        public CallResult<KunaPlacedOrder> GetOrderInfo(long orderId) => GetOrderInfoAsync(orderId).Result;
+
+        public async Task<CallResult<KunaPlacedOrder>> GetOrderInfoAsync(long orderId)
         {
             var parameters = new Dictionary<string, object>()
             {
                 { "id", orderId },
             };
-           
-            var result = ExecuteRequest<KunaPlacedOrder>(GetUrl(SingleOrderEndpoint), "GET", parameters, true).Result;
+
+            var result = await ExecuteRequest<KunaPlacedOrder>(GetUrl(SingleOrderEndpoint), "GET", parameters, true).ConfigureAwait(false);
             return new CallResult<KunaPlacedOrder>(result.Data, result.Error);
         }
+        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc") => GetMyTradesAsync(market, toDate, fromId, toId, limit, sort).Result;
 
-        public CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="desc")
+        public async Task<CallResult<List<KunaTrade>>> GetMyTradesAsync(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc")
         {
             var parameters = new Dictionary<string, object>() { { "market", market }, { "order_by", sort }, };
             if (toDate != null)
-            {                
+            {
                 parameters.AddOptionalParameter("timestamp", JsonConvert.SerializeObject(toDate, new TimestampSecondsConverter()));
             }
             parameters.AddOptionalParameter("from", fromId);
@@ -146,7 +157,7 @@ namespace Kuna.Net
                 limit = 1000;
             }
             parameters.AddOptionalParameter("limit", limit);
-            var result = ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters,true).Result;
+            var result = await ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters, true).ConfigureAwait(false);
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
         #region BaseMethodOverride
@@ -159,7 +170,7 @@ namespace Kuna.Net
                 parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
             if ((method == Constants.GetMethod || method == Constants.DeleteMethod || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
-                uriString += "?" + parameters.CreateParamString(true,ArrayParametersSerialization.MultipleValues);
+                uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
             }
 
             var request = RequestFactory.Create(uriString);
@@ -179,54 +190,20 @@ namespace Kuna.Net
 
             return request;
         }
-        
+
         protected Uri GetUrl(string endpoint, string version = null)
         {
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
         }
+        public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
 
-        public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo()
+        public async Task<CallResult<List<KunaTraidingPair>>> GetExchangeCurrenciesInfoAsync()
         {
             string url = "https://api.kuna.io/v3/markets";
-            var result = ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).Result;
+            var result = await ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).ConfigureAwait(false);
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
         }
 
-        public CallResult<string> Auth()
-        {
-            string authEndpoint = "https://api.kuna.io/v3/auth/me";
-            var result = ExecuteRequest<object>(new Uri(authEndpoint), "GET", null, true).Result;
-            return new CallResult<string>("",null);
-        }
-
-        public WebCallResult<KunaAccountInfo> GetAccountInfo2()
-        {
-            var result = ExecuteRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), "GET", null, true).Result;
-            return new WebCallResult<KunaAccountInfo>(result.ResponseStatusCode,result.ResponseHeaders,result.Data,result.Error);
-        }
-
-        /*
-         
-         const apiPath = '/v3/auth/kuna_codes/issued-by-me'
-const nonce = Date.now().toString()
-const body = {}
-let signature = `${apiPath}${nonce}${JSON.stringify(body)}`
-const sig = crypto.createHmac('sha384', apiSecret).update(signature)
-const shex = sig.digest('hex')
-const options = {
-url: `https://api.kuna.io${apiPath}`,
-headers: {
-'kun-nonce': nonce,
-'kun-apikey': apiKey,
-'kun-signature': shex
-},
-body: body,
-json: true
-}
-request.post(options, (error, response, body) => {
-console.log(body);
-})
-         */
         #endregion
 
     }
