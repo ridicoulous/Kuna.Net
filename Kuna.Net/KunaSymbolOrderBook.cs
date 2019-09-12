@@ -51,10 +51,12 @@ namespace Kuna.Net
 
         public void Run()
         {
-
             LastUpdate = DateTime.UtcNow;
             if (_useSocketClient)
             {
+                if (_kunaSocketClient != null)
+                    _kunaSocketClient.Dispose();
+                _kunaSocketClient = new KunaSocketClient();
                 _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
             }
             else
