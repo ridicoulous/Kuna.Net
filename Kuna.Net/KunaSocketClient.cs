@@ -19,7 +19,7 @@ namespace Kuna.Net
         public event OnStateChanged StateChanged;
         public delegate void OnPusherError(PusherException ex);
         public event OnPusherError PusherError;
-        public KunaSocketClient( ) : base(null, null)
+        public KunaSocketClient( ) : base(new KunaSocketClientOptions(), null)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Authorizer = new HttpAuthorizer("https://kuna.io/pusher/auth"), Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();

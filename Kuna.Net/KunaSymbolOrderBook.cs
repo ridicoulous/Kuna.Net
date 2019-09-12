@@ -83,7 +83,7 @@ namespace Kuna.Net
             var bids = arg1.Bids.Select(c => new OrderBookEntry(c.Price, c.Amount));
             SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
             LastUpdate = DateTime.UtcNow;
-
+            OnOrderBookUpdate?.Invoke();
         }
 
         public void StopGettingOrderBook()
