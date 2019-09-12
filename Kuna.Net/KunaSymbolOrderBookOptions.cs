@@ -9,9 +9,12 @@ namespace Kuna.Net
     public class KunaSymbolOrderBookOptions : OrderBookOptions
     {
         public readonly int? EntriesCount;
-        public KunaSymbolOrderBookOptions(string name, int? limit=null) : base(name, false)
+        public readonly bool UseSocketClient;
+
+        public KunaSymbolOrderBookOptions(bool useSocketClient,string name, int? limit=null) : base(name, false)
         {
             EntriesCount = limit;
+            UseSocketClient = useSocketClient;
            // LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug;            
         }
     }

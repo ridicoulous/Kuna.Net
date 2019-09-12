@@ -17,6 +17,8 @@ namespace Kuna.Net
     {
         HttpClient httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
         private readonly int? _orderBookLimit;
+        private readonly bool _useSocketClient;
+        private KunaSocketClient _kunaSocketClient;
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
         public event OrderBookUpdated OnOrderBookUpdate;
@@ -24,6 +26,7 @@ namespace Kuna.Net
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
             _orderBookLimit = options.EntriesCount ?? 1000;
+            _useSocketClient = options.UseSocketClient;
           //  new Thread(Watch).Start();
            
         }
@@ -36,13 +39,32 @@ namespace Kuna.Net
 
         public void Run()
         {
+
             LastUpdate = DateTime.UtcNow;
-            cancellationToken?.Dispose();
-            cancellationToken = null;
-            cancellationToken = new CancellationTokenSource();
-            Task.Factory.StartNew(() =>
-                   Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
+            if (_useSocketClient)
+            {
+                _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
+            }
+            else
+            {
+                cancellationToken?.Dispose();
+                cancellationToken = null;
+                cancellationToken = new CancellationTokenSource();
+                Task.Factory.StartNew(() =>
+                       Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
+            }
+            
         }
+
+        private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
+        {
+            var asks = arg1.Asks.Select(c => new OrderBookEntry(c.Price, c.Amount));
+            var bids = arg1.Bids.Select(c => new OrderBookEntry(c.Price, c.Amount));
+            SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
+            LastUpdate = DateTime.UtcNow;
+
+        }
+
         public void StopGettingOrderBook()
         {
             cancellationToken.Cancel();
