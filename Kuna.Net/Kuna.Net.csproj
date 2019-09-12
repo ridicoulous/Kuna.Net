@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.4.2</Version>
+    <Version>1.5.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous</Copyright>
@@ -10,15 +10,15 @@
     <PackageProjectUrl>https://github.com/ridicoulous/Kuna.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ridicoulous/Kuna.Net</RepositoryUrl>
     <PackageTags>kuna.io kuna</PackageTags>
-    <AssemblyVersion>1.4.2.0</AssemblyVersion>
-    <FileVersion>1.4.2.0</FileVersion>
+    <AssemblyVersion>1.5.1.0</AssemblyVersion>
+    <FileVersion>1.5.1.0</FileVersion>
     <Authors>ridicoulous</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>fixes</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="2.1.7" />
+    <PackageReference Include="CryptoExchange.Net" Version="2.1.8" />
     <PackageReference Include="Pusher.NetStandard" Version="0.5.7" />
   </ItemGroup>
 

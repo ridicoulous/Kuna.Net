@@ -58,9 +58,11 @@ namespace Kuna.Net
             {
                 parameters.Add("access_key", Credentials.Key.GetString());
                 parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
+              
+
                 parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
 
-                var paramString = parameters.CreateParamString(false);
+                var paramString = parameters.CreateParamString(false,ArrayParametersSerialization.MultipleValues);
                 var signData = method + "|";
                 signData += uri + "|";
                 signData += paramString;
