@@ -15,7 +15,7 @@ namespace Kuna.Net
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
         private readonly bool _useSocketClient;
-        private KunaSocketClient _kunaSocketClient;
+        private readonly KunaSocketClient _kunaSocketClient;
         private readonly HttpClient httpClient;
         private readonly int _orderBookLimit;
         private int _timeOut;
@@ -28,6 +28,18 @@ namespace Kuna.Net
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
+            _useSocketClient = false;
+            _responseTimeout = options.ResponseTimeout;
+            _orderBookLimit = options.EntriesCount;
+            _timeOut = options.UpdateTimeout;
+            httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
+            _orderBookLimit = options.EntriesCount;           
+        }
+        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaSymbolOrderBookOptions options) : base(symbol, options)
+        {
+            _useSocketClient = true;
             _responseTimeout = options.ResponseTimeout;
             _orderBookLimit = options.EntriesCount;
             _timeOut = options.UpdateTimeout;
@@ -35,9 +47,7 @@ namespace Kuna.Net
             httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
             _orderBookLimit = options.EntriesCount;
-            _useSocketClient = options.UseSocketClient;
-          //  new Thread(Watch).Start();
-           
+            _kunaSocketClient = socketClient;
         }
         public void SetUpdateTimeout(int ms)
         {
@@ -53,10 +63,7 @@ namespace Kuna.Net
         {
             LastUpdate = DateTime.UtcNow;
             if (_useSocketClient)
-            {
-                if (_kunaSocketClient != null)
-                    _kunaSocketClient.Dispose();
-                _kunaSocketClient = new KunaSocketClient();
+            {              
                 _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
             }
             else
