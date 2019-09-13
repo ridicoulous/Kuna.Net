@@ -10,9 +10,6 @@ namespace Kuna.Net.Interfaces
     public interface IKunaSocketClient:IDisposable
     {
         void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent, string> onUpdate);
-        void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate);
-        CallResult<UpdateSubscription> CreateFakeSubsctiption();
-
-        Task<CallResult<UpdateSubscription>> CreateFakeSubsctiptionAsync();
+        void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate);     
     }
 }
