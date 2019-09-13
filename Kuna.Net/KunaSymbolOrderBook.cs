@@ -1,4 +1,6 @@
-﻿using CryptoExchange.Net.Objects;
+﻿using CryptoExchange.Net;
+using CryptoExchange.Net.Interfaces;
+using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.OrderBook;
 using CryptoExchange.Net.Sockets;
 using Kuna.Net.Objects;
@@ -112,21 +114,32 @@ namespace Kuna.Net
             httpClient?.Dispose();
         }
 
-        protected override Task<CallResult<bool>> DoResync()
+        protected override async Task<CallResult<bool>> DoResync()
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
 
             //return GetOrderBook();
+            return new CallResult<bool>(true,null);
         }
         
         protected override  async Task<CallResult<UpdateSubscription>> DoStart()
         {
+            Run();
+            var t = 
+            //return null;
             //Status = OrderBookStatus.Syncing;
-            throw new NotImplementedException();
-           // CallResult<UpdateSubscription> subResult = new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new So)));
-           // return new CallResult<UpdateSubscription>(subResult.Data, null); 
-            //return new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new KunaSocketClient()),new SocketSubscription()),null)
+            //throw new NotImplementedException();
+            // CallResult<UpdateSubscription> subResult = new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new So)));
+            // return new CallResult<UpdateSubscription>(subResult.Data, null); 
+            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(), null), null);
         }
 
+    }
+    public class FakeConnection : SocketConnection
+    {     
+
+        public FakeConnection() : base(null, null)
+        {
+        }
     }
 }

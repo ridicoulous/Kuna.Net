@@ -138,5 +138,18 @@ namespace Kuna.Net
         {
             throw new NotImplementedException();
         }
+        public CallResult<UpdateSubscription> CreateFakeSubsctiption() => CreateFakeSubsctiptionAsync().Result;
+
+        public async Task<CallResult<UpdateSubscription>> CreateFakeSubsctiptionAsync()
+        {
+            var t = new Action<object>(data => Console.WriteLine(data));
+          //  symbols = symbols.Select(a => a.ToLower() + KlineStreamEndpoint + "_" + JsonConvert.SerializeObject(interval, new KlineIntervalConverter(false))).ToArray();
+            return await Subscribe(new object(),"fake",false,t).ConfigureAwait(false);
+        }
+        protected override Task<CallResult<UpdateSubscription>> Subscribe<T>(object request, string identifier, bool authenticated, Action<T> dataHandler)
+        {
+            var result =  base.Subscribe(request, identifier, authenticated, dataHandler);
+            return result;
+        }
     }
 }
