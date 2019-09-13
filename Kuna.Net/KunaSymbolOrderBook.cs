@@ -16,6 +16,8 @@ namespace Kuna.Net
 {
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
+        private readonly bool _useSocketClient;
+        private readonly KunaSocketClient _kunaSocketClient;
         private readonly HttpClient httpClient;
         private readonly int _orderBookLimit;
         private int _timeOut;
@@ -28,15 +30,26 @@ namespace Kuna.Net
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
+            _useSocketClient = false;
             _responseTimeout = options.ResponseTimeout;
             _orderBookLimit = options.EntriesCount;
             _timeOut = options.UpdateTimeout;
             httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
-       
-            //  new Thread(Watch).Start();
-
+            _orderBookLimit = options.EntriesCount;           
+        }
+        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaSymbolOrderBookOptions options) : base(symbol, options)
+        {
+            _useSocketClient = true;
+            _responseTimeout = options.ResponseTimeout;
+            _orderBookLimit = options.EntriesCount;
+            _timeOut = options.UpdateTimeout;
+            httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
+            _orderBookLimit = options.EntriesCount;
+            _kunaSocketClient = socketClient;
         }
         public void SetUpdateTimeout(int ms)
         {
@@ -51,12 +64,30 @@ namespace Kuna.Net
         public void Run()
         {
             LastUpdate = DateTime.UtcNow;
-            cancellationToken?.Dispose();
-            cancellationToken = null;
-            cancellationToken = new CancellationTokenSource();
-            Task.Factory.StartNew(() =>
-                   Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
+            if (_useSocketClient)
+            {              
+                _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
+            }
+            else
+            {
+                cancellationToken?.Dispose();
+                cancellationToken = null;
+                cancellationToken = new CancellationTokenSource();
+                Task.Factory.StartNew(() =>
+                       Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
+            }
+            
         }
+
+        private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
+        {
+            var asks = arg1.Asks.Select(c => new OrderBookEntry(c.Price, c.Amount));
+            var bids = arg1.Bids.Select(c => new OrderBookEntry(c.Price, c.Amount));
+            SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
+            LastUpdate = DateTime.UtcNow;
+            OnOrderBookUpdate?.Invoke();
+        }
+
         public void StopGettingOrderBook()
         {
             cancellationToken.Cancel();
