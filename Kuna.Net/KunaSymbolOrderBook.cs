@@ -17,12 +17,14 @@ namespace Kuna.Net
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
         private readonly bool _useSocketClient;
-        private  KunaSocketClient _kunaSocketClient;
+        private KunaSocketClient _kunaSocketClient;
         private readonly HttpClient httpClient;
         private readonly int _orderBookLimit;
         private int _timeOut;
         private int _responseTimeout;
-
+        private bool v3;
+        public List<KunaOrderBookEntry> Ask = new List<KunaOrderBookEntry>();
+        public List<KunaOrderBookEntry> Bid = new List<KunaOrderBookEntry>();
 
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
@@ -37,10 +39,12 @@ namespace Kuna.Net
             httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
-            _orderBookLimit = options.EntriesCount;           
+            _orderBookLimit = options.EntriesCount;
+            v3 = options.Usev3;
         }
         public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
+            v3 = options.Usev3;
             _useSocketClient = true;
             _responseTimeout = options.ResponseTimeout;
             _orderBookLimit = options.EntriesCount;
@@ -65,7 +69,7 @@ namespace Kuna.Net
         {
             LastUpdate = DateTime.UtcNow;
             if (_useSocketClient)
-            {              
+            {
                 _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
             }
             else
@@ -74,9 +78,9 @@ namespace Kuna.Net
                 cancellationToken = null;
                 cancellationToken = new CancellationTokenSource();
                 Task.Factory.StartNew(async () =>
-                     await  Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
+                     await Watch(), cancellationToken.Token).ContinueWith(Catch, TaskContinuationOptions.OnlyOnFaulted);
             }
-            
+
         }
 
         private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
@@ -102,8 +106,16 @@ namespace Kuna.Net
                     // Dispose();
                     break;
                 }
-                await GetOrderBook();
-              //  Thread.Sleep(_timeOut);
+                if (v3)
+                {
+                    await GetOrderBookV3();
+                }
+                else
+                {
+                    await GetOrderBook();
+
+                }
+                //  Thread.Sleep(_timeOut);
             }
         }
 
@@ -146,6 +158,49 @@ namespace Kuna.Net
             }
         }
 
+        private async Task<CallResult<bool>> GetOrderBookV3()
+        {
+            try
+            {
+                await _slim.WaitAsync().ConfigureAwait(false);
+                Thread.Sleep(_timeOut);
+                var result = await httpClient.GetAsync($"https://api.kuna.io/v3/book/{Symbol}");
+                if (result.IsSuccessStatusCode)
+                {
+                    var ob = result.Content.ReadAsStringAsync().Result;
+
+                    var data = JsonConvert.DeserializeObject<List<KunaOrderBookEntry>>(ob);
+                    var asks = data.Where(c => c.Quantity < 0).Select(c => new KunaOrderBookEntry() { Quantity = c.Quantity * -1, Price = c.Price, Count = c.Count });
+                    var bids = data.Where(c => c.Quantity > 0).Select(c => new KunaOrderBookEntry() { Quantity = c.Quantity, Price = c.Price, Count = c.Count });
+                    Ask.Clear();
+                    Ask.AddRange(asks.OrderBy(c => c.Price));
+                    Bid.Clear();
+                    Bid.AddRange(bids.OrderByDescending(c => c.Price));
+
+                    SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
+
+                    LastUpdate = DateTime.UtcNow;
+                    OnOrderBookUpdate?.Invoke();
+                    _slim.Release();
+
+                    return new CallResult<bool>(true, null);
+                }
+                else
+                {
+                    _slim.Release();
+
+                    log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
+                    return new CallResult<bool>(false, new KunaApiCallError((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
+                _slim.Release();
+
+                return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
+            }
+        }
         public override void Dispose()
         {
             processBuffer.Clear();
@@ -157,15 +212,15 @@ namespace Kuna.Net
         protected override async Task<CallResult<bool>> DoResync()
         {
             // throw new NotImplementedException();
-            
+
             return await GetOrderBook();
-           // return new CallResult<bool>(true,null);
+            // return new CallResult<bool>(true,null);
         }
         WebsocketFactory wf = new WebsocketFactory();
-        protected override  async Task<CallResult<UpdateSubscription>> DoStart()
+        protected override async Task<CallResult<UpdateSubscription>> DoStart()
         {
             Run();
-            if(_kunaSocketClient==null)
+            if (_kunaSocketClient == null)
                 _kunaSocketClient = new KunaSocketClient();
             //var sub = await _kunaSocketClient.CreateFakeSubsctiptionAsync();
             //return null;
@@ -173,7 +228,7 @@ namespace Kuna.Net
             //throw new NotImplementedException();
             // CallResult<UpdateSubscription> subResult = new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new So)));
             // return new CallResult<UpdateSubscription>(subResult.Data, null); 
-            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient,wf.CreateWebsocket(log, "wss://echo.websocket.org")), null), null);
+            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, wf.CreateWebsocket(log, "wss://echo.websocket.org")), null), null);
         }
 
     }

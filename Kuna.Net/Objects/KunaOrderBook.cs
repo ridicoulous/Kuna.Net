@@ -22,6 +22,8 @@ namespace Kuna.Net.Objects
         public decimal Price { get; set; }
         [ArrayProperty(1), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Quantity { get; set; }
-        
-    }
+        [ArrayProperty(2), JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Count { get; set; }
+    }   
+
 }
