@@ -39,6 +39,8 @@ namespace Kuna.Net
 
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
+        private const string CandlesHistoryEndpoint = "tv/history";
+
 
         #endregion
         public CallResult<DateTime> GetServerTime() => GetServerTimeAsync().Result;
@@ -62,7 +64,7 @@ namespace Kuna.Net
             var result = await ExecuteRequest<KunaOrderBook>(GetUrl(OrderBookEndpoint), "GET", parameters).ConfigureAwait(false);
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
-        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc") =>GetTradesAsync(market, toDate, fromId, toId, limit, sort).Result;
+        public CallResult<List<KunaTrade>> GetTrades(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc") => GetTradesAsync(market, toDate, fromId, toId, limit, sort).Result;
 
         public async Task<CallResult<List<KunaTrade>>> GetTradesAsync(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc")
         {
@@ -90,7 +92,7 @@ namespace Kuna.Net
             return new CallResult<KunaAccountInfo>(result.Data, result.Error);
         }
 
-        public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market) => PlaceOrderAsync(type,side,volume,price,market).Result;
+        public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market) => PlaceOrderAsync(type, side, volume, price, market).Result;
 
         public async Task<CallResult<KunaPlacedOrder>> PlaceOrderAsync(OrderType type, OrderSide side, decimal volume, decimal price, string market)
         {
@@ -160,6 +162,25 @@ namespace Kuna.Net
             var result = await ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters, true).ConfigureAwait(false);
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
+
+        public async Task<CallResult<List<KunaOhclv>>> GetCandlesHistoryAsync(string symbol, int resolution, DateTime from, DateTime to)
+        {            
+            var parameters = new Dictionary<string, object>() { { "symbol", symbol }, { "resolution", resolution }, { "from", JsonConvert.SerializeObject(from, new TimestampSecondsConverter()) }, { "to", JsonConvert.SerializeObject(to, new TimestampSecondsConverter()) } };
+            var result = await ExecuteRequest<TradingViewOhclv>(GetUrl(CandlesHistoryEndpoint, "3"), "GET", parameters, false).ConfigureAwait(false);
+            List<KunaOhclv> data = null;
+            if (result.Success)
+            {
+                data = new List<KunaOhclv>();
+                var t = result.Data;
+                for(int i=0; i < result.Data.Closes.Count; i++)
+                {
+                    var candle = new KunaOhclv(t.Timestamps[i], t.Opens[i], t.Highs[i], t.Lows[i],t.Closes[i],t.Volumes[i]);
+                    data.Add(candle);
+                }
+            }
+            return new CallResult<List<KunaOhclv>>(data, result.Error);
+        }
+
         #region BaseMethodOverride
         protected override IRequest ConstructRequest(Uri uri, string method, Dictionary<string, object> parameters, bool signed)
         {
@@ -193,7 +214,7 @@ namespace Kuna.Net
 
         protected Uri GetUrl(string endpoint, string version = null)
         {
-            return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
+            return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
         }
         public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
 
