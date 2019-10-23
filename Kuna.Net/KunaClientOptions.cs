@@ -4,9 +4,8 @@ namespace Kuna.Net
 {
     public class KunaClientOptions : RestClientOptions
     {
-        public KunaClientOptions()
-        {
-            BaseAddress = "https://kuna.io/api/v2";
+        public KunaClientOptions(string baseAddress= "https://kuna.io/api/v2") :base(baseAddress)
+        {            
 
         }
     }

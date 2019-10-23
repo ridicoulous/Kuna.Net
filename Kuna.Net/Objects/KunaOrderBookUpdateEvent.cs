@@ -9,24 +9,24 @@ namespace Kuna.Net.Objects
     public class KunaOrderBookUpdateEvent
     {
         [JsonProperty("asks")]
-        public List<KunaOrderBookUpdateEntry> Asks { get; set; }
+        public List<KunaOrderBookEntry> Asks { get; set; }
         [JsonProperty("bids")]
-        public List<KunaOrderBookUpdateEntry> Bids { get; set; }
+        public List<KunaOrderBookEntry> Bids { get; set; }
         [JsonProperty("daily_stats")]
         public DailyStats DailyStats { get; set; }
     }
 
-    [JsonConverter(typeof(ArrayConverter))]
-    public class KunaOrderBookUpdateEntry
-    {
-        [ArrayProperty(0), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Price { get; set; }
-        [ArrayProperty(1), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Amount { get; set; }
-        [ArrayProperty(2)]
-        public int Count { get; set; }
+    //[JsonConverter(typeof(ArrayConverter))]
+    //public class KunaOrderBookUpdateEntry
+    //{
+    //    [ArrayProperty(0), JsonConverter(typeof(StringToDecimalConverter))]
+    //    public decimal Price { get; set; }
+    //    [ArrayProperty(1), JsonConverter(typeof(StringToDecimalConverter))]
+    //    public decimal Amount { get; set; }
+    //    [ArrayProperty(2)]
+    //    public int Count { get; set; }
 
-    }
+    //}
     public class DailyStats
     {
         [JsonProperty("highest_bid")]

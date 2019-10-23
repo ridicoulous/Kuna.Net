@@ -85,9 +85,9 @@ namespace Kuna.Net
 
         private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
         {
-            var asks = arg1.Asks.Select(c => new OrderBookEntry(c.Price, c.Amount));
-            var bids = arg1.Bids.Select(c => new OrderBookEntry(c.Price, c.Amount));
-            SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
+            //var asks = arg1.Asks.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
+            //var bids = arg1.Bids.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
+            SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Asks, arg1.Bids);
             LastUpdate = DateTime.UtcNow;
             OnOrderBookUpdate?.Invoke();
         }

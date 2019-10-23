@@ -1,4 +1,5 @@
 ﻿using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.OrderBook;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
@@ -16,14 +17,15 @@ namespace Kuna.Net.Objects
         public List<KunaOrderBookEntry> Bids { get; set; }
     }
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaOrderBookEntry: ISymbolOrderBookEntry
+    public class KunaOrderBookEntry : ISymbolOrderBookEntry
     {
+
         [ArrayProperty(0), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Price { get; set; }
         [ArrayProperty(1), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Quantity { get; set; }
         [ArrayProperty(2), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Count { get; set; }
-    }   
+    }
 
 }
