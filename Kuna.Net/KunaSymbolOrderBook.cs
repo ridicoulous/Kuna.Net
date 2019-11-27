@@ -28,7 +28,7 @@ namespace Kuna.Net
 
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
-        public event OrderBookUpdated OnOrderBookUpdate;
+        //public event OrderBookUpdated OnOrderBookUpdate;
         private CancellationTokenSource cancellationToken;
         public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
         {
@@ -87,9 +87,9 @@ namespace Kuna.Net
         {
             //var asks = arg1.Asks.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
             //var bids = arg1.Bids.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
-            SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Asks, arg1.Bids);
+            SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Bids.OrderByDescending(c => c.Price), arg1.Asks.OrderBy(c=>c.Price) );
             LastUpdate = DateTime.UtcNow;
-            OnOrderBookUpdate?.Invoke();
+           // OnOrderBookUpdate?.Invoke();
         }
 
         public void StopGettingOrderBook()
@@ -133,10 +133,10 @@ namespace Kuna.Net
 
                     var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
 
-                    SetInitialOrderBook(DateTime.UtcNow.Ticks, data.Asks, data.Bids);
+                    SetInitialOrderBook(DateTime.UtcNow.Ticks, data.Bids.OrderByDescending(c=>c.Price), data.Asks.OrderBy(c=>c.Price));
 
                     LastUpdate = DateTime.UtcNow;
-                    OnOrderBookUpdate?.Invoke();
+                  //  OnOrderBookUpdate?.Invoke();
                     _slim.Release();
 
                     return new CallResult<bool>(true, null);
@@ -177,10 +177,9 @@ namespace Kuna.Net
                     Bid.Clear();
                     Bid.AddRange(bids.OrderByDescending(c => c.Price));
 
-                    SetInitialOrderBook(DateTime.UtcNow.Ticks, asks, bids);
-
+                    SetInitialOrderBook(DateTime.UtcNow.Ticks, bids.OrderByDescending(c => c.Price), asks.OrderBy(c => c.Price));
                     LastUpdate = DateTime.UtcNow;
-                    OnOrderBookUpdate?.Invoke();
+                    //OnOrderBookUpdate?.Invoke();
                     _slim.Release();
 
                     return new CallResult<bool>(true, null);
