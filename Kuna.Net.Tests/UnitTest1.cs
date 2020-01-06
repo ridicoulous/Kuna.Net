@@ -2,13 +2,12 @@ using Kuna.Net.Interfaces;
 using System;
 using Xunit;
 using Shouldly;
+using Microsoft.Extensions.Configuration;
+
 namespace Kuna.Net.Tests
 {
     public class UnitTest1
-    {
-        //CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc");
-
-        //CallResult<KunaAccountInfo> GetAccountInfo();
+    {        
 
         //CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market);
 
@@ -18,7 +17,6 @@ namespace Kuna.Net.Tests
 
         //CallResult<KunaPlacedOrder> GetOrderInfo(long orderId);
 
-
         //CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc");
 
         //CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
@@ -27,8 +25,8 @@ namespace Kuna.Net.Tests
         [Fact(DisplayName = "ServerTime")]
         public void ShouldGetServerTime()
         {
-            var serverTime = client.GetServerTime();            
-            Assert.True(serverTime.Data>DateTime.UtcNow.AddSeconds(-1));            
+            var serverTime = client.GetServerTime();
+            Assert.True(serverTime.Data > DateTime.UtcNow.AddSeconds(-1));
         }
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
@@ -42,22 +40,37 @@ namespace Kuna.Net.Tests
             var orderbook = client.GetOrderBook("btcusdt");
             Assert.True(orderbook);
             orderbook.Data.Asks.ShouldNotBeNull();
-            orderbook.Data.Bids.ShouldNotBeNull();            
+            orderbook.Data.Bids.ShouldNotBeNull();
         }
         [Fact(DisplayName = "TradesHistory")]
         public void ShoulGetTradesHistory()
         {
-            var orderbook = client.GetOrderBook("btcusdt");
-            Assert.True(orderbook);
-            orderbook.Data.Asks.ShouldNotBeNull();
-            orderbook.Data.Bids.ShouldNotBeNull();
+            var trades = client.GetTrades("btcusdt");
+            Assert.True(trades);
+            trades.Data.ShouldNotBeNull();
+            trades.Error.ShouldBeNull();
         }
 
-        [Theory(DisplayName ="Account")]
-        [InlineData("","")]
-        public void ShouldGetAccountInfo(string key, string secret)
-        {
+        [Fact(DisplayName = "Account")]
 
+        public void ShouldGetAccountInfo()
+        {
+            var _client = GetClientWithAuthentication();
+            var accountData = _client.GetAccountInfo();
+            Assert.True(accountData);
+            accountData.Data.ShouldNotBeNull();
+        }
+
+        private IKunaClient GetClientWithAuthentication()
+        {
+            var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
+            var key = config["key"];
+            var secret = config["secret"];
+            var client = new KunaClient(new KunaClientOptions()
+            {
+                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(key, secret)
+            }) ;
+            return client;            
         }
     }
 }
