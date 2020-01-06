@@ -19,5 +19,7 @@ namespace Kuna.Net.Interfaces
 
         CallResult<List<KunaTrade>> GetMyTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort="asc");
         CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
+        CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int limit = 100, bool sortDesc = false);
+
     }
 }

@@ -33,7 +33,7 @@ namespace Kuna.Net
 
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
-
+        private const string Ordersv3 = "auth/r/orders";
         #endregion
         public CallResult<DateTime> GetServerTime()
         {
@@ -149,6 +149,27 @@ namespace Kuna.Net
             var result = ExecuteRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), "GET", parameters,true).Result;
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
+        public CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int limit = 100, bool sortDesc = false)
+        {
+            var endpoint = Ordersv3;
+            if (!String.IsNullOrEmpty(market))
+            {
+                endpoint += $"/{market}";
+            }
+            if (state == OrderState.Done || state == OrderState.Cancel)
+            {
+                endpoint += "/hist";
+            }
+            var url = GetUrl(endpoint, "3");
+
+            var parameters = new Dictionary<string, object>();
+            parameters.AddOptionalParameter("start", JsonConvert.SerializeObject(from, new TimestampConverter()));
+            parameters.AddOptionalParameter("end", JsonConvert.SerializeObject(to, new TimestampConverter()));
+            parameters.AddOptionalParameter("limit", limit);
+            parameters.AddOptionalParameter("sort", sortDesc ? -1 : 1);
+            var result = ExecuteRequest<List<KunaPlacedOrderV3>>(url, "GET", parameters, true).Result;
+            return result;
+        }
         #region BaseMethodOverride
         protected override IRequest ConstructRequest(Uri uri, string method, Dictionary<string, object> parameters, bool signed)
         {
@@ -157,6 +178,7 @@ namespace Kuna.Net
             var uriString = uri.ToString();
             if (authProvider != null)
                 parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
+            
             if ((method == Constants.GetMethod || method == Constants.DeleteMethod || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
                 uriString += "?" + parameters.CreateParamString(true);
@@ -181,7 +203,7 @@ namespace Kuna.Net
         }
         protected Uri GetUrl(string endpoint, string version = null)
         {
-            return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
+            return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"https://api.kuna.io/v3/{endpoint}");
         }
 
         public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo()
@@ -189,7 +211,9 @@ namespace Kuna.Net
             string url = "https://api.kuna.io/v3/markets";
             var result = ExecuteRequest<List<KunaTraidingPair>>(new Uri(url), "GET", null, false).Result;
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
-        }           
+        }
+
+    
 
 
         #endregion
