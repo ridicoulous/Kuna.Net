@@ -42,7 +42,7 @@ namespace Kuna.Net
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
         private const string CandlesHistoryEndpoint = "tv/history";
-
+        private const string Orders3 = "auth/r/orders/";
 
         #endregion
         public CallResult<DateTime> GetServerTime() => GetServerTimeAsync().Result;
@@ -92,6 +92,27 @@ namespace Kuna.Net
         {
             var result = await SendRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), HttpMethod.Get, ct, null, true).ConfigureAwait(false);
             return new CallResult<KunaAccountInfo>(result.Data, result.Error);
+        }
+        public CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int limit = 100, bool sortDesc = false, CancellationToken ct=default)
+        {
+            var endpoint = Orders3;
+            if (!String.IsNullOrEmpty(market))
+            {
+                endpoint += $"{market}";
+            }
+            if (state == OrderState.Done || state == OrderState.Cancel)
+            {
+                endpoint += "/hist";
+            }
+            var url = GetUrl(endpoint, "3");
+
+            var parameters = new Dictionary<string, object>();
+            parameters.AddOptionalParameter("start", JsonConvert.SerializeObject(from, new TimestampConverter()));
+            parameters.AddOptionalParameter("end", JsonConvert.SerializeObject(to, new TimestampConverter()));
+            parameters.AddOptionalParameter("limit", limit);
+            parameters.AddOptionalParameter("sort", sortDesc ? -1 : 1);
+            var result = SendRequest<List<KunaPlacedOrderV3>>(url, HttpMethod.Post,ct, parameters, true).Result;
+            return result;
         }
 
         public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market) => PlaceOrderAsync(type, side, volume, price, market).Result;
@@ -190,24 +211,40 @@ namespace Kuna.Net
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
             var uriString = uri.ToString();
-            if (authProvider != null)
-                parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
-            if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
+            if(uriString.Contains("v2"))
             {
-                uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
+                if (authProvider != null)
+                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
+                if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
+                {
+                    uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
+                }
             }
+           
 
             var request = RequestFactory.Create(method, uriString);
             // request.Content = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
             request.Method = method;
             //var headers = new Dictionary<string, string>();
-
+            if (uriString.Contains("v3"))
+            {
+                if (authProvider != null)
+                {
+                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed);
+                    foreach(var header in headers)
+                    {
+                        request.AddHeader(header.Key, header.Value);
+                    }
+                }
+               
+            }
 
             if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
             {
                 WriteParamBody(request, parameters, requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader);
             }
+            
 
             return request;
         }
