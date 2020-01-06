@@ -1,5 +1,6 @@
 ﻿using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
 using System;
@@ -22,10 +23,11 @@ namespace Kuna.Net
         {
             creds = credentials;
             encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
+            encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
+
         }
         public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
         {
-            encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
             if (!signed)
                 return new Dictionary<string, string>();
 
@@ -33,17 +35,20 @@ namespace Kuna.Net
 
             if (uri.Contains("v3"))
             {
-
-                result.Add("kun-nonce", Credentials.Key.GetString());
-
+                var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+                var n = JsonConvert.SerializeObject(DateTime.UtcNow, new TimestampConverter());
+                var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
+                var signedData = Sign(signature);
+                result.Add("accept", "application/json");
                 result.Add("kun-apikey", Credentials.Key.GetString());
-                result.Add("kun-signature", Credentials.Key.GetString());
+                result.Add("kun-nonce", n);
+                result.Add("kun-signature", signedData.ToLower());
 
 
-                string jsonContent = "";
-                if (method != HttpMethod.Get&& method != HttpMethod.Delete)
-                    jsonContent = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-                result.Add("Api-Content-Hash", ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(jsonContent))).ToLower());
+                //string jsonContent = "";
+                //if (method != HttpMethod.Get&& method != HttpMethod.Delete)
+                //    jsonContent = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+                //result.Add("Api-Content-Hash", ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(jsonContent))).ToLower());
             }
             //uri = WebUtility.UrlDecode(uri); // Sign needs the query parameters to not be encoded
             //var sign = result["Api-Timestamp"] + uri + method + result["Api-Content-Hash"] + "";
@@ -76,17 +81,16 @@ namespace Kuna.Net
                 //    foreach (var kvp in parameters)
                 //        parameters.Add(kvp.Key, kvp.Value);
             }
-            else if (uri.Contains("v3"))
-            {
-            }
+            
             return parameters;
         }
 
-        //public override string Sign(string toSign)
-        //{
-        //    return base.Sign(toSign);
-        //}
 
+        public override string Sign(string toSign)
+        {
+            lock (encryptLock)
+                return ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+        }
         //public override byte[] Sign(byte[] toSign)
         //{
         //    return base.Sign(toSign);
