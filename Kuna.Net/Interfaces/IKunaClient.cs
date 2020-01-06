@@ -45,6 +45,12 @@ namespace Kuna.Net.Interfaces
         CallResult<List<KunaOhclv>> GetCandlesHistory(string symbol, int resolution, DateTime from, DateTime to);
 
         Task<CallResult<List<KunaOhclv>>> GetCandlesHistoryAsync(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
+        Task<CallResult<List<KunaPlacedOrderV3>>> GetOrders3Async(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default);
+        CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null);
+        CallResult<List<KunaTrade3>> GetOrderTrades(string market,long id);
+        Task<CallResult<List<KunaTrade3>>> GetOrderTradesAsync(string market, long id, CancellationToken ct);
+
+
 
 
     }

@@ -93,7 +93,7 @@ namespace Kuna.Net
             var result = await SendRequest<KunaAccountInfo>(GetUrl(AccountInfoEndpoint), HttpMethod.Get, ct, null, true).ConfigureAwait(false);
             return new CallResult<KunaAccountInfo>(result.Data, result.Error);
         }
-        public CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int limit = 100, bool sortDesc = false, CancellationToken ct=default)
+        public async Task<CallResult<List<KunaPlacedOrderV3>>> GetOrders3Async(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct=default)
         {
             var endpoint = Orders3;
             if (!String.IsNullOrEmpty(market))
@@ -102,18 +102,28 @@ namespace Kuna.Net
             }
             if (state == OrderState.Done || state == OrderState.Cancel)
             {
-                endpoint += "/hist";
+                if(!endpoint.EndsWith("/"))
+                {
+                    endpoint += "/";
+                }
+                endpoint += "hist";
             }
             var url = GetUrl(endpoint, "3");
 
             var parameters = new Dictionary<string, object>();
-            parameters.AddOptionalParameter("start", JsonConvert.SerializeObject(from, new TimestampConverter()));
-            parameters.AddOptionalParameter("end", JsonConvert.SerializeObject(to, new TimestampConverter()));
-            parameters.AddOptionalParameter("limit", limit);
-            parameters.AddOptionalParameter("sort", sortDesc ? -1 : 1);
-            var result = SendRequest<List<KunaPlacedOrderV3>>(url, HttpMethod.Post,ct, parameters, true).Result;
+            if(from.HasValue)
+                parameters.AddOptionalParameter("start", JsonConvert.SerializeObject(from, new TimestampConverter()));
+            if(to.HasValue)
+                parameters.AddOptionalParameter("end", JsonConvert.SerializeObject(to, new TimestampConverter()));
+            if(limit.HasValue)
+                parameters.AddOptionalParameter("limit", limit.Value);
+            if(sortDesc.HasValue)
+                parameters.AddOptionalParameter("sort", sortDesc.Value ? -1 : 1);
+            var result = await SendRequest<List<KunaPlacedOrderV3>>(url, HttpMethod.Post,ct, parameters, true);
             return result;
         }
+        public CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null)
+   => GetOrders3Async(state, market, from, to, limit, sortDesc).Result;
 
         public CallResult<KunaPlacedOrder> PlaceOrder(OrderType type, OrderSide side, decimal volume, decimal price, string market) => PlaceOrderAsync(type, side, volume, price, market).Result;
 
@@ -203,6 +213,14 @@ namespace Kuna.Net
             }
             return new CallResult<List<KunaOhclv>>(data, result.Error);
         }
+        public CallResult<List<KunaTrade3>> GetOrderTrades(string market, long id) => GetOrderTradesAsync(market, id).Result;
+
+        public async Task<CallResult<List<KunaTrade3>>> GetOrderTradesAsync(string market, long id, CancellationToken ct=default)
+        {
+            var url = GetUrl($"auth/r/order/{market}:{id}/trades", "3");
+            var result = await SendRequest<List<KunaTrade3>>(url, HttpMethod.Post, ct, new Dictionary<string, object>(), true);
+            return result;
+        }
 
         #region BaseMethodOverride
 
@@ -220,8 +238,6 @@ namespace Kuna.Net
                     uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
                 }
             }
-           
-
             var request = RequestFactory.Create(method, uriString);
             // request.Content = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
@@ -235,7 +251,8 @@ namespace Kuna.Net
                     foreach(var header in headers)
                     {
                         request.AddHeader(header.Key, header.Value);
-                    }
+                    }                    
+                  //  request.AddHeader("content-type", "application/json");
                 }
                
             }
@@ -251,6 +268,14 @@ namespace Kuna.Net
 
         protected Uri GetUrl(string endpoint, string version = null)
         {
+            if(version!=null)
+            {
+                postParametersPosition = PostParameters.InBody;
+            }
+            else
+            {
+                postParametersPosition = PostParameters.InUri;
+            }
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
         }
         public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
@@ -263,6 +288,8 @@ namespace Kuna.Net
         }
 
         public CallResult<List<KunaOhclv>> GetCandlesHistory(string symbol, int resolution, DateTime from, DateTime to) => GetCandlesHistoryAsync(symbol, resolution, from, to).Result;
+
+  
 
         #endregion
 

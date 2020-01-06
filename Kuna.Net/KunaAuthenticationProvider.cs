@@ -35,11 +35,12 @@ namespace Kuna.Net
 
             if (uri.Contains("v3"))
             {
+              //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
                 var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
                 var n = JsonConvert.SerializeObject(DateTime.UtcNow, new TimestampConverter());
                 var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
-                var signedData = Sign(signature);
-                result.Add("accept", "application/json");
+                var signedData = Sign(signature);                
+
                 result.Add("kun-apikey", Credentials.Key.GetString());
                 result.Add("kun-nonce", n);
                 result.Add("kun-signature", signedData.ToLower());
@@ -88,8 +89,9 @@ namespace Kuna.Net
 
         public override string Sign(string toSign)
         {
-            lock (encryptLock)
-                return ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+            //lock (encryptLock)
+            //    return ByteToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign))).ToLower();
+            return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
         }
         //public override byte[] Sign(byte[] toSign)
         //{
