@@ -5,6 +5,7 @@ using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -18,6 +19,23 @@ namespace Kuna.Net
         private HMACSHA384 encryptorv3;
 
         private readonly object encryptLock = new object();
+        private static readonly object nonceLock = new object();
+        private static long lastNonce;
+        internal static string Nonce
+        {
+            get
+            {
+                lock (nonceLock)
+                {
+                    var nonce = (long)Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
+                    if (nonce == lastNonce)
+                        nonce += 1;
+
+                    lastNonce = nonce;
+                    return lastNonce.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+        }
         ApiCredentials creds;
         public KunaAuthenticationProvider(ApiCredentials credentials) : base(credentials)
         {
@@ -35,11 +53,11 @@ namespace Kuna.Net
 
             if (uri.Contains("v3"))
             {
-              //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
+                //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
                 var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-                var n = JsonConvert.SerializeObject(DateTime.UtcNow, new TimestampConverter());
+                var n = Nonce;
                 var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
-                var signedData = Sign(signature);                
+                var signedData = Sign(signature);
 
                 result.Add("kun-apikey", Credentials.Key.GetString());
                 result.Add("kun-nonce", n);
@@ -64,12 +82,12 @@ namespace Kuna.Net
             if (uri.Contains("v2"))
             {
                 parameters.Add("access_key", Credentials.Key.GetString());
-                parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
-              
+                var n = Nonce;
+                parameters.Add("tonce", n);
 
                 parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
 
-                var paramString = parameters.CreateParamString(false,ArrayParametersSerialization.MultipleValues);
+                var paramString = parameters.CreateParamString(false, ArrayParametersSerialization.MultipleValues);
                 var signData = method + "|";
                 signData += uri + "|";
                 signData += paramString;
@@ -82,7 +100,7 @@ namespace Kuna.Net
                 //    foreach (var kvp in parameters)
                 //        parameters.Add(kvp.Key, kvp.Value);
             }
-            
+
             return parameters;
         }
 
