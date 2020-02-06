@@ -15,8 +15,8 @@ namespace Kuna.Net.Interfaces
         CallResult<KunaTickerInfo> GetMarketInfo(string market);
         Task<CallResult<KunaTickerInfo>> GetMarketInfoAsync(string market, CancellationToken ct = default);
 
-        CallResult<KunaOrderBook> GetOrderBook(string market, int limit);
-        Task<CallResult<KunaOrderBook>> GetOrderBookAsync(string market, int limit, CancellationToken ct = default);
+        CallResult<KunaOrderBook> GetOrderBook(string market, int limit = 1000);
+        Task<CallResult<KunaOrderBook>> GetOrderBookAsync(string market, int limit = 1000, CancellationToken ct = default);
 
         CallResult<List<KunaTrade>> GetTrades(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc");
         Task<CallResult<List<KunaTrade>>> GetTradesAsync(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc", CancellationToken ct = default);
