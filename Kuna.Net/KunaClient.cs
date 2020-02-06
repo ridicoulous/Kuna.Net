@@ -23,7 +23,6 @@ namespace Kuna.Net
     {
         public KunaClient() : base(new KunaClientOptions(), null)
         {
-
         }
         public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
@@ -59,10 +58,10 @@ namespace Kuna.Net
             var result = await SendRequest<KunaTickerInfo>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), HttpMethod.Get, ct).ConfigureAwait(false);
             return new CallResult<KunaTickerInfo>(result.Data, result.Error);
         }
-        public CallResult<KunaOrderBook> GetOrderBook(string market) => GetOrderBookAsync(market).Result;
-        public async Task<CallResult<KunaOrderBook>> GetOrderBookAsync(string market, CancellationToken ct = default)
+        public CallResult<KunaOrderBook> GetOrderBook(string market, int limit= 1000) => GetOrderBookAsync(market,limit).Result;
+        public async Task<CallResult<KunaOrderBook>> GetOrderBookAsync(string market, int limit=1000, CancellationToken ct = default)
         {
-            var parameters = new Dictionary<string, object>() { { "market", market } };
+            var parameters = new Dictionary<string, object>() { { "market", market }, { "limit", limit } };
             var result = await SendRequest<KunaOrderBook>(GetUrl(OrderBookEndpoint), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
             return new CallResult<KunaOrderBook>(result.Data, result.Error);
         }
