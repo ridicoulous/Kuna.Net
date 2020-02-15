@@ -3,6 +3,7 @@ using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.OrderBook;
 using CryptoExchange.Net.Sockets;
+using Kuna.Net.Converters;
 using Kuna.Net.Objects;
 using Newtonsoft.Json;
 using System;
@@ -84,14 +85,10 @@ namespace Kuna.Net
         }
 
         private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
-        {
-            //var asks = arg1.Asks.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
-            //var bids = arg1.Bids.Select(c => new KunaOrderBookEntry(c.Price, c.Amount));
+        {                
             SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Bids.OrderByDescending(c => c.Price), arg1.Asks.OrderBy(c=>c.Price) );
-            LastUpdate = DateTime.UtcNow;
-         //   OnOrderBookUpdate?.Invoke();
         }
-
+        
         public void StopGettingOrderBook()
         {
             cancellationToken.Cancel();

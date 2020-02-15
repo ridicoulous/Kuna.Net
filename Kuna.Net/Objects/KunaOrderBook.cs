@@ -19,13 +19,22 @@ namespace Kuna.Net.Objects
     [JsonConverter(typeof(ArrayConverter))]
     public class KunaOrderBookEntry : ISymbolOrderBookEntry
     {
+        public KunaOrderBookEntry()
+        {
 
+        }
+        public KunaOrderBookEntry(decimal price, decimal amount, int count=1)
+        {
+            Price = price;
+            Quantity = amount;
+            Count = count;
+        }
         [ArrayProperty(0), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Price { get; set; }
         [ArrayProperty(1), JsonConverter(typeof(StringToDecimalConverter))]
         public decimal Quantity { get; set; }
         [ArrayProperty(2), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Count { get; set; }
+        public int Count { get; set; }
     }
 
 }
