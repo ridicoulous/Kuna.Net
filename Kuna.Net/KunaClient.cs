@@ -237,6 +237,10 @@ namespace Kuna.Net
                     uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
                 }
             }
+            if (method == HttpMethod.Get) 
+            {
+                uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
+            }
             var request = RequestFactory.Create(method, uriString);
             // request.Content = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
