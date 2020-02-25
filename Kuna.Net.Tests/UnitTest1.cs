@@ -3,6 +3,7 @@ using System;
 using Xunit;
 using Shouldly;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace Kuna.Net.Tests
 {
@@ -59,6 +60,20 @@ namespace Kuna.Net.Tests
             var accountData = _client.GetAccountInfo();
             Assert.True(accountData);
             accountData.Data.ShouldNotBeNull();
+        }
+
+        [Fact(DisplayName = "CandlesHistoryAsync")]
+        public async Task ShouldGetCandlesHistoryAsync()
+        {
+            var date = new DateTime(2020, 01, 01);
+            var date1 = date.AddDays(-1);
+            var date2 = date.AddDays(0);
+            var history = await client.GetCandlesHistoryAsync("btcusd", 60, date1, date2);
+
+            Assert.True(history);
+            history.Data.ShouldNotBeNull();
+            history.Data.Count.ShouldBe(25);
+            history.Error.ShouldBeNull();
         }
 
         private IKunaClient GetClientWithAuthentication()
