@@ -57,7 +57,7 @@ namespace Kuna.Net
                 var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
                 var n = Nonce;
                 var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
-                var signedData = Sign(signature);
+                var signedData = SignV3(signature);
 
                 result.Add("kun-apikey", Credentials.Key.GetString());
                 result.Add("kun-nonce", n);
@@ -69,8 +69,7 @@ namespace Kuna.Net
         public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
         {
             if (!signed)
-                return parameters;
-            //   var uriObj = new Uri(uri);
+                return parameters;       
             if (uri.Contains("v2"))
             {
                 parameters.Add("access_key", Credentials.Key.GetString());
@@ -87,13 +86,12 @@ namespace Kuna.Net
                 lock (encryptLock)
                     signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
                 parameters.Add("signature", ByteArrayToString(signBytes));
-
             }
 
             return parameters;
         }
 
-        public override string Sign(string toSign)
+        public string SignV3(string toSign)
         {           
             return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
         }    
@@ -103,13 +101,8 @@ namespace Kuna.Net
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
-        }
-        
-        public override string Sign(string toSign)
-        {
-            lock (locker)
-                return ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
-        }
+        }        
+      
 
     }
 }
