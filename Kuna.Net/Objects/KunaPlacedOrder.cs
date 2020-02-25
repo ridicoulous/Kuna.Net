@@ -45,8 +45,6 @@ namespace Kuna.Net.Objects
         [JsonProperty("trades_count")]
         public int TradesCount { get; set; }
     }
-       
- 
     [JsonConverter(typeof(ArrayConverter))]
     public class KunaPlacedOrderV3
     {
@@ -158,7 +156,6 @@ namespace Kuna.Net.Objects
         public decimal? PriceAverage { get; set; }
         [JsonIgnore]
         public OrderSide OrderSide => AmountOriginal > 0 ? OrderSide.Buy : OrderSide.Sell;
-
 
     }
 }

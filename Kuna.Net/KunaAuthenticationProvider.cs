@@ -1,9 +1,11 @@
 ﻿using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -14,51 +16,87 @@ namespace Kuna.Net
     public class KunaAuthenticationProvider : AuthenticationProvider
     {
         private readonly HMACSHA256 encryptor;
+        private HMACSHA384 encryptorv3;
+
         private readonly object encryptLock = new object();
-        private readonly HMACSHA384 encryptor3;
-        private readonly object locker;
+
+        private static readonly object nonceLock = new object();
+        private static long lastNonce;
+        internal static string Nonce
+        {
+            get
+            {
+                lock (nonceLock)
+                {
+                    var nonce = (long)Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
+                    if (nonce == lastNonce)
+                        nonce += 1;
+
+                    lastNonce = nonce;
+                    return lastNonce.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+        }
+        ApiCredentials creds;
         public KunaAuthenticationProvider(ApiCredentials credentials) : base(credentials)
         {
-            if (credentials.Secret == null)
-                throw new ArgumentException("ApiKey/Secret needed");
+            creds = credentials;
             encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
-            encryptor3 = new HMACSHA384(Encoding.UTF8.GetBytes(credentials.Secret.GetString()));
+            encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
+        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        {
+            if (!signed)
+                return new Dictionary<string, string>();
 
-        public override Dictionary<string, object> AddAuthenticationToParameters(string uri, string method, Dictionary<string, object> parameters, bool signed)
-        {         
+            var result = new Dictionary<string, string>();
+
+            if (uri.Contains("v3"))
+            {
+                //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
+                var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+                var n = Nonce;
+                var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
+                var signedData = Sign(signature);
+
+                result.Add("kun-apikey", Credentials.Key.GetString());
+                result.Add("kun-nonce", n);
+                result.Add("kun-signature", signedData.ToLower());
+            }
+          
+            return result;
+        }
+        public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        {
             if (!signed)
                 return parameters;
-         //   var uriObj = new Uri(uri);
-            parameters.Add("access_key", Credentials.Key.GetString());
-            parameters.Add("tonce", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
-            parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
+            //   var uriObj = new Uri(uri);
+            if (uri.Contains("v2"))
+            {
+                parameters.Add("access_key", Credentials.Key.GetString());
+                var n = Nonce;
+                parameters.Add("tonce", n);
 
-            var paramString = parameters.CreateParamString(false);
-            var signData = method + "|";        
-            signData += uri+ "|";
-            signData += paramString;
-            byte[] signBytes;
-            lock (encryptLock)
-                signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
-            parameters.Add("signature", ByteArrayToString(signBytes));
+                parameters = parameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
 
-            //if (method != Constants.GetMethod)
-            //    foreach (var kvp in parameters)
-            //        parameters.Add(kvp.Key, kvp.Value);
+                var paramString = parameters.CreateParamString(false, ArrayParametersSerialization.MultipleValues);
+                var signData = method + "|";
+                signData += uri + "|";
+                signData += paramString;
+                byte[] signBytes;
+                lock (encryptLock)
+                    signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
+                parameters.Add("signature", ByteArrayToString(signBytes));
+
+            }
 
             return parameters;
         }
 
-        //public override string Sign(string toSign)
-        //{
-        //    return base.Sign(toSign);
-        //}
-
-        //public override byte[] Sign(byte[] toSign)
-        //{
-        //    return base.Sign(toSign);
-        //}
+        public override string Sign(string toSign)
+        {           
+            return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+        }    
         public string ByteArrayToString(byte[] ba)
         {
             StringBuilder hex = new StringBuilder(ba.Length * 2);
@@ -66,40 +104,7 @@ namespace Kuna.Net
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
         }
-        public  Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
-        {
-            if (Credentials.Key == null)
-                throw new ArgumentException("ApiKey/Secret needed");
-
-            var result = new Dictionary<string, string>();
-            if (!signed)
-                return result;
-
-            if (uri.Contains("v1"))
-            {
-                var signature = JsonConvert.SerializeObject(parameters);
-
-                var payload = Convert.ToBase64String(Encoding.ASCII.GetBytes(signature));
-                var signedData = Sign(payload);
-
-                result.Add("X-BFX-APIKEY", Credentials.Key.GetString());
-                result.Add("X-BFX-PAYLOAD", payload);
-                result.Add("X-BFX-SIGNATURE", signedData.ToLower());
-            }
-            else if (uri.Contains("v2"))
-            {
-                var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-              
-                var signature = $"/api{uri.Split(new[] { ".com" }, StringSplitOptions.None)[1]}42{json}";
-                var signedData = Sign(signature);
-
-                result.Add("bfx-apikey", Credentials.Key.GetString());
-                result.Add("bfx-nonce", "42");
-                result.Add("bfx-signature", signedData.ToLower());
-            }
-
-            return result;
-        }
+        
         public override string Sign(string toSign)
         {
             lock (locker)

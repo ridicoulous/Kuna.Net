@@ -1,13 +1,13 @@
 ﻿using CryptoExchange.Net.Objects;
+using System;
 
 namespace Kuna.Net
 {
-    public class KunaClientOptions : ClientOptions
+    public class KunaClientOptions : RestClientOptions
     {
-        public KunaClientOptions()
+        public KunaClientOptions(string baseAddress= "https://kuna.io/api/v2", TimeSpan? timeout=null) :base(baseAddress)
         {
-            BaseAddress = "https://kuna.io/api/v2";
-
+            this.RequestTimeout = timeout?? TimeSpan.FromMilliseconds(2700);
         }
     }
 }

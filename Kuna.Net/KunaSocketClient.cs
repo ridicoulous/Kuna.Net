@@ -19,14 +19,21 @@ namespace Kuna.Net
         public event OnStateChanged StateChanged;
         public delegate void OnPusherError(PusherException ex);
         public event OnPusherError PusherError;
-        public KunaSocketClient(KunaSocketClientOptions options):base(options,null)
+        public KunaSocketClient( ) : base(new KunaSocketClientOptions("wss://echo.websocket.org"), null)
         {
-            _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
+            _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Authorizer = new HttpAuthorizer("https://kuna.io/pusher/auth"), Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();
             _pusherClient.Error += _pusherClient_Error;
             _pusherClient.ConnectionStateChanged += _pusherClient_ConnectionStateChanged;
         }
-        
+        public KunaSocketClient(KunaSocketClientOptions options):base(options,null)
+        {
+            _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() { Authorizer = new HttpAuthorizer("https://kuna.io/pusher/auth"), Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
+            _pusherClient.Connect();
+            _pusherClient.Error += _pusherClient_Error;
+            _pusherClient.ConnectionStateChanged += _pusherClient_ConnectionStateChanged;
+        }
+       
         private void _pusherClient_ConnectionStateChanged(object sender, ConnectionState state)
         {
             log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Pusher state is {state.ToString()}");
@@ -72,6 +79,16 @@ namespace Kuna.Net
             });
 
         }
+        public void MyChannel()
+        {
+            var _myChannel = _pusherClient.Subscribe("private-7GBET5ZHZ");
+            _myChannel.Bind("account", (dynamic data) =>
+            {
+                string t = Convert.ToString(data);
+                Console.WriteLine(data);
+            });
+
+        }
 
         public void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate)
         {
@@ -87,7 +104,11 @@ namespace Kuna.Net
         public override Task UnsubscribeAll()
         {
             if(_pusherClient!=null)
+            {
+                _pusherClient.UnbindAll();
                 _pusherClient.Disconnect();
+
+            }
             return Task.CompletedTask;
         }
         public override void Dispose()
@@ -123,6 +144,6 @@ namespace Kuna.Net
         protected override Task<bool> Unsubscribe(SocketConnection connection, SocketSubscription s)
         {
             throw new NotImplementedException();
-        }
+        }   
     }
 }
