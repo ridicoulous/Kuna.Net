@@ -37,12 +37,10 @@ namespace Kuna.Net
         private const string AccountInfoEndpoint = "members/me";
         private const string OrdersEndpoint = "orders";
         private const string SingleOrderEndpoint = "order";
-
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
         private const string CandlesHistoryEndpoint = "tv/history";
         private const string Orders3 = "auth/r/orders/";
-
         #endregion
         public CallResult<DateTime> GetServerTime() => GetServerTimeAsync().Result;
         public async Task<CallResult<DateTime>> GetServerTimeAsync(CancellationToken ct = default)
@@ -194,7 +192,6 @@ namespace Kuna.Net
             var result = await SendRequest<List<KunaTrade>>(GetUrl(MyTradesEndpoint), HttpMethod.Get, ct, parameters, true).ConfigureAwait(false);
             return new CallResult<List<KunaTrade>>(result.Data, result.Error);
         }
-
         public async Task<CallResult<List<KunaOhclv>>> GetCandlesHistoryAsync(string symbol, int resolution, DateTime from, DateTime to, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>() { { "symbol", symbol }, { "resolution", resolution }, { "from", JsonConvert.SerializeObject(from, new TimestampSecondsConverter()) }, { "to", JsonConvert.SerializeObject(to, new TimestampSecondsConverter()) } };
@@ -228,6 +225,7 @@ namespace Kuna.Net
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
             var uriString = uri.ToString();
+
             if(uriString.Contains("v2"))
             {
                 if (authProvider != null)
@@ -252,15 +250,13 @@ namespace Kuna.Net
                         request.AddHeader(header.Key, header.Value);
                     }                    
                   //  request.AddHeader("content-type", "application/json");
-                }
-               
+                }               
             }
 
             if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
             {
                 WriteParamBody(request, parameters, requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader);
-            }
-            
+            }            
 
             return request;
         }
@@ -276,6 +272,7 @@ namespace Kuna.Net
                 postParametersPosition = PostParameters.InUri;
             }
             return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
+
         }
         public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
 
@@ -287,8 +284,6 @@ namespace Kuna.Net
         }
 
         public CallResult<List<KunaOhclv>> GetCandlesHistory(string symbol, int resolution, DateTime from, DateTime to) => GetCandlesHistoryAsync(symbol, resolution, from, to).Result;
-
-  
 
         #endregion
 

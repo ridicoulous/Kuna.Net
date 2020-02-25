@@ -19,6 +19,7 @@ namespace Kuna.Net
         private HMACSHA384 encryptorv3;
 
         private readonly object encryptLock = new object();
+
         private static readonly object nonceLock = new object();
         private static long lastNonce;
         internal static string Nonce
@@ -42,7 +43,6 @@ namespace Kuna.Net
             creds = credentials;
             encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
             encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
-
         }
         public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
         {
@@ -62,16 +62,8 @@ namespace Kuna.Net
                 result.Add("kun-apikey", Credentials.Key.GetString());
                 result.Add("kun-nonce", n);
                 result.Add("kun-signature", signedData.ToLower());
-
-
-                //string jsonContent = "";
-                //if (method != HttpMethod.Get&& method != HttpMethod.Delete)
-                //    jsonContent = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-                //result.Add("Api-Content-Hash", ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(jsonContent))).ToLower());
             }
-            //uri = WebUtility.UrlDecode(uri); // Sign needs the query parameters to not be encoded
-            //var sign = result["Api-Timestamp"] + uri + method + result["Api-Content-Hash"] + "";
-            //result.Add("Api-Signature", ByteToString(encryptorHmac.ComputeHash(Encoding.UTF8.GetBytes(sign))));
+          
             return result;
         }
         public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
@@ -96,25 +88,15 @@ namespace Kuna.Net
                     signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
                 parameters.Add("signature", ByteArrayToString(signBytes));
 
-                //if (method != Constants.GetMethod)
-                //    foreach (var kvp in parameters)
-                //        parameters.Add(kvp.Key, kvp.Value);
             }
 
             return parameters;
         }
 
-
         public override string Sign(string toSign)
-        {
-            //lock (encryptLock)
-            //    return ByteToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign))).ToLower();
+        {           
             return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
-        }
-        //public override byte[] Sign(byte[] toSign)
-        //{
-        //    return base.Sign(toSign);
-        //}
+        }    
         public string ByteArrayToString(byte[] ba)
         {
             StringBuilder hex = new StringBuilder(ba.Length * 2);
@@ -122,5 +104,12 @@ namespace Kuna.Net
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
         }
+        
+        public override string Sign(string toSign)
+        {
+            lock (locker)
+                return ByteToString(encryptor.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+        }
+
     }
 }

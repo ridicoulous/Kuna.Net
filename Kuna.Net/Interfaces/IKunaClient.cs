@@ -41,6 +41,7 @@ namespace Kuna.Net.Interfaces
         Task<CallResult<List<KunaTrade>>> GetMyTradesAsync(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc", CancellationToken ct = default);
 
         CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
+
         Task<CallResult<List<KunaTraidingPair>>> GetExchangeCurrenciesInfoAsync(CancellationToken ct = default);
         CallResult<List<KunaOhclv>> GetCandlesHistory(string symbol, int resolution, DateTime from, DateTime to);
 
@@ -49,9 +50,6 @@ namespace Kuna.Net.Interfaces
         CallResult<List<KunaPlacedOrderV3>> GetOrders3(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null);
         CallResult<List<KunaTrade3>> GetOrderTrades(string market, long id);
         Task<CallResult<List<KunaTrade3>>> GetOrderTradesAsync(string market, long id, CancellationToken ct);
-
-
-
 
     }
 }

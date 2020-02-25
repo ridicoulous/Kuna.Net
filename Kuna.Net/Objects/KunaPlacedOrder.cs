@@ -157,6 +157,5 @@ namespace Kuna.Net.Objects
         [JsonIgnore]
         public OrderSide OrderSide => AmountOriginal > 0 ? OrderSide.Buy : OrderSide.Sell;
 
-
     }
 }
