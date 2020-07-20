@@ -220,7 +220,7 @@ namespace Kuna.Net
 
         #region BaseMethodOverride
 
-        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
@@ -229,7 +229,7 @@ namespace Kuna.Net
             if(uriString.Contains("v2"))
             {
                 if (authProvider != null)
-                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed);
+                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed,postParametersPosition,arraySerialization);
                 if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
                 {
                     uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
@@ -248,7 +248,7 @@ namespace Kuna.Net
             {
                 if (authProvider != null)
                 {
-                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed);
+                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed,postParametersPosition,arraySerialization);
                     foreach(var header in headers)
                     {
                         request.AddHeader(header.Key, header.Value);

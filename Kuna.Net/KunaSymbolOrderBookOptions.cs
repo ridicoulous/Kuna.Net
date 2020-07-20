@@ -13,7 +13,7 @@ namespace Kuna.Net
         public readonly int ResponseTimeout;
         public readonly bool Usev3;
 
-        public KunaSymbolOrderBookOptions(string name, int limit = 100, int? timeout = 300, int? responseTimeout = 3, bool v3=false) : base(name, false)
+        public KunaSymbolOrderBookOptions(string name, int limit = 100, int? timeout = 300, int? responseTimeout = 3, bool v3=false) : base(name, false,false)
         {
             EntriesCount = limit;
             Usev3 = v3;

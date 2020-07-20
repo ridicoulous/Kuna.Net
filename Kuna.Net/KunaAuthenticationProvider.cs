@@ -44,7 +44,8 @@ namespace Kuna.Net
             encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
             encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
-        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+      
+        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (!signed)
                 return new Dictionary<string, string>();
@@ -66,7 +67,8 @@ namespace Kuna.Net
           
             return result;
         }
-        public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        
+        public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (!signed)
                 return parameters;       

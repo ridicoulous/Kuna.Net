@@ -27,7 +27,7 @@ namespace Kuna.Net.Tests
         public void ShouldGetServerTime()
         {
             var serverTime = client.GetServerTime();
-            Assert.True(serverTime.Data > DateTime.UtcNow.AddSeconds(-1));
+            Assert.True(Math.Abs(serverTime.Data.Subtract( DateTime.UtcNow).Seconds)<2);
         }
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
