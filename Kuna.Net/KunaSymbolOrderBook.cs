@@ -85,7 +85,7 @@ namespace Kuna.Net
         }
 
         private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
-        {                
+        {   
             SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Bids.OrderByDescending(c => c.Price), arg1.Asks.OrderBy(c=>c.Price) );
         }
         

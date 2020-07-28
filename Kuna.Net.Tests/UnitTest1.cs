@@ -40,6 +40,7 @@ namespace Kuna.Net.Tests
         {
             var orderbook = client.GetOrderBook("btcusdt");
             Assert.True(orderbook);
+            
             orderbook.Data.Asks.ShouldNotBeNull();
             orderbook.Data.Bids.ShouldNotBeNull();
         }

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kuna.Net.SampleApp", "Kuna.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{5945FF9F-96EB-433F-B489-2C63ACEE1A26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kuna.Net.Tests", "Kuna.Net.Tests\Kuna.Net.Tests.csproj", "{533C5141-B222-445F-B010-2D7A4859FAAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kuna.Net.Tests", "Kuna.Net.Tests\Kuna.Net.Tests.csproj", "{533C5141-B222-445F-B010-2D7A4859FAAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
