@@ -7,7 +7,7 @@ namespace Kuna.Net
     public class KunaClientOptions : RestClientOptions
     {
 
-        public KunaClientOptions(HttpClient httpClient):base("https://kuna.io/api/v2")
+        public KunaClientOptions(HttpClient httpClient):base(httpClient,"https://kuna.io/api/v2")
         {
 
         }
