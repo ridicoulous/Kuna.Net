@@ -228,14 +228,11 @@ namespace Kuna.Net
 
             if(uriString.Contains("v2"))
             {
-                if (authProvider != null)
+                if (authProvider != null&&signed)
                     parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed,postParametersPosition,arraySerialization);
-                if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
-                {
-                    uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
-                }
+               
             }
-            if (method == HttpMethod.Get) 
+            if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
                 uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
             }
@@ -255,8 +252,7 @@ namespace Kuna.Net
                     }                    
                   //  request.AddHeader("content-type", "application/json");
                 }               
-            }
-
+            }       
             if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
             {
                 WriteParamBody(request, parameters, requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader);
