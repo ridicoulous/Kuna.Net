@@ -1,10 +1,7 @@
 ﻿using CryptoExchange.Net;
-using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
-using CryptoExchange.Net.RateLimiter;
-using CryptoExchange.Net.Requests;
 using Kuna.Net.Converters;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects;
@@ -220,23 +217,23 @@ namespace Kuna.Net
 
         #region BaseMethodOverride
 
-        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
+        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization, int requestId)
         {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
             var uriString = uri.ToString();
 
-            if(uriString.Contains("v2"))
+            if (uriString.Contains("v2"))
             {
-                if (authProvider != null&&signed)
-                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed,postParametersPosition,arraySerialization);
-               
+                if (authProvider != null && signed)
+                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed, postParametersPosition, arraySerialization);
+
             }
             if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
             {
                 uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
             }
-            var request = RequestFactory.Create(method, uriString);
+            var request = RequestFactory.Create(method, uriString,requestId);
             // request.Content = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
             request.Method = method;
@@ -245,18 +242,18 @@ namespace Kuna.Net
             {
                 if (authProvider != null)
                 {
-                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed,postParametersPosition,arraySerialization);
-                    foreach(var header in headers)
+                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed, postParametersPosition, arraySerialization);
+                    foreach (var header in headers)
                     {
                         request.AddHeader(header.Key, header.Value);
-                    }                    
-                  //  request.AddHeader("content-type", "application/json");
-                }               
-            }       
+                    }
+                    //  request.AddHeader("content-type", "application/json");
+                }
+            }
             if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
             {
                 WriteParamBody(request, parameters, requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader);
-            }            
+            }
 
             return request;
         }
