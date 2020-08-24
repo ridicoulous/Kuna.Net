@@ -4,6 +4,7 @@ using Xunit;
 using Shouldly;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using CryptoExchange.Net.Logging;
 
 namespace Kuna.Net.Tests
 {
@@ -84,7 +85,10 @@ namespace Kuna.Net.Tests
             var secret = config["secret"];
             var client = new KunaClient(new KunaClientOptions()
             {
-                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(key, secret)
+                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(key, secret),
+                LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
+                LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new ThreadSafeFileWriter("debug-client.log") }
+
             }) ;
             return client;            
         }

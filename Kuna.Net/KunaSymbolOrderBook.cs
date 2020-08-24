@@ -37,7 +37,7 @@ namespace Kuna.Net
             _responseTimeout = options.ResponseTimeout;
             _orderBookLimit = options.EntriesCount;
             _timeOut = options.UpdateTimeout;
-            httpClient = new HttpClient();
+            httpClient = options.HttpClient?? new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
             _orderBookLimit = options.EntriesCount;
@@ -50,7 +50,7 @@ namespace Kuna.Net
             _responseTimeout = options.ResponseTimeout;
             _orderBookLimit = options.EntriesCount;
             _timeOut = options.UpdateTimeout;
-            httpClient = new HttpClient();
+            httpClient = options.HttpClient ?? new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(_responseTimeout);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36");
             _orderBookLimit = options.EntriesCount;
@@ -217,13 +217,7 @@ namespace Kuna.Net
         {
             Run();
             if (_kunaSocketClient == null)
-                _kunaSocketClient = new KunaSocketClient();
-            //var sub = await _kunaSocketClient.CreateFakeSubsctiptionAsync();
-            //return null;
-            //Status = OrderBookStatus.Syncing;
-            //throw new NotImplementedException();
-            // CallResult<UpdateSubscription> subResult = new CallResult<UpdateSubscription>(new UpdateSubscription(new SocketConnection(new So)));
-            // return new CallResult<UpdateSubscription>(subResult.Data, null); 
+                _kunaSocketClient = new KunaSocketClient();            
             return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, wf.CreateWebsocket(log, "wss://echo.websocket.org")), null), null);
         }
 

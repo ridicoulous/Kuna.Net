@@ -45,28 +45,28 @@ namespace Kuna.Net
             encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
       
-        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
-        {
-            if (!signed)
-                return new Dictionary<string, string>();
+        //public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
+        //{
+        //    if (!signed)
+        //        return new Dictionary<string, string>();
 
-            var result = new Dictionary<string, string>();
+        //    var result = new Dictionary<string, string>();
 
-            if (uri.Contains("v3"))
-            {
-                //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
-                var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
-                var n = Nonce;
-                var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
-                var signedData = SignV3(signature);
+        //    if (uri.Contains("v3"))
+        //    {
+        //        //  HMACSHA384 hmac = new HMACSHA384(Encoding.UTF8.GetBytes(creds.Secret.GetString()));
+        //        var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+        //        var n = Nonce;
+        //        var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
+        //        var signedData = SignV3(signature);
 
-                result.Add("kun-apikey", Credentials.Key.GetString());
-                result.Add("kun-nonce", n);
-                result.Add("kun-signature", signedData.ToLower());
-            }
+        //        result.Add("kun-apikey", Credentials.Key.GetString());
+        //        result.Add("kun-nonce", n);
+        //        result.Add("kun-signature", signedData.ToLower());
+        //    }
           
-            return result;
-        }
+        //    return result;
+        //}
         
         public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
