@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>1.7.5</Version>
+    <Version>1.7.6</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous</Copyright>
@@ -15,7 +15,7 @@
     <FileVersion>1.6.7.0</FileVersion>
     <Authors>ridicoulous</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>more detailed and readable logs, base library update</PackageReleaseNotes>
+    <PackageReleaseNotes>added missing object to order</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
