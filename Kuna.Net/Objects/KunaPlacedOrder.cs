@@ -44,6 +44,8 @@ namespace Kuna.Net.Objects
 
         [JsonProperty("trades_count")]
         public int TradesCount { get; set; }
+        [JsonProperty("trades")]
+        public object[] Trades{ get; set; }
     }
     [JsonConverter(typeof(ArrayConverter))]
     public class KunaPlacedOrderV3
