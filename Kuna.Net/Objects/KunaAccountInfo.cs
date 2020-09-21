@@ -24,10 +24,11 @@ namespace Kuna.Net.Objects
         public string Currency { get; set; }
 
         [JsonProperty("balance"), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Balance { get; set; }
+        public decimal FreeBalance { get; set; }
 
         [JsonProperty("locked"), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Locked { get; set; }
+        public decimal LockedBalance { get; set; }
+        public decimal TotalBalance => FreeBalance + LockedBalance;
     }
 
 }
