@@ -30,34 +30,34 @@ namespace Kuna.Net.Objects
     public class DailyStats
     {
         [JsonProperty("highest_bid")]
-        public decimal HighestBid { get; set; }
+        public decimal? HighestBid { get; set; }
 
         [JsonProperty("bids_sum")]
-        public decimal BidsSum { get; set; }
+        public decimal? BidsSum { get; set; }
 
         [JsonProperty("lowest_ask")]
-        public decimal LowestAsk { get; set; }
+        public decimal? LowestAsk { get; set; }
 
         [JsonProperty("asks_sum")]
-        public decimal AsksSum { get; set; }
+        public decimal? AsksSum { get; set; }
 
         [JsonProperty("price_change")]
-        public decimal PriceChange { get; set; }
+        public decimal? PriceChange { get; set; }
 
         [JsonProperty("price_change_percentage")]
-        public decimal PriceChangePercentage { get; set; }
+        public decimal? PriceChangePercentage { get; set; }
 
         [JsonProperty("last_price")]
-        public decimal LastPrice { get; set; }
+        public decimal? LastPrice { get; set; }
 
         [JsonProperty("daily_volume")]
         public decimal DailyVolume { get; set; }
 
         [JsonProperty("daily_high")]
-        public decimal DailyHigh { get; set; }
+        public decimal? DailyHigh { get; set; }
 
         [JsonProperty("daily_low")]
-        public decimal DailyLow { get; set; }
+        public decimal? DailyLow { get; set; }
     }
 
 }
