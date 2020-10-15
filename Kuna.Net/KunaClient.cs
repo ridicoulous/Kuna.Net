@@ -268,7 +268,7 @@ namespace Kuna.Net
             {
                 postParametersPosition = PostParameters.InUri;
             }
-            return version == null ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
+            return version == null ? new Uri($"{BaseAddress}{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
 
         }
         public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
