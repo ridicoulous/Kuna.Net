@@ -19,14 +19,14 @@ namespace Kuna.Net
         public event OnStateChanged StateChanged;
         public delegate void OnPusherError(PusherException ex);
         public event OnPusherError PusherError;
-        public KunaSocketClient( ) : base(new KunaSocketClientOptions("wss://echo.websocket.org"), null)
+        public KunaSocketClient( ) : base("KunaSocketClient",new KunaSocketClientOptions("wss://echo.websocket.org"), null)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() {  Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();
             _pusherClient.Error += _pusherClient_Error;
             _pusherClient.ConnectionStateChanged += _pusherClient_ConnectionStateChanged;
         }
-        public KunaSocketClient(KunaSocketClientOptions options):base(options,null)
+        public KunaSocketClient(KunaSocketClientOptions options):base("KunaSocketClient", options,null)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() {  Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();

@@ -18,10 +18,10 @@ namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClient
     {
-        public KunaClient() : base(new KunaClientOptions(), null)
+        public KunaClient() : base("KunaApiClient",new KunaClientOptions(), null)
         {
         }
-        public KunaClient(KunaClientOptions options) : base(options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
+        public KunaClient(KunaClientOptions options, string clientName= "KunaApiClient") : base(clientName, options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
             postParametersPosition = PostParameters.InUri;
             requestBodyFormat = RequestBodyFormat.Json;

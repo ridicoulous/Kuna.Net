@@ -18,7 +18,7 @@ namespace Kuna.Net
     public class KunaSymbolOrderBook : SymbolOrderBook
     {
         private readonly bool _useSocketClient;
-        private KunaSocketClient _kunaSocketClient;
+        private readonly KunaSocketClient _kunaSocketClient;
         private readonly HttpClient httpClient;
         private readonly int _orderBookLimit;
         private int _timeOut;
@@ -110,9 +110,8 @@ namespace Kuna.Net
                 else
                 {
                     await GetOrderBook();
-
                 }
-                //  Thread.Sleep(_timeOut);
+                await Task.Delay(_timeOut);
             }
         }
 
@@ -121,8 +120,7 @@ namespace Kuna.Net
         {
             try
             {
-                await _slim.WaitAsync().ConfigureAwait(false);
-                Thread.Sleep(_timeOut);
+                await _slim.WaitAsync().ConfigureAwait(false);             
                 var result = await httpClient.GetAsync($"https://kuna.io/api/v2/depth?market={Symbol}&limit={_orderBookLimit}");
                 if (result.IsSuccessStatusCode)
                 {
@@ -150,7 +148,6 @@ namespace Kuna.Net
             {
                 log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
                 _slim.Release();
-
                 return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
             }
         }
@@ -159,8 +156,7 @@ namespace Kuna.Net
         {
             try
             {
-                await _slim.WaitAsync().ConfigureAwait(false);
-                Thread.Sleep(_timeOut);
+                await _slim.WaitAsync().ConfigureAwait(false);     
                 var result = await httpClient.GetAsync($"https://api.kuna.io/v3/book/{Symbol}");
                 if (result.IsSuccessStatusCode)
                 {
@@ -175,8 +171,7 @@ namespace Kuna.Net
                     Bid.AddRange(bids.OrderByDescending(c => c.Price));
 
                     SetInitialOrderBook(DateTime.UtcNow.Ticks, bids.OrderByDescending(c => c.Price), asks.OrderBy(c => c.Price));
-                    LastUpdate = DateTime.UtcNow;
-                //    OnOrderBookUpdate?.Invoke();
+                    LastUpdate = DateTime.UtcNow; 
                     _slim.Release();
 
                     return new CallResult<bool>(true, null);
@@ -216,8 +211,7 @@ namespace Kuna.Net
         protected override async Task<CallResult<UpdateSubscription>> DoStart()
         {
             Run();
-            if (_kunaSocketClient == null)
-                _kunaSocketClient = new KunaSocketClient();            
+               
             return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, wf.CreateWebsocket(log, "wss://echo.websocket.org")), null), null);
         }
 
