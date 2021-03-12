@@ -271,14 +271,23 @@ namespace Kuna.Net
             return version == null ? new Uri($"{BaseAddress}{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
 
         }
-        public CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo() => GetExchangeCurrenciesInfoAsync().Result;
+        public CallResult<List<KunaTraidingPair>> GeMarkets() => GeMarketsAsync().Result;
 
-        public async Task<CallResult<List<KunaTraidingPair>>> GetExchangeCurrenciesInfoAsync(CancellationToken ct = default)
+        public async Task<CallResult<List<KunaTraidingPair>>> GeMarketsAsync(CancellationToken ct = default)
         {
             string url = "https://api.kuna.io/v3/markets";
             var result = await SendRequest<List<KunaTraidingPair>>(new Uri(url), HttpMethod.Get, ct, null, false,false).ConfigureAwait(false);
             return new CallResult<List<KunaTraidingPair>>(result.Data, result.Error);
         }
+
+        public CallResult<List<KunaCurrency>> GetCurrencies(CancellationToken ct = default) => GetCurrenciesAsync().Result;
+        public async Task<CallResult<List<KunaCurrency>>> GetCurrenciesAsync(CancellationToken ct = default)
+        {
+            string url = "https://api.kuna.io/v3/currencies";
+            var result = await SendRequest<List<KunaCurrency>>(new Uri(url), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
+            return new CallResult<List<KunaCurrency>>(result.Data, result.Error);
+        }
+
 
         public CallResult<List<KunaOhclv>> GetCandlesHistory(string symbol, int resolution, DateTime from, DateTime to) => GetCandlesHistoryAsync(symbol, resolution, from, to).Result;
 
