@@ -3,6 +3,7 @@ using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects;
+using Kuna.Net.Objects.V2;
 using Newtonsoft.Json.Linq;
 using PusherClient;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Kuna.Net
 {
     /*wss://pusher.kuna.io/app/4b6a8b2c758be4e58868?protocol=7&client=js&version=3.0.0&flash=false*/
-    public class KunaSocketClient : SocketClient, IKunaSocketClient
+    public class KunaSocketClient : SocketClient, IKunaSocketClientV2
     {
         private readonly Pusher _pusherClient;
         public delegate void OnStateChanged(ConnectionState state);
@@ -68,13 +69,13 @@ namespace Kuna.Net
         private const string MarketTradesChannel = "market-{}-global";
 
         #endregion
-        public void SubscribeToOrderBookSideUpdates(string market, Action<KunaOrderBookUpdateEvent,string> onUpdate)
+        public void SubscribeToOrderBookSideUpdatesV2(string market, Action<KunaOrderBookUpdateEventV2,string> onUpdate)
         {
             var _myChannel = _pusherClient.Subscribe(FillPathParameter(MarketTradesChannel, market));
             _myChannel.Bind("update", (dynamic data) =>
             {
                 string t = Convert.ToString(data);          
-                KunaOrderBookUpdateEvent deserialized = Deserialize<KunaOrderBookUpdateEvent>(t).Data;
+                KunaOrderBookUpdateEventV2 deserialized = Deserialize<KunaOrderBookUpdateEventV2>(t).Data;
                 onUpdate(deserialized,market);
             });
 
@@ -90,13 +91,13 @@ namespace Kuna.Net
 
         }
 
-        public void SubscribeToTrades(string market, Action<KunaTradeEvent,string> onUpdate)
+        public void SubscribeToTradesV2(string market, Action<KunaTradeEventV2,string> onUpdate)
         {
             var _myChannel = _pusherClient.Subscribe(FillPathParameter(MarketTradesChannel, market));
             _myChannel.Bind("trades", (dynamic data) =>
             {
                 string t = Convert.ToString(data);
-                KunaTradeEvent deserialized = Deserialize<KunaTradeEvent>(t).Data;
+                KunaTradeEventV2 deserialized = Deserialize<KunaTradeEventV2>(t).Data;
                 onUpdate(deserialized, market);
             });
 

@@ -23,25 +23,25 @@ namespace Kuna.Net.Tests
 
         //CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
         //Task<CallResult<List<KunaOhclv>>> GetCandlesHistoryAsync(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
-        IKunaClient client = new KunaClient();
+        IKunaClientV2 client = new KunaClient();
         [Fact(DisplayName = "ServerTime")]
         public void ShouldGetServerTime()
         {
-            var serverTime = client.GetServerTime();
+            var serverTime = client.GetServerTimeV2();
             Assert.True(Math.Abs(serverTime.Data.Subtract( DateTime.UtcNow).Seconds)<2);
-            var c = client.GetCurrencies();
+            var c = client.GetCurrenciesV2();
             Assert.True(c);
         }
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
         {
-            var marketInfo = client.GetMarketInfo("btcusdt");
+            var marketInfo = client.GetMarketInfoV2("btcusdt");
             Assert.True(marketInfo);
         }
         [Fact(DisplayName = "OrderBook")]
         public void SholdGetOrderbook()
         {
-            var orderbook = client.GetOrderBook("btcusdt");
+            var orderbook = client.GetOrderBookV2("btcusdt");
             Assert.True(orderbook);
             
             orderbook.Data.Asks.ShouldNotBeNull();
@@ -50,7 +50,7 @@ namespace Kuna.Net.Tests
         [Fact(DisplayName = "TradesHistory")]
         public void ShoulGetTradesHistory()
         {
-            var trades = client.GetTrades("btcusdt");
+            var trades = client.GetTradesV2("btcusdt");
             Assert.True(trades);
             trades.Data.ShouldNotBeNull();
             trades.Error.ShouldBeNull();
@@ -61,7 +61,7 @@ namespace Kuna.Net.Tests
         public void ShouldGetAccountInfo()
         {
             var _client = GetClientWithAuthentication();
-            var accountData = _client.GetAccountInfo();
+            var accountData = _client.GetAccountInfoV2();
             Assert.True(accountData);
             accountData.Data.ShouldNotBeNull();
         }
@@ -72,7 +72,7 @@ namespace Kuna.Net.Tests
             var date = new DateTime(2020, 01, 01);
             var date1 = date.AddDays(-1);
             var date2 = date.AddDays(0);
-            var history = await client.GetCandlesHistoryAsync("btcusd", 60, date1, date2);
+            var history = await client.GetCandlesHistoryV2Async("btcusd", 60, date1, date2);
 
             Assert.True(history);
             history.Data.ShouldNotBeNull();
@@ -80,7 +80,7 @@ namespace Kuna.Net.Tests
             history.Error.ShouldBeNull();
         }
 
-        private IKunaClient GetClientWithAuthentication()
+        private IKunaClientV2 GetClientWithAuthentication()
         {
             var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
             var key = config["key"];

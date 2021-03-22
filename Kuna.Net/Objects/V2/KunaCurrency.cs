@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public  class KunaCurrency
+    public  class KunaCurrencyV2
     {
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -20,7 +20,7 @@ namespace Kuna.Net.Objects
         public bool? HasMemo { get; set; }
 
         [JsonProperty("icons")]
-        public Icons Icons { get; set; }
+        public IconsV2 Icons { get; set; }
 
         [JsonProperty("coin")]
         public bool Coin { get; set; }
@@ -32,7 +32,7 @@ namespace Kuna.Net.Objects
         public long SortOrder { get; set; }
 
         [JsonProperty("precision")]
-        public Precision Precision { get; set; }
+        public PrecisionV2 Precision { get; set; }
 
         [JsonProperty("privileged")]
         public bool Privileged { get; set; }
@@ -41,7 +41,7 @@ namespace Kuna.Net.Objects
         public bool? Fuel { get; set; }
     }
 
-    public  class Icons
+    public  class IconsV2
     {
         [JsonProperty("std")]
         public Uri Std { get; set; }
@@ -56,7 +56,7 @@ namespace Kuna.Net.Objects
         public Uri Png3X { get; set; }
     }
 
-    public  class Precision
+    public  class PrecisionV2
     {
         [JsonProperty("real")]
         public long Real { get; set; }

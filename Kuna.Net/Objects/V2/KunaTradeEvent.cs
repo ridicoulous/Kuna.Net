@@ -5,21 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public  class KunaTradeEvent
+    public  class KunaTradeEventV2
     {
         [JsonProperty("trades")]
-        public List<Trade> Trades { get; set; }
+        public List<TradeV2> Trades { get; set; }
     }
 
-    public class Trade
+    public class TradeV2
     {
         [JsonProperty("tid")]
         public long Tid { get; set; }
 
         [JsonProperty("type"), JsonConverter(typeof(OrderSideConverter))]
-        public OrderSide Type { get; set; }
+        public KunaOrderSideV2 Type { get; set; }
 
         [JsonProperty("date"), JsonConverter(typeof(TimestampSecondsConverter))]
         public DateTime Date { get; set; }

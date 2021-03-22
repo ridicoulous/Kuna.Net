@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V3
 {
     public enum OrderSide
     {

@@ -1,61 +1,15 @@
-﻿using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.Converters;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V3
 {
-    public class KunaTrade
-    {
-        [JsonProperty("id")]
-        public long Id { get; set; }
-
-        [JsonProperty("price"), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Price { get; set; }
-
-        [JsonProperty("volume"), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal Volume { get; set; }
-
-        [JsonProperty("funds"), JsonConverter(typeof(StringToDecimalConverter))]
-        public decimal TradeSumm { get; set; }
-
-        [JsonProperty("market")]
-        public string Market { get; set; }
-
-        [JsonProperty("created_at"), JsonConverter(typeof(IsoDateTimeConverter))]
-        public DateTime Timestamp { get; set; }
-
-        [JsonProperty("side")]
-        public string Side { get; set; }
-
-        [JsonProperty("trend"), JsonConverter(typeof(OrderSideConverter))]
-        public OrderSide TradeType { get; set; }
-        public bool IsMaker()
-        {
-            if (String.IsNullOrEmpty(Side))
-            {
-                return false;
-            }
-            if (Side == "ask")
-            {
-                return TradeType == OrderSide.Buy;
-            }
-            if (Side == "bid")
-            {
-                return TradeType == OrderSide.Sell;
-            }
-            else return false;
-
-        }
-
-    }
-
     /// <summary>
     /// Details of a trade
     /// </summary>
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaTrade3
+    public class KunaTrade
     {
         /// <summary>
         /// The id of the trade

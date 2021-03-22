@@ -1,20 +1,20 @@
 ﻿using CryptoExchange.Net.Converters;
-using Kuna.Net.Objects;
+using Kuna.Net.Objects.V2;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Kuna.Net.Converters
 {
-    public class OrderTypeConverter : BaseConverter<OrderType>
+    public class OrderTypeConverter : BaseConverter<KunaOrderTypeV2>
     {
         public OrderTypeConverter() : this(false) { }
         public OrderTypeConverter(bool quotes) : base(quotes) { }
 
-        protected override List<KeyValuePair<OrderType, string>> Mapping => new List<KeyValuePair<OrderType, string>>
+        protected override List<KeyValuePair<KunaOrderTypeV2, string>> Mapping => new List<KeyValuePair<KunaOrderTypeV2, string>>
         {
-            new KeyValuePair<OrderType, string>(OrderType.Limit, "limit"),
-            new KeyValuePair<OrderType, string>(OrderType.Market, "market")
+            new KeyValuePair<KunaOrderTypeV2, string>(KunaOrderTypeV2.Limit, "limit"),
+            new KeyValuePair<KunaOrderTypeV2, string>(KunaOrderTypeV2.Market, "market")
 
         };
     }

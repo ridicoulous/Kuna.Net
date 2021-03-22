@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public class KunaOhclv
+    public class KunaOhclvV2
     {
-        public KunaOhclv(long timestamp, decimal open, decimal high, decimal low, decimal close, decimal volume)
+        public KunaOhclvV2(long timestamp, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
             Open = open;
             High = high;
@@ -24,7 +24,7 @@ namespace Kuna.Net.Objects
         public decimal Volume { get; set; }
         public DateTime Timestamp { get; set; }
     }
-    internal class TradingViewOhclv
+    internal class TradingViewOhclvV2
     {
         [JsonProperty("t")]
         public List<long> Timestamps { get; set; }
