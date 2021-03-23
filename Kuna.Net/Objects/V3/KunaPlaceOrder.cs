@@ -61,14 +61,14 @@ namespace Kuna.Net.Objects.V3
         /// <summary>
         /// The order type
         /// </summary>
-        [ArrayProperty(8), JsonConverter(typeof(OrderTypeConverter))]
-        public OrderType Type { get; set; }
+        [ArrayProperty(8), JsonConverter(typeof(OrderTypeV2Converter))]
+        public KunaOrderType Type { get; set; }
 
         /// <summary>
         /// The previous order type
         /// </summary>
-        [ArrayProperty(9), JsonConverter(typeof(OrderTypeConverter))]
-        public OrderType? TypePrevious { get; set; }
+        [ArrayProperty(9), JsonConverter(typeof(OrderTypeV2Converter))]
+        public KunaOrderType? TypePrevious { get; set; }
 
         /// <summary>
         /// 
@@ -117,7 +117,7 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(17)]
         public decimal? PriceAverage { get; set; }
         [JsonIgnore]
-        public OrderSide OrderSide => AmountOriginal > 0 ? OrderSide.Buy : OrderSide.Sell;
+        public KunaOrderSide OrderSide => AmountOriginal > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
 
     }
 }

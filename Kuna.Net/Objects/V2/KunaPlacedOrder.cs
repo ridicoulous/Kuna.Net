@@ -15,7 +15,7 @@ namespace Kuna.Net.Objects.V2
         [JsonProperty("side"), JsonConverter(typeof(OrderSideConverter))]
         public KunaOrderSideV2 Side { get; set; }
 
-        [JsonProperty("ord_type"), JsonConverter(typeof(OrderTypeConverter))]
+        [JsonProperty("ord_type"), JsonConverter(typeof(OrderTypeV2Converter))]
         public KunaOrderTypeV2 OrderType { get; set; }
 
         [JsonProperty("price")]
@@ -24,7 +24,7 @@ namespace Kuna.Net.Objects.V2
         [JsonProperty("avg_price")]
         public decimal AvgPrice { get; set; }
 
-        [JsonProperty("state"), JsonConverter(typeof(OrderStatusConverter))]
+        [JsonProperty("state"), JsonConverter(typeof(OrderStatusV2Converter))]
         public KunaOrderStateV2 State { get; set; }
 
         [JsonProperty("market")]

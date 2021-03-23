@@ -3,6 +3,7 @@ using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using Kuna.Net.Converters;
+using Kuna.Net.Helpers;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects.V2;
 using Kuna.Net.Objects.V3;
@@ -29,16 +30,21 @@ namespace Kuna.Net
         }
         #region Endpoints
         private const string ServerTimeEndpoint = "timestamp";
-        private const string MarketInfoEndpoint = "tickers/{}";
-        private const string OrderBookEndpoint = "depth";
+        private const string MarketInfoV2Endpoint = "tickers/{}";
+        private const string OrderBookV2Endpoint = "depth";
         private const string AllTradesEndpoint = "trades";
         private const string AccountInfoEndpoint = "members/me";
-        private const string OrdersEndpoint = "orders";
+        private const string OrdersV2Endpoint = "orders";
         private const string SingleOrderEndpoint = "order";
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
         private const string CandlesHistoryEndpoint = "tv/history";
-        private const string Orders3 = "auth/r/orders/";
+        private const string OrdersEndpoint = "auth/r/orders/";
+        private const string CurrenciesEndpoint = "currencies";
+        private const string TickersEndpoint = "tickers";
+        private const string OrderBookEndpoint = "book/{}";
+        private const string PlaceOrderEndpoint = "auth/w/order/submit";
+        
         #endregion
         public CallResult<DateTime> GetServerTimeV2() => GetServerTimeV2Async().Result;
         public async Task<CallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default)
@@ -51,14 +57,14 @@ namespace Kuna.Net
         public CallResult<KunaTickerInfoV2> GetMarketInfoV2(string market) => GetMarketInfoV2Async(market).Result;
         public async Task<CallResult<KunaTickerInfoV2>> GetMarketInfoV2Async(string market, CancellationToken ct = default)
         {
-            var result = await SendRequest<KunaTickerInfoV2>(GetUrl(FillPathParameter(MarketInfoEndpoint, market)), HttpMethod.Get, ct,null, false, false).ConfigureAwait(false);
+            var result = await SendRequest<KunaTickerInfoV2>(GetUrl(FillPathParameter(MarketInfoV2Endpoint, market)), HttpMethod.Get, ct,null, false, false).ConfigureAwait(false);
             return new CallResult<KunaTickerInfoV2>(result.Data, result.Error);
         }
         public CallResult<KunaOrderBookV2> GetOrderBookV2(string market, int limit = 1000) => GetOrderBookV2Async(market, limit).Result;
         public async Task<CallResult<KunaOrderBookV2>> GetOrderBookV2Async(string market, int limit = 1000, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>() { { "market", market }, { "limit", limit } };
-            var result = await SendRequest<KunaOrderBookV2>(GetUrl(OrderBookEndpoint), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
+            var result = await SendRequest<KunaOrderBookV2>(GetUrl(OrderBookV2Endpoint), HttpMethod.Get, ct, parameters).ConfigureAwait(false);
             return new CallResult<KunaOrderBookV2>(result.Data, result.Error);
         }
         public CallResult<List<KunaTradeV2>> GetTradesV2(string market, DateTime? toDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "desc") => GetTradesV2Async(market, toDate, fromId, toId, limit, sort).Result;
@@ -88,14 +94,14 @@ namespace Kuna.Net
             var result = await SendRequest<KunaAccountInfoV2>(GetUrl(AccountInfoEndpoint), HttpMethod.Get, ct, null, true,false).ConfigureAwait(false);
             return new CallResult<KunaAccountInfoV2>(result.Data, result.Error);
         }
-        public async Task<CallResult<List<KunaPlacedOrder>>> GetOrdersAsync(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
+        public async Task<CallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
         {
-            var endpoint = Orders3;
+            var endpoint = OrdersEndpoint;
             if (!String.IsNullOrEmpty(market))
             {
                 endpoint += $"{market}";
             }
-            if (state == OrderState.Done || state == OrderState.Cancel)
+            if (state == KunaOrderState.Done || state == KunaOrderState.Cancel)
             {
                 if (!endpoint.EndsWith("/"))
                 {
@@ -117,7 +123,7 @@ namespace Kuna.Net
             var result = await SendRequest<List<KunaPlacedOrder>>(url, HttpMethod.Post, ct, parameters, true,false);
             return result;
         }
-        public CallResult<List<KunaPlacedOrder>> GetOrders(OrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null)
+        public CallResult<List<KunaPlacedOrder>> GetOrders(KunaOrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null)
    => GetOrdersAsync(state, market, from, to, limit, sortDesc).Result;
 
         public CallResult<KunaPlacedOrderV2> PlaceOrderV2(KunaOrderTypeV2 type, KunaOrderSideV2 side, decimal volume, decimal price, string market) => PlaceOrderV2Async(type, side, volume, price, market).Result;
@@ -127,13 +133,13 @@ namespace Kuna.Net
             var parameters = new Dictionary<string, object>()
             {
                 { "side", JsonConvert.SerializeObject(side,new OrderSideConverter()) },
-                { "type", JsonConvert.SerializeObject(type,new OrderTypeConverter()) },
+                { "type", JsonConvert.SerializeObject(type,new OrderTypeV2Converter()) },
                 { "volume", volume.ToString(CultureInfo.GetCultureInfo("en-US")) },
                 { "market", market },
                 { "price", price.ToString(CultureInfo.GetCultureInfo("en-US")) }
             };
 
-            var result = await SendRequest<KunaPlacedOrderV2>(GetUrl(OrdersEndpoint), HttpMethod.Post, ct, parameters, true,false).ConfigureAwait(false);
+            var result = await SendRequest<KunaPlacedOrderV2>(GetUrl(OrdersV2Endpoint), HttpMethod.Post, ct, parameters, true,false).ConfigureAwait(false);
             return new CallResult<KunaPlacedOrderV2>(result.Data, result.Error);
         }
         public CallResult<KunaPlacedOrderV2> CancelOrderV2(long orderId) => CancelOrderV2Async(orderId).Result;
@@ -151,12 +157,12 @@ namespace Kuna.Net
             var parameters = new Dictionary<string, object>()
             {
                 { "market", market },
-                { "state", JsonConvert.SerializeObject(orderState, new OrderStatusConverter())},
+                { "state", JsonConvert.SerializeObject(orderState, new OrderStatusV2Converter())},
                 { "order_by", sort },
                 { "page", page }
             };
 
-            var result = await SendRequest<List<KunaPlacedOrderV2>>(GetUrl(OrdersEndpoint), HttpMethod.Get, ct, parameters, true,false).ConfigureAwait(false);
+            var result = await SendRequest<List<KunaPlacedOrderV2>>(GetUrl(OrdersV2Endpoint), HttpMethod.Get, ct, parameters, true,false).ConfigureAwait(false);
             return new CallResult<List<KunaPlacedOrderV2>>(result.Data, result.Error);
         }
         public CallResult<KunaPlacedOrderV2> GetOrderInfoV2(long orderId) => GetOrderInfoV2Async(orderId).Result;
@@ -216,7 +222,9 @@ namespace Kuna.Net
             return result;
         }
 
+
         #region BaseMethodOverride
+    
 
         protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization, int requestId)
         {
@@ -294,5 +302,28 @@ namespace Kuna.Net
 
         #endregion
 
+        #region V3
+        CallResult<IEnumerable<KunaTicker>> GetTickers(params string[] symbols)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<CallResult<IEnumerable<KunaTicker>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols)
+        {
+            var request = new Dictionary<string, object>();
+            string symb = symbols.AsStringParameterOrNull() ?? "ALL";
+            request.AddOptionalParameter("symbols", symb);
+            return await SendRequest<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Post, ct, request, false, false);
+
+        }
+        CallResult<KunaOrderBook> GetOrderBook(string symbol)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<CallResult<KunaOrderBook>> GetOrderBookV2Async(string symbol, CancellationToken ct = default)
+        {
+            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(OrderBookEndpoint, symbol)), HttpMethod.Get, ct).ConfigureAwait(false);
+            return new CallResult<KunaOrderBook>(new KunaOrderBook(result.Data), result.Error);
+        }
+        #endregion V3
     }
 }

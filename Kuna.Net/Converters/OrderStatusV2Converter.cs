@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Kuna.Net.Converters
 {
-    public class OrderStatusConverter : BaseConverter<KunaOrderStateV2>
+    public class OrderStatusV2Converter : BaseConverter<KunaOrderStateV2>
     {
-        public OrderStatusConverter() : this(false) { }
-        public OrderStatusConverter(bool quotes) : base(quotes) { }
+        public OrderStatusV2Converter() : this(false) { }
+        public OrderStatusV2Converter(bool quotes) : base(quotes) { }
 
         protected override List<KeyValuePair<KunaOrderStateV2, string>> Mapping => new List<KeyValuePair<KunaOrderStateV2, string>>
         {
