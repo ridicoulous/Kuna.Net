@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V3
 {
-    public enum OrderSide
+    public enum KunaOrderSide
     {
         Buy,
         Sell
     }
-    public enum OrderType
+    public enum KunaOrderType
     {
         Limit,
-        Market
+        Market,
+        MarketByQuote,
+        StopLimit
     }
-    public enum OrderState
+    public enum KunaOrderState
     {
         Wait,
         Cancel,

@@ -5,6 +5,7 @@ using CryptoExchange.Net.OrderBook;
 using CryptoExchange.Net.Sockets;
 using Kuna.Net.Converters;
 using Kuna.Net.Objects;
+using Kuna.Net.Objects.V2;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,8 @@ namespace Kuna.Net
         private int _timeOut;
         private int _responseTimeout;
         private bool v3;
-        public List<KunaOrderBookEntry> Ask = new List<KunaOrderBookEntry>();
-        public List<KunaOrderBookEntry> Bid = new List<KunaOrderBookEntry>();
+        public List<KunaOrderBookEntryV2> Ask = new List<KunaOrderBookEntryV2>();
+        public List<KunaOrderBookEntryV2> Bid = new List<KunaOrderBookEntryV2>();
 
         public DateTime LastUpdate { get; set; } = DateTime.UtcNow;
         public delegate void OrderBookUpdated();
@@ -71,7 +72,7 @@ namespace Kuna.Net
             LastUpdate = DateTime.UtcNow;
             if (_useSocketClient)
             {
-                _kunaSocketClient.SubscribeToOrderBookSideUpdates(this.Symbol, SocketOrderBookUpdate);
+                _kunaSocketClient.SubscribeToOrderBookSideUpdatesV2(this.Symbol, SocketOrderBookUpdate);
             }
             else
             {
@@ -84,7 +85,7 @@ namespace Kuna.Net
 
         }
 
-        private void SocketOrderBookUpdate(KunaOrderBookUpdateEvent arg1, string arg2)
+        private void SocketOrderBookUpdate(KunaOrderBookUpdateEventV2 arg1, string arg2)
         {   
             SetInitialOrderBook(DateTime.UtcNow.Ticks, arg1.Bids.OrderByDescending(c => c.Price), arg1.Asks.OrderBy(c=>c.Price) );
         }
@@ -126,7 +127,7 @@ namespace Kuna.Net
                 {
                     var ob = result.Content.ReadAsStringAsync().Result;
 
-                    var data = JsonConvert.DeserializeObject<KunaOrderBook>(ob);
+                    var data = JsonConvert.DeserializeObject<KunaOrderBookV2>(ob);
 
                     SetInitialOrderBook(DateTime.UtcNow.Ticks, data.Bids.OrderByDescending(c=>c.Price), data.Asks.OrderBy(c=>c.Price));
 
@@ -141,14 +142,14 @@ namespace Kuna.Net
                     _slim.Release();
 
                     log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallError((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
                 log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
                 _slim.Release();
-                return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
+                return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
         }
 
@@ -162,9 +163,9 @@ namespace Kuna.Net
                 {
                     var ob = result.Content.ReadAsStringAsync().Result;
 
-                    var data = JsonConvert.DeserializeObject<List<KunaOrderBookEntry>>(ob);
-                    var asks = data.Where(c => c.Quantity < 0).Select(c => new KunaOrderBookEntry() { Quantity = c.Quantity * -1, Price = c.Price, Count = c.Count });
-                    var bids = data.Where(c => c.Quantity > 0).Select(c => new KunaOrderBookEntry() { Quantity = c.Quantity, Price = c.Price, Count = c.Count });
+                    var data = JsonConvert.DeserializeObject<List<KunaOrderBookEntryV2>>(ob);
+                    var asks = data.Where(c => c.Quantity < 0).Select(c => new KunaOrderBookEntryV2() { Quantity = c.Quantity * -1, Price = c.Price, Count = c.Count });
+                    var bids = data.Where(c => c.Quantity > 0).Select(c => new KunaOrderBookEntryV2() { Quantity = c.Quantity, Price = c.Price, Count = c.Count });
                     Ask.Clear();
                     Ask.AddRange(asks.OrderBy(c => c.Price));
                     Bid.Clear();
@@ -181,7 +182,7 @@ namespace Kuna.Net
                     _slim.Release();
 
                     log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallError((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
@@ -189,7 +190,7 @@ namespace Kuna.Net
                 log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
                 _slim.Release();
 
-                return new CallResult<bool>(false, new KunaApiCallError(-13, $"{ex.ToString()}"));
+                return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
         }
         public override void Dispose()

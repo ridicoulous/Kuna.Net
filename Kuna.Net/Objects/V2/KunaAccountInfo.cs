@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public class KunaAccountInfo
+    public class KunaAccountInfoV2
     {
         [JsonProperty("email")]
         public string Email { get; set; }
@@ -15,10 +15,10 @@ namespace Kuna.Net.Objects
         public bool Activated { get; set; }
 
         [JsonProperty("accounts")]
-        public List<Account> Accounts { get; set; }
+        public List<AccountV2> Accounts { get; set; }
     }
 
-    public class Account
+    public class AccountV2
     {
         [JsonProperty("currency")]
         public string Currency { get; set; }

@@ -2,16 +2,16 @@
 using Newtonsoft.Json;
 using System;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public class KunaTickerInfo
+    public class KunaTickerInfoV2
     {
         [JsonProperty("at"), JsonConverter(typeof(TimestampConverter))]
         public DateTime ServerTime { get; set; }
         [JsonProperty("ticker")]
-        public KunaTicker Ticker { get; set; }
+        public KunaTickerV2 Ticker { get; set; }
     }
-    public class KunaTicker
+    public class KunaTickerV2
     {
         [JsonProperty("buy")]
         public string Buy { get; set; }

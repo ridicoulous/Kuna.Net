@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public class KunaTraidingPair
+    public class KunaTraidingPairV2
     {
         [JsonProperty("id")]
         public string Pair { get; set; }

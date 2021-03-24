@@ -3,17 +3,17 @@ using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
 
-    public class KunaOrderBookUpdateEvent
+    public class KunaOrderBookUpdateEventV2
     {
         [JsonProperty("asks")]
-        public List<KunaOrderBookEntry> Asks { get; set; }
+        public List<KunaOrderBookEntryV2> Asks { get; set; }
         [JsonProperty("bids")]
-        public List<KunaOrderBookEntry> Bids { get; set; }
+        public List<KunaOrderBookEntryV2> Bids { get; set; }
         [JsonProperty("daily_stats")]
-        public DailyStats DailyStats { get; set; }
+        public DailyStatsV2 DailyStats { get; set; }
     }
 
     //[JsonConverter(typeof(ArrayConverter))]
@@ -27,7 +27,7 @@ namespace Kuna.Net.Objects
     //    public int Count { get; set; }
 
     //}
-    public class DailyStats
+    public class DailyStatsV2
     {
         [JsonProperty("highest_bid")]
         public decimal? HighestBid { get; set; }

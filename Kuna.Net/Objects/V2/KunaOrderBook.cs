@@ -5,25 +5,25 @@ using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Kuna.Net.Objects
+namespace Kuna.Net.Objects.V2
 {
-    public class KunaOrderBook
+    public class KunaOrderBookV2
     {
         [JsonProperty("timestamp")]
         public long Timestamp { get; set; }
         [JsonProperty("asks")]
-        public List<KunaOrderBookEntry> Asks { get; set; }
+        public List<KunaOrderBookEntryV2> Asks { get; set; }
         [JsonProperty("bids")]
-        public List<KunaOrderBookEntry> Bids { get; set; }
+        public List<KunaOrderBookEntryV2> Bids { get; set; }
     }
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaOrderBookEntry : ISymbolOrderBookEntry
+    public class KunaOrderBookEntryV2 : ISymbolOrderBookEntry
     {
-        public KunaOrderBookEntry()
+        public KunaOrderBookEntryV2()
         {
 
         }
-        public KunaOrderBookEntry(decimal price, decimal amount, int count=1)
+        public KunaOrderBookEntryV2(decimal price, decimal amount, int count=1)
         {
             Price = price;
             Quantity = amount;
