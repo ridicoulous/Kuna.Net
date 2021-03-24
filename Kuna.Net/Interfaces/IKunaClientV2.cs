@@ -40,15 +40,10 @@ namespace Kuna.Net.Interfaces
         CallResult<List<KunaTradeV2>> GetMyTradesV2(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc");
         Task<CallResult<List<KunaTradeV2>>> GetMyTradesV2Async(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc", CancellationToken ct = default);
 
-        CallResult<List<KunaTraidingPairV2>> GeMarketsV2();
-
-        Task<CallResult<List<KunaTraidingPairV2>>> GeMarketsV2Async(CancellationToken ct = default);
         CallResult<List<KunaOhclvV2>> GetCandlesHistoryV2(string symbol, int resolution, DateTime from, DateTime to);
 
         Task<CallResult<List<KunaOhclvV2>>> GetCandlesHistoryV2Async(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
 
-        CallResult<List<KunaCurrencyV2>> GetCurrenciesV2(CancellationToken ct = default);
-        Task<CallResult<List<KunaCurrencyV2>>> GetCurrenciesV2Async(CancellationToken ct = default);
 
 
 

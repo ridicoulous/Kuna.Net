@@ -50,7 +50,7 @@ namespace Kuna.Net.Objects.V3
         /// <summary>
         /// The type of the order
         /// </summary>
-        [ArrayProperty(6), JsonConverter(typeof(OrderTypeV2Converter))]
+        [ArrayProperty(6), JsonConverter(typeof(OrderTypeConverter))]
         public KunaOrderType? OrderType { get; set; }
 
         /// <summary>

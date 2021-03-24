@@ -1,13 +1,14 @@
 using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaTicker
+    public class KunaTicker: ICommonTicker
     {
         [ArrayProperty(0)]
-        public string TradingPair { get; set; }
+        public string Symbol { get; set; }
        
         [ArrayProperty(1)]
         public decimal Bid { get; set; }
@@ -47,5 +48,12 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(10)]
         public decimal Low { get; set; }
 
+        public string CommonSymbol => Symbol;
+
+        public decimal CommonHigh => High;
+
+        public decimal CommonLow => Low;
+
+        public decimal CommonVolume => Volume;
     }
 }

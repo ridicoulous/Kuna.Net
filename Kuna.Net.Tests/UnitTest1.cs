@@ -24,14 +24,14 @@ namespace Kuna.Net.Tests
         //CallResult<List<KunaTraidingPair>> GetExchangeCurrenciesInfo();
         //Task<CallResult<List<KunaOhclv>>> GetCandlesHistoryAsync(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
         IKunaClientV2 client = new KunaClient();
-        [Fact(DisplayName = "ServerTime")]
-        public void ShouldGetServerTime()
-        {
-            var serverTime = client.GetServerTimeV2();
-            Assert.True(Math.Abs(serverTime.Data.Subtract( DateTime.UtcNow).Seconds)<2);
-            var c = client.GetCurrenciesV2();
-            Assert.True(c);
-        }
+        // [Fact(DisplayName = "ServerTime")]
+        // public void ShouldGetServerTime()
+        // {
+        //     var serverTime = client.GetServerTimeV2();
+        //     Assert.True(Math.Abs(serverTime.Data.Subtract( DateTime.UtcNow).Seconds)<2);
+        //     var c = client.GetCurrenciesV2();
+        //     Assert.True(c);
+        // }
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
         {

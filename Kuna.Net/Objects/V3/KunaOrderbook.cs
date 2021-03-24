@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Interfaces;
 
 namespace Kuna.Net.Objects.V3
 {
-    public class KunaOrderBook
+    public class KunaOrderBook : ICommonOrderBook
     {
         public KunaOrderBook(List<KunaOrderBookEntry> asks, List<KunaOrderBookEntry> bids)
         {
@@ -19,6 +20,10 @@ namespace Kuna.Net.Objects.V3
         }
         public List<KunaOrderBookEntry> Asks { get; set; }
         public List<KunaOrderBookEntry> Bids { get; set; }
+
+        public IEnumerable<ISymbolOrderBookEntry> CommonBids => Bids;
+
+        public IEnumerable<ISymbolOrderBookEntry> CommonAsks => Asks;
     }
 
 
