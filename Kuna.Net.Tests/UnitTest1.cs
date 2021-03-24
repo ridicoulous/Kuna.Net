@@ -32,6 +32,19 @@ namespace Kuna.Net.Tests
         //     var c = client.GetCurrenciesV2();
         //     Assert.True(c);
         // }
+        [Fact(DisplayName = "PlaceORder")]
+        public void PlaceOrder()
+        {
+            var c = GetClientWithAuthentication();
+            var o = c.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
+            if(o)
+            {
+                var cancel = c.CancelOrder(o.Data.Id);
+                var order = c.GetOrders(Objects.V3.KunaOrderStatus.Done);
+                Assert.True(order);
+            }
+          
+        }
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
         {
@@ -80,7 +93,7 @@ namespace Kuna.Net.Tests
             history.Error.ShouldBeNull();
         }
 
-        private IKunaClientV2 GetClientWithAuthentication()
+        private KunaClient GetClientWithAuthentication()
         {
             var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
             var key = config["key"];
@@ -89,7 +102,7 @@ namespace Kuna.Net.Tests
             {
                 ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(key, secret),
                 LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
-                LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new ThreadSafeFileWriter("debug-client.log") }
+                LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") }
 
             }) ;
             return client;            

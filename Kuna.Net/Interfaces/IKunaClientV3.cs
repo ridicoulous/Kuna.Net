@@ -13,7 +13,7 @@ namespace Kuna.Net.Interfaces
         WebCallResult<DateTime?> GetServerTime();
         Task<WebCallResult<DateTime?>> GetServerTimeAsync(CancellationToken ct = default);
         WebCallResult<IEnumerable<KunaTradingPair>> GetTradingPairs();
-        Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync( CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync(CancellationToken ct = default);
         /// <summary>
         /// Get tickers data
         /// Get https://api.kuna.io:443/v3/tickers
@@ -29,8 +29,17 @@ namespace Kuna.Net.Interfaces
         /// <param name="symbols">list of explicit market codes</param>
         /// <returns></returns>
         Task<WebCallResult<IEnumerable<KunaTicker>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols);
-        Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default);
-        WebCallResult<List<KunaPlacedOrder>> GetOrders(KunaOrderState state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null);
+        Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default);
+        WebCallResult<List<KunaPlacedOrder>> GetOrders(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null);
+
+        /// <summary>
+        /// Cancel multiple orders
+        ///  Post https://api.kuna.io:443/v3/order/cancel
+        /// </summary>
+        /// <param name="orderId">list of order ids, e.g."order_id": 1000000</param>
+        /// <returns></returns>
+        Task<WebCallResult<KunaCanceledOrder>> CancelOrderAsync(long orderId, CancellationToken ct = default);
+        WebCallResult<KunaCanceledOrder> CancelOrder(long orderId);
 
         /// <summary>
         /// Cancel multiple orders
@@ -51,6 +60,10 @@ namespace Kuna.Net.Interfaces
         Task<WebCallResult<List<KunaCurrency>>> GetCurrenciesAsync(bool? privileged = null, CancellationToken ct = default);
         WebCallResult<KunaOrderBook> GetOrderBook(string symbol);
         Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default);
-        
+       
+
+        Task<WebCallResult<KunaPlacedOrder>> PlaceOrderAsync(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price=null, decimal? stopPrice=null, CancellationToken ct = default);
+        WebCallResult<KunaPlacedOrder> PlaceOrder(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price=null, decimal? stopPrice=null);
+
     }
 }

@@ -1,4 +1,5 @@
 using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.ExchangeInterfaces;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +9,7 @@ namespace Kuna.Net.Objects.V3
 {
 
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPlacedOrder
+    public class KunaPlacedOrder :ICommonOrder, ICommonOrderId
     {
         /// <summary>
         /// The id of the order
@@ -119,5 +120,25 @@ namespace Kuna.Net.Objects.V3
         [JsonIgnore]
         public KunaOrderSide OrderSide => AmountOriginal > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
 
+        public string CommonId => Id.ToString();
+
+        public string CommonSymbol => Symbol;
+
+        public decimal CommonPrice => Price;
+
+        public decimal CommonQuantity => Math.Abs(AmountOriginal);
+
+        public string CommonStatus => StatusString;
+
+        public bool IsActive => CommonStatus.ToLower() == "new";
+
+        public IExchangeClient.OrderSide CommonSide => AmountOriginal > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
+
+        public IExchangeClient.OrderType CommonType => Type switch { 
+            KunaOrderType.Limit => IExchangeClient.OrderType.Limit, 
+            KunaOrderType.Market => IExchangeClient.OrderType.Market, 
+            KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market, 
+            KunaOrderType.StopLimit => IExchangeClient.OrderType.Other
+        };
     }
 }
