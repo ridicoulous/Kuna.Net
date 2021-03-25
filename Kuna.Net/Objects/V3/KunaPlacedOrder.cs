@@ -62,13 +62,13 @@ namespace Kuna.Net.Objects.V3
         /// <summary>
         /// The order type
         /// </summary>
-        [ArrayProperty(8), JsonConverter(typeof(OrderTypeV2Converter))]
+        [ArrayProperty(8), JsonConverter(typeof(OrderTypeConverter))]
         public KunaOrderType Type { get; set; }
 
         /// <summary>
         /// The previous order type
         /// </summary>
-        [ArrayProperty(9), JsonConverter(typeof(OrderTypeV2Converter))]
+        [ArrayProperty(9), JsonConverter(typeof(OrderTypeConverter))]
         public KunaOrderType? TypePrevious { get; set; }
 
         /// <summary>

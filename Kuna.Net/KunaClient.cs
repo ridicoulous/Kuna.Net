@@ -251,10 +251,7 @@ namespace Kuna.Net
         #endregion
 
         #region implementing IKunaClientV3
-        public WebCallResult<IEnumerable<KunaTicker>> GetTickers(params string[] symbols)
-        {
-            throw new NotImplementedException();
-        }
+        public WebCallResult<IEnumerable<KunaTicker>> GetTickers(params string[] symbols) => GetTickersAsync(default, symbols).Result;
         public async Task<WebCallResult<IEnumerable<KunaTicker>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols)
         {
             var request = new Dictionary<string, object>();
@@ -263,21 +260,14 @@ namespace Kuna.Net
             return await SendRequest<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Post, ct, request, false, false);
 
         }
-        public WebCallResult<KunaOrderBook> GetOrderBook(string symbol)
-        {
-            throw new NotImplementedException();
-        }
+        public WebCallResult<KunaOrderBook> GetOrderBook(string symbol) => GetOrderBookAsync(symbol, default).Result;
         public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default)
         {
             var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(OrderBookEndpoint, symbol)), HttpMethod.Get, ct).ConfigureAwait(false);
             return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result ? new KunaOrderBook(result.Data) : null, result.Error);
         }
 
-        public WebCallResult<DateTime?> GetServerTime()
-        {
-            throw new NotImplementedException();
-        }
-
+        public WebCallResult<DateTime?> GetServerTime() => GetServerTimeAsync().Result;
         public async Task<WebCallResult<DateTime?>> GetServerTimeAsync(CancellationToken ct = default)
         {
             var result = await SendRequest<KunaTimestampResponse>(GetUrl(ServerTimeEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
@@ -292,11 +282,7 @@ namespace Kuna.Net
             return await SendRequest<IEnumerable<KunaTradingPair>>(GetUrl(TradingPairsEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
         }
 
-        public WebCallResult<List<KunaCurrency>> GetCurrencies(bool? privileged = null)
-        {
-            throw new NotImplementedException();
-        }
-
+        public WebCallResult<List<KunaCurrency>> GetCurrencies(bool? privileged = null) => GetCurrenciesAsync(privileged, default).Result;
         public async Task<WebCallResult<List<KunaCurrency>>> GetCurrenciesAsync(bool? privileged = null, CancellationToken ct = default)
         {
             var request = new Dictionary<string, object>();
@@ -431,9 +417,17 @@ stop_price	цена, при достижении которой активиру
             throw new NotImplementedException();
         }
 
-        public Task<WebCallResult<ICommonOrderId>> PlaceOrderAsync(string symbol, IExchangeClient.OrderSide side, IExchangeClient.OrderType type, decimal quantity, decimal? price = null, string accountId = null)
+        public async Task<WebCallResult<ICommonOrderId>> PlaceOrderAsync(string symbol, IExchangeClient.OrderSide side, IExchangeClient.OrderType type, decimal quantity, decimal? price = null, string accountId = null)
         {
-            throw new NotImplementedException();
+            var kunaSide = side == IExchangeClient.OrderSide.Buy ? KunaOrderSide.Buy : KunaOrderSide.Sell;
+            var kunaType = type switch
+            {
+                IExchangeClient.OrderType.Limit => KunaOrderType.Limit,
+                IExchangeClient.OrderType.Market => KunaOrderType.Market,
+                _ => throw new NotImplementedException("Undefined order type. Use market or limit")
+            };
+            var result = await PlaceOrderAsync(symbol, kunaSide, kunaType, quantity, price);
+            return WebCallResult<ICommonOrderId>.CreateFrom(result);
         }
 
         public Task<WebCallResult<ICommonOrder>> GetOrderAsync(string orderId, string symbol = null)
