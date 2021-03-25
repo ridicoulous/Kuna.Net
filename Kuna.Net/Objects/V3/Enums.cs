@@ -16,7 +16,7 @@ namespace Kuna.Net.Objects.V3
         MarketByQuote,
         StopLimit
     }
-    public enum KunaOrderState
+    public enum KunaOrderStatus
     {
         Wait,
         Cancel,
