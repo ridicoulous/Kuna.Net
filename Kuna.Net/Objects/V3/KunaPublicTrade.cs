@@ -1,0 +1,34 @@
+using System;
+using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.ExchangeInterfaces;
+using Newtonsoft.Json;
+
+namespace Kuna.Net.Objects.V3
+{
+    [JsonConverter(typeof(ArrayConverter))]
+    public class KunaPublicTrade: ICommonRecentTrade
+    {
+        [ArrayProperty(0)]
+        public string Id { get; set; }
+
+        /// <summary>
+        /// The time the trade was executed
+        /// </summary>
+        [ArrayProperty(1), JsonConverter(typeof(TimestampConverter))]
+        public DateTime TradeTime { get; set; }
+
+        [ArrayProperty(3)]
+        public decimal Quantity { get; set; }
+
+        [ArrayProperty(4)]
+        public decimal Price { get; set; }
+
+        public KunaOrderSide Side => Quantity > 0? KunaOrderSide.Buy : KunaOrderSide.Sell;
+
+        public decimal CommonPrice => Price;
+
+        public decimal CommonQuantity => Quantity;
+
+        public DateTime CommonTradeTime => TradeTime;
+    }
+}

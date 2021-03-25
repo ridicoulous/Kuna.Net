@@ -1,4 +1,5 @@
 ﻿using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.ExchangeInterfaces;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace Kuna.Net.Objects.V3
 {
-    public  class KunaCanceledOrder
+    public  class KunaCanceledOrder: ICommonOrderId
     {
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -55,7 +56,9 @@ namespace Kuna.Net.Objects.V3
         public bool? WasForced { get; set; }
 
         [JsonProperty("exchange")]
-        public string? Exchange { get; set; }
+        public string Exchange { get; set; }
+
+        public string CommonId => Id.ToString();
     }
 
 }

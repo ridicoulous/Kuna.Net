@@ -65,5 +65,44 @@ namespace Kuna.Net.Interfaces
         Task<WebCallResult<KunaPlacedOrder>> PlaceOrderAsync(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price=null, decimal? stopPrice=null, CancellationToken ct = default);
         WebCallResult<KunaPlacedOrder> PlaceOrder(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price=null, decimal? stopPrice=null);
 
+        /// <summary>
+        /// POST https://api.kuna.io:443/v3/auth/r/orders/details
+        /// </summary>
+        /// <param name="id"> order id</param>
+        /// <returns></returns>
+        WebCallResult<KunaPlacedOrder> GetOrder(long id);
+        /// <summary>
+        /// POST https://api.kuna.io:443/v3/auth/r/orders/details
+        /// </summary>
+        /// <param name="id"> order id</param>
+        /// <returns></returns>
+        Task<WebCallResult<KunaPlacedOrder>> GetOrderAsync(long id, CancellationToken ct = default);
+        /// <summary>
+        /// Get https://api.kuna.io:443/v3/trades/{symbol}/hist
+        /// </summary>
+        /// <param name="symbol">trading pair</param>
+        /// <param name="limit">max entries in response</param>
+        /// <returns></returns>
+        WebCallResult<IEnumerable<KunaPublicTrade>> GetRecentPublicTrades(string symbol, int limit = 25);
+        /// <summary>
+        /// Get https://api.kuna.io:443/v3/trades/{symbol}/hist
+        /// </summary>
+        /// <param name="symbol">trading pair</param>
+        /// <param name="limit">max entries in response, default 25, max 500</param>
+        /// <returns></returns>
+        Task<WebCallResult<IEnumerable<KunaPublicTrade>>> GetRecentPublicTradesAsync(string symbol, int limit = 25, CancellationToken ct = default);
+
+        /// <summary>
+        /// POST https://api.kuna.io:443/v3/auth/r/wallets
+        /// </summary>
+        /// <returns></returns>
+        WebCallResult<IEnumerable<KunaAccountBalance>> GetBalances();
+
+        /// <summary>
+        /// POST https://api.kuna.io:443/v3/auth/r/wallets
+        /// </summary>
+        /// <returns></returns>
+        Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default);
     }
+ 
 }
