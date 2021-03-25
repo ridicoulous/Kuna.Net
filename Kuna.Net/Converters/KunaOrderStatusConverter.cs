@@ -15,6 +15,10 @@ namespace Kuna.Net.Converters
         protected override List<KeyValuePair<KunaOrderStatus, string>> Mapping => new List<KeyValuePair<KunaOrderStatus, string>>
         {
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Canceled, "CANCELED"),
+            new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Canceled, "Cancel"),
+            new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Active, "Wait"),
+            new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Filled, "Done"),
+
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Filled, "EXECUTED"),
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Active, "ACTIVE"),
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.PartiallyFilled, "PARTIALLYFILLED"),
