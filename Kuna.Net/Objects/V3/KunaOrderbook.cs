@@ -3,6 +3,7 @@ using System.Linq;
 using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Interfaces;
+using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
@@ -16,6 +17,8 @@ namespace Kuna.Net.Objects.V3
         public KunaOrderBook(IEnumerable<KunaOrderBookEntry> entries)
         {
             Asks = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity < 0));
+            foreach (var a in Asks)
+                a.Quantity *= -1;
             Bids = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity > 0));
         }
         public List<KunaOrderBookEntry> Asks { get; set; }
@@ -26,7 +29,7 @@ namespace Kuna.Net.Objects.V3
         public IEnumerable<ISymbolOrderBookEntry> CommonAsks => Asks;
     }
 
-
+    [JsonConverter(typeof(ArrayConverter))]
     public class KunaOrderBookEntry : ISymbolOrderBookEntry
     {
         public KunaOrderBookEntry()
