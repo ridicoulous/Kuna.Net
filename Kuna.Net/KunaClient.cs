@@ -59,10 +59,10 @@ namespace Kuna.Net
         private const string ProCancelMultipleOrdersEndpoint = "auth/pro/order/cancel/multi";
         private const string ProPlaceOrderEndpoint = "auth/pro/w/order/submit";
         private const string ProOrderDetailsEndpoint = "auth/pro/r/orders/details";
-        private const string ProOrdersHistoryEndpoint = "auth/pro/r/orders/hist";
-        private const string ProOrdersHistoryByMarketEndpoint = "auth/pro/r/orders/{}/hist";
-        private const string ProActiveOrdersMarketEndpoint = "auth/pro/r/orders/{}";
-        private const string ProAllActiveOrdersEndpoint = "auth/pro/r/orders";
+        // private const string ProOrdersHistoryEndpoint = "auth/pro/r/orders/hist";
+        // private const string ProOrdersHistoryByMarketEndpoint = "auth/pro/r/orders/{}/hist";
+        // private const string ProActiveOrdersMarketEndpoint = "auth/pro/r/orders/{}";
+        private const string ProOrdersEndpoint = "auth/pro/r/orders";
 
 
 
@@ -279,7 +279,8 @@ namespace Kuna.Net
         public WebCallResult<KunaOrderBook> GetOrderBook(string symbol) => GetOrderBookAsync(symbol).Result;
         public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default)
         {
-            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(OrderBookEndpoint, symbol),"3"), HttpMethod.Get, ct).ConfigureAwait(false);
+            string url = IsProAccount ? ProBookEnpoint : OrderBookEndpoint;
+            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(url, symbol),"3"), HttpMethod.Get, ct, null, IsProAccount).ConfigureAwait(false);
             return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result ? new KunaOrderBook(result.Data) : null, result.Error);
         }
 
@@ -325,8 +326,8 @@ stop_price	цена, при достижении которой активиру
             parameters.AddOptionalParameter("price", price);
             parameters.AddOptionalParameter("stop_price", stopPrice);
 
-
-            var request = await SendRequest<KunaPlacedOrder>(GetUrl(V3PlaceOrderEndpoint, "3"), HttpMethod.Post, ct, parameters, true, false, PostParameters.InBody);
+            string url = IsProAccount ? ProPlaceOrderEndpoint : V3PlaceOrderEndpoint;
+            var request = await SendRequest<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false, PostParameters.InBody);
             return request;
         }
 
@@ -334,7 +335,8 @@ stop_price	цена, при достижении которой активиру
 
         public async Task<WebCallResult<KunaCanceledOrder>> CancelOrderAsync(long orderId, CancellationToken ct = default)
         {
-            return await SendRequest<KunaCanceledOrder>(GetUrl(V3CancelOrderEndpoint, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_id", orderId } }, true, false, PostParameters.InBody);
+            string url = IsProAccount ? ProCancelOrderEndpoint : V3CancelOrderEndpoint;
+            return await SendRequest<KunaCanceledOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_id", orderId } }, true, false, PostParameters.InBody);
         }
 
         public WebCallResult<KunaCanceledOrder> CancelOrder(long orderId) => CancelOrderAsync(orderId).Result;
@@ -342,14 +344,15 @@ stop_price	цена, при достижении которой активиру
 
         public async Task<WebCallResult<List<KunaPlacedOrder>>> CancelOrdersAsync(List<long> orderIds, CancellationToken ct = default)
         {
-            return await SendRequest<List<KunaPlacedOrder>>(GetUrl(V3CancelOrderEndpoint+"/multi", "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_ids", JsonConvert.SerializeObject(orderIds) } }, true, false, PostParameters.InBody);
+            string url = IsProAccount ? ProCancelMultipleOrdersEndpoint : V3CancelOrderEndpoint+"/multi";
+            return await SendRequest<List<KunaPlacedOrder>>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_ids", JsonConvert.SerializeObject(orderIds) } }, true, false, PostParameters.InBody);
 
         }
         public WebCallResult<List<KunaPlacedOrder>> CancelOrders(List<long> orderIds) => CancelOrdersAsync(orderIds).Result;
 
         public async Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
         {
-            var endpoint = OrdersEndpoint;
+            var endpoint = IsProAccount? ProOrdersEndpoint: OrdersEndpoint;
             if (!String.IsNullOrEmpty(market))
             {
                 endpoint += $"{market}";
