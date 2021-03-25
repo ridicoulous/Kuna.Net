@@ -7,12 +7,13 @@ namespace Kuna.Net
     public class KunaClientOptions : RestClientOptions
     {
         public bool IsProAccount { get; set; }
-        public KunaClientOptions(HttpClient httpClient):base(httpClient,"https://kuna.io/api/v2")
+        public KunaClientOptions(HttpClient httpClient, bool isPro = false) :base(httpClient,"https://kuna.io/api/v2")
         {
-
+            IsProAccount = isPro;
         }
-        public KunaClientOptions(string baseAddress= "https://kuna.io/api/v2", TimeSpan? timeout=null) :base(baseAddress)
+        public KunaClientOptions(bool isPro=false, string baseAddress= "https://kuna.io/api/v2", TimeSpan? timeout=null) :base(baseAddress)
         {
+            IsProAccount = isPro;
             this.RequestTimeout = timeout?? TimeSpan.FromMilliseconds(3000);
         }
     }
