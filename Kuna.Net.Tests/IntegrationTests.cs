@@ -21,7 +21,7 @@ namespace Kuna.Net.Tests
         public void PlaceOrder()
         {
             var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
-            var t = ordersss.Data.Where(o => o.Status != Objects.V3.KunaOrderStatus.Canceled).ToList();
+            var t = ordersss.Data.Where(o => o.Status==Objects.V3.KunaOrderStatus.Filled).ToList();
             var o = client.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
             if (o)
             {               

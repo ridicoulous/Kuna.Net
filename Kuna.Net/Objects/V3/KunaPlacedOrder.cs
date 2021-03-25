@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V3
 {
 
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPlacedOrder :ICommonOrder, ICommonOrderId
+    public class KunaPlacedOrder : ICommonOrder, ICommonOrderId
     {
         /// <summary>
         /// The id of the order
@@ -69,7 +69,7 @@ namespace Kuna.Net.Objects.V3
         /// The previous order type
         /// </summary>
         [ArrayProperty(9), JsonConverter(typeof(OrderTypeConverter))]
-        public KunaOrderType? TypePrevious { get; set; }        
+        public KunaOrderType? TypePrevious { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -95,10 +95,10 @@ namespace Kuna.Net.Objects.V3
         public string StatusString { get; set; }
 
         /// <summary>
-        /// The raw status string
+        /// Status
         /// </summary>
         [ArrayProperty(13), JsonConverter(typeof(KunaOrderStatusConverter))]
-        public KunaOrderStatus Status { get; set; } 
+        public KunaOrderStatus Status { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -128,7 +128,7 @@ namespace Kuna.Net.Objects.V3
 
         public string CommonSymbol => Symbol;
 
-        public decimal CommonPrice => Price;
+        public decimal CommonPrice => Price == 0 ? PriceAverage ?? 0 : Price;
 
         public decimal CommonQuantity => Math.Abs(AmountOriginal);
 
@@ -138,10 +138,11 @@ namespace Kuna.Net.Objects.V3
 
         public IExchangeClient.OrderSide CommonSide => AmountOriginal > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
 
-        public IExchangeClient.OrderType CommonType => Type switch { 
-            KunaOrderType.Limit => IExchangeClient.OrderType.Limit, 
-            KunaOrderType.Market => IExchangeClient.OrderType.Market, 
-            KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market, 
+        public IExchangeClient.OrderType CommonType => Type switch
+        {
+            KunaOrderType.Limit => IExchangeClient.OrderType.Limit,
+            KunaOrderType.Market => IExchangeClient.OrderType.Market,
+            KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market,
             _ => IExchangeClient.OrderType.Other
         };
     }
