@@ -138,7 +138,7 @@ namespace Kuna.Net.Objects.V3
             KunaOrderType.Limit => IExchangeClient.OrderType.Limit, 
             KunaOrderType.Market => IExchangeClient.OrderType.Market, 
             KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market, 
-            KunaOrderType.StopLimit => IExchangeClient.OrderType.Other
+            _ => IExchangeClient.OrderType.Other
         };
     }
 }
