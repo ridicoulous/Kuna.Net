@@ -36,6 +36,7 @@ namespace Kuna.Net.Tests
         public void PlaceOrder()
         {
             var c = GetClientWithAuthentication();
+            var book = c.GetOrderBook("btcusdt");
             var o = c.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
             if(o)
             {

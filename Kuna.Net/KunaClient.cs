@@ -21,15 +21,19 @@ namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClientV2, IKunaClientV3
     {
+        private readonly bool IsProAccount;
         public KunaClient() : base("KunaApiClient", new KunaClientOptions(), null)
         {
+
         }
         public KunaClient(KunaClientOptions options, string clientName = "KunaApiClient") : base(clientName, options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
+            IsProAccount = options.IsProAccount;
             postParametersPosition = PostParameters.InUri;
             requestBodyFormat = RequestBodyFormat.Json;
         }
         #region Endpoints
+        private const string LatestVersion = "3";
         private const string ServerTimeEndpoint = "timestamp";
         private const string MarketInfoV2Endpoint = "tickers/{}";
         private const string OrderBookV2Endpoint = "depth";
@@ -48,6 +52,18 @@ namespace Kuna.Net
         private const string V3CancelOrderEndpoint = "order/cancel";
 
         private const string TradingPairsEndpoint = "markets";
+        
+        private const string ProBookEnpoint = "auth/pro/book/{}";
+        private const string ProWalletsEndpoint = "auth/pro/r/wallets";
+        private const string ProCancelOrderEndpoint = "auth/pro/order/cancel";
+        private const string ProCancelMultipleOrdersEndpoint = "auth/pro/order/cancel/multi";
+        private const string ProPlaceOrderEndpoint = "auth/pro/w/order/submit";
+        private const string ProOrderDetailsEndpoint = "auth/pro/r/orders/details";
+        private const string ProOrdersHistoryEndpoint = "auth/pro/r/orders/hist";
+        private const string ProOrdersHistoryByMarketEndpoint = "auth/pro/r/orders/{}/hist";
+        private const string ProActiveOrdersMarketEndpoint = "auth/pro/r/orders/{}";
+        private const string ProAllActiveOrdersEndpoint = "auth/pro/r/orders";
+
 
 
         #endregion
@@ -263,13 +279,10 @@ namespace Kuna.Net
             return await SendRequest<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Post, ct, request, false, false);
 
         }
-        public WebCallResult<KunaOrderBook> GetOrderBook(string symbol)
-        {
-            throw new NotImplementedException();
-        }
+        public WebCallResult<KunaOrderBook> GetOrderBook(string symbol) => GetOrderBookAsync(symbol).Result;
         public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default)
         {
-            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(OrderBookEndpoint, symbol)), HttpMethod.Get, ct).ConfigureAwait(false);
+            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(OrderBookEndpoint, symbol),"3"), HttpMethod.Get, ct).ConfigureAwait(false);
             return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result ? new KunaOrderBook(result.Data) : null, result.Error);
         }
 
@@ -420,7 +433,7 @@ stop_price	цена, при достижении которой активиру
             throw new NotImplementedException();
         }
 
-        public async Task<WebCallResult<ICommonOrderBook>> GetOrderBookAsync(string symbol)
+         async Task<WebCallResult<ICommonOrderBook>> IExchangeClient.GetOrderBookAsync(string symbol)
         {
             var result = await GetOrderBookAsync(symbol, default);
             return WebCallResult<ICommonOrderBook>.CreateFrom(result);

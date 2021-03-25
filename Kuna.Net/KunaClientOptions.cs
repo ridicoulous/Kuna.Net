@@ -6,7 +6,7 @@ namespace Kuna.Net
 {
     public class KunaClientOptions : RestClientOptions
     {
-
+        public bool IsProAccount { get; set; }
         public KunaClientOptions(HttpClient httpClient):base(httpClient,"https://kuna.io/api/v2")
         {
 
