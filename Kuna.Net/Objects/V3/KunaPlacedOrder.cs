@@ -69,8 +69,7 @@ namespace Kuna.Net.Objects.V3
         /// The previous order type
         /// </summary>
         [ArrayProperty(9), JsonConverter(typeof(OrderTypeConverter))]
-        public KunaOrderType? TypePrevious { get; set; }
-
+        public KunaOrderType? TypePrevious { get; set; }        
         /// <summary>
         /// 
         /// </summary>
@@ -89,12 +88,17 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(12)]
         public int? Flags { get; set; }
 
-
         /// <summary>
         /// The raw status string
         /// </summary>
         [ArrayProperty(13)]
-        public string StatusString { get; set; } = "";
+        public string StatusString { get; set; }
+
+        /// <summary>
+        /// The raw status string
+        /// </summary>
+        [ArrayProperty(13), JsonConverter(typeof(KunaOrderStatusConverter))]
+        public KunaOrderStatus Status { get; set; } 
         /// <summary>
         /// 
         /// </summary>
@@ -128,7 +132,7 @@ namespace Kuna.Net.Objects.V3
 
         public decimal CommonQuantity => Math.Abs(AmountOriginal);
 
-        public string CommonStatus => StatusString;
+        public string CommonStatus => Status.ToString();
 
         public bool IsActive => CommonStatus.ToLower() == "new";
 

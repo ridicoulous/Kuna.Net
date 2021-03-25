@@ -5,6 +5,7 @@ using Shouldly;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Logging;
+using System.Linq;
 
 namespace Kuna.Net.Tests
 {
@@ -19,10 +20,12 @@ namespace Kuna.Net.Tests
         [Fact(DisplayName = "PlaceORder")]
         public void PlaceOrder()
         {
+            var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
+            var t = ordersss.Data.Where(o => o.Status != Objects.V3.KunaOrderStatus.Canceled).ToList();
             var o = client.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
             if (o)
             {               
-                var orders = client.GetOrders(Objects.V3.KunaOrderStatus.Wait);
+                var orders = client.GetOrders(Objects.V3.KunaOrderStatus.Filled,"xrpusdt",limit:1000);
                 var placed = client.GetOrder(o.Data.Id);
                 var cancel = client.CancelOrder(o.Data.Id);
                 Assert.True(orders);

@@ -356,7 +356,7 @@ namespace Kuna.Net
             {
                 endpoint += $"/{market}";
             }
-            if (state == KunaOrderStatus.Done || state == KunaOrderStatus.Cancel)
+            if (state == KunaOrderStatus.Filled || state == KunaOrderStatus.Canceled)
             {
                 if (!endpoint.EndsWith("/"))
                 {
@@ -481,13 +481,13 @@ namespace Kuna.Net
 
         async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetOpenOrdersAsync(string symbol = null)
         {
-            var result = await GetOrdersAsync(KunaOrderStatus.Wait, symbol);
+            var result = await GetOrdersAsync(KunaOrderStatus.Active, symbol);
             return WebCallResult<IEnumerable<ICommonOrder>>.CreateFrom(result);
         }
 
         async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetClosedOrdersAsync(string symbol = null)
         {
-            var result = await GetOrdersAsync(KunaOrderStatus.Done, symbol);
+            var result = await GetOrdersAsync(KunaOrderStatus.Filled, symbol);
             return WebCallResult<IEnumerable<ICommonOrder>>.CreateFrom(result);
         }
 
