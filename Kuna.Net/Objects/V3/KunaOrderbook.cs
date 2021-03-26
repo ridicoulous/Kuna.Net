@@ -16,10 +16,11 @@ namespace Kuna.Net.Objects.V3
         }
         public KunaOrderBook(IEnumerable<KunaOrderBookEntry> entries)
         {
-            Asks = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity < 0).OrderBy(c=>c.Price));
+            Asks = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity < 0).OrderBy(c=>c.Price));  
+            Bids = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity > 0).OrderByDescending(c => c.Price));
+
             foreach (var a in Asks)
                 a.Quantity *= -1;
-            Bids = new List<KunaOrderBookEntry>(entries.Where(e => e.Quantity > 0).OrderByDescending(c => c.Price));
         }
         public List<KunaOrderBookEntry> Asks { get; set; }
         public List<KunaOrderBookEntry> Bids { get; set; }

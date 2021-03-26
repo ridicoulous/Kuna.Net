@@ -14,12 +14,14 @@ namespace Kuna.Net.Tests
         KunaClient client;
         public IntegrationTests()
         {
-            client = GetClientWithAuthentication(false);
+           client = GetClientWithAuthentication(false);
 
         }
         [Fact(DisplayName = "PlaceORder")]
         public void PlaceOrder()
         {
+           
+            var book = client.GetOrderBook("btcusdt");
             var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
             var t = ordersss.Data.Where(o => o.Status==Objects.V3.KunaOrderStatus.Filled).ToList();
             var o = client.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
@@ -84,9 +86,10 @@ namespace Kuna.Net.Tests
             var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
             var key = config["key"];
             var secret = config["secret"];
+            CryptoExchange.Net.Authentication.ApiCredentials c = string.IsNullOrEmpty(key) ? null : new CryptoExchange.Net.Authentication.ApiCredentials(key, secret);
             var client = new KunaClient(new KunaClientOptions()
             {
-                ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(key, secret),
+                ApiCredentials = c,
                 LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
                 LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
                 IsProAccount = pro
