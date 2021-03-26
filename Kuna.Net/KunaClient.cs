@@ -403,7 +403,7 @@ namespace Kuna.Net
         public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
         {
             string url = IsProAccount ? ProWalletsEndpoint : WalletEndpoint;
-            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url), HttpMethod.Post, ct, null, true, false);
+            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url,"3"), HttpMethod.Post, ct, null, true, false);
         }
 
         #endregion implementing IKunaClientV3
