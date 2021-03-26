@@ -50,24 +50,20 @@ namespace Kuna.Net
         private const string OrderBookEndpoint = "book/{}";
         private const string V3PlaceOrderEndpoint = "auth/w/order/submit";
         private const string V3CancelOrderEndpoint = "order/cancel";
-        private const string OrderDetailsEndpoint = "/auth/r/orders/details";
+        private const string OrderDetailsEndpoint = "auth/r/orders/details";
 
         private const string TradingPairsEndpoint = "markets";
         private const string PublicTradesEndPoint = "trades/{}/hist";
         private const string WalletEndpoint = "auth/r/wallets";
-        
+
         private const string ProBookEnpoint = "auth/pro/book/{}";
         private const string ProWalletsEndpoint = "auth/pro/r/wallets";
         private const string ProCancelOrderEndpoint = "auth/pro/order/cancel";
         private const string ProCancelMultipleOrdersEndpoint = "auth/pro/order/cancel/multi";
         private const string ProPlaceOrderEndpoint = "auth/pro/w/order/submit";
         private const string ProOrderDetailsEndpoint = "auth/pro/r/orders/details";
-        // private const string ProOrdersHistoryEndpoint = "auth/pro/r/orders/hist";
-        // private const string ProOrdersHistoryByMarketEndpoint = "auth/pro/r/orders/{}/hist";
-        // private const string ProActiveOrdersMarketEndpoint = "auth/pro/r/orders/{}";
+ 
         private const string ProOrdersEndpoint = "auth/pro/r/orders";
-
-
 
         #endregion
         public CallResult<DateTime> GetServerTimeV2() => GetServerTimeV2Async().Result;
@@ -227,10 +223,8 @@ namespace Kuna.Net
                 uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
             }
             var request = RequestFactory.Create(method, uriString, requestId);
-            // request.Content = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
             request.Method = method;
-            //var headers = new Dictionary<string, string>();
             if (uriString.Contains("v3"))
             {
                 if (authProvider != null)
@@ -240,7 +234,6 @@ namespace Kuna.Net
                     {
                         request.AddHeader(header.Key, header.Value);
                     }
-                    //  request.AddHeader("content-type", "application/json");
                 }
             }
             if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
@@ -283,7 +276,7 @@ namespace Kuna.Net
         public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default)
         {
             string url = IsProAccount ? ProBookEnpoint : OrderBookEndpoint;
-            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(url, symbol),"3"), HttpMethod.Get, ct, null, IsProAccount).ConfigureAwait(false);
+            var result = await SendRequest<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(url, symbol), "3"), IsProAccount ? HttpMethod.Post : HttpMethod.Get, ct, null, IsProAccount).ConfigureAwait(false);
             return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result ? new KunaOrderBook(result.Data) : null, result.Error);
         }
 
@@ -293,7 +286,6 @@ namespace Kuna.Net
             var result = await SendRequest<KunaTimestampResponse>(GetUrl(ServerTimeEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
             return new WebCallResult<DateTime?>(result.ResponseStatusCode, result.ResponseHeaders, result.Data?.CurrentTime, result.Error);
         }
-
 
         public WebCallResult<IEnumerable<KunaTradingPair>> GetTradingPairs() => GetTradingPairsAsync().Result;
 
@@ -318,12 +310,7 @@ namespace Kuna.Net
             parameters.AddParameter("limit", limit);
             return await SendRequest<IEnumerable<KunaPublicTrade>>(GetUrl(FillPathParameter(PublicTradesEndPoint, symbol), "3"), HttpMethod.Get, ct, parameters, false, false);
         }
-
-        /*symbol	код маркета (можно в верхнем и нижнем регистре)
-type	тип ордера (limit, market, market_by_quote, limit_stop_loss - можно в верхнем и нижнем регистре)
-amount	сумма (положительная для покупки, отрицательная для продажи)
-price	цена (обязательна только для limit)
-stop_price	цена, при достижении которой активируется ордер с типом limit_stop_loss; если не задана, то берется значение параметра price*/
+     
         public async Task<WebCallResult<KunaPlacedOrder>> PlaceOrderAsync(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price = null, decimal? stopPrice = null, CancellationToken ct = default)
         {
             var amount = side switch
@@ -357,7 +344,7 @@ stop_price	цена, при достижении которой активиру
 
         public async Task<WebCallResult<List<KunaPlacedOrder>>> CancelOrdersAsync(List<long> orderIds, CancellationToken ct = default)
         {
-            string url = IsProAccount ? ProCancelMultipleOrdersEndpoint : V3CancelOrderEndpoint+"/multi";
+            string url = IsProAccount ? ProCancelMultipleOrdersEndpoint : V3CancelOrderEndpoint + "/multi";
             return await SendRequest<List<KunaPlacedOrder>>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_ids", JsonConvert.SerializeObject(orderIds) } }, true, false, PostParameters.InBody);
 
         }
@@ -365,12 +352,12 @@ stop_price	цена, при достижении которой активиру
 
         public async Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
         {
-            var endpoint = IsProAccount? ProOrdersEndpoint: OrdersEndpoint;
+            var endpoint = IsProAccount ? ProOrdersEndpoint : OrdersEndpoint;
             if (!String.IsNullOrEmpty(market))
             {
                 endpoint += $"/{market}";
             }
-            if (state == KunaOrderStatus.Done || state == KunaOrderStatus.Cancel)
+            if (state == KunaOrderStatus.Filled || state == KunaOrderStatus.Canceled)
             {
                 if (!endpoint.EndsWith("/"))
                 {
@@ -413,13 +400,11 @@ stop_price	цена, при достижении которой активиру
             var result = await SendRequest<List<KunaTrade>>(url, HttpMethod.Post, ct, new Dictionary<string, object>(), true, false);
             return result;
         }
-
-
         public WebCallResult<IEnumerable<KunaAccountBalance>> GetBalances() => GetBalancesAsync().Result;
         public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
         {
             string url = IsProAccount ? ProWalletsEndpoint : WalletEndpoint;
-            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url), HttpMethod.Post, ct, null, true, false);
+            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url,"3"), HttpMethod.Post, ct, null, true, false);
         }
 
         #endregion implementing IKunaClientV3
@@ -430,19 +415,19 @@ stop_price	цена, при достижении которой активиру
             return baseAsset + quoteAsset;
         }
 
-        public async Task<WebCallResult<IEnumerable<ICommonSymbol>>> GetSymbolsAsync()
+        async Task<WebCallResult<IEnumerable<ICommonSymbol>>> IExchangeClient.GetSymbolsAsync()
         {
             var result = await GetTradingPairsAsync();
             return WebCallResult<IEnumerable<ICommonSymbol>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<IEnumerable<ICommonTicker>>> GetTickersAsync()
+        async Task<WebCallResult<IEnumerable<ICommonTicker>>> IExchangeClient.GetTickersAsync()
         {
             var result = await GetTickersAsync(default);
             return WebCallResult<IEnumerable<ICommonTicker>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<ICommonTicker>> GetTickerAsync(string symbol)
+        async Task<WebCallResult<ICommonTicker>> IExchangeClient.GetTickerAsync(string symbol)
         {
             var result = await GetTickersAsync(symbols: symbol);
             var singleTickerResult = new WebCallResult<KunaTicker>(
@@ -453,12 +438,12 @@ stop_price	цена, при достижении которой активиру
             return WebCallResult<ICommonTicker>.CreateFrom(singleTickerResult);
         }
 
-        public Task<WebCallResult<IEnumerable<ICommonKline>>> GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null)
+        async Task<WebCallResult<IEnumerable<ICommonKline>>> IExchangeClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null)
         {
             throw new NotImplementedException();
         }
 
-         async Task<WebCallResult<ICommonOrderBook>> IExchangeClient.GetOrderBookAsync(string symbol)
+        async Task<WebCallResult<ICommonOrderBook>> IExchangeClient.GetOrderBookAsync(string symbol)
         {
             var result = await GetOrderBookAsync(symbol, default);
             return WebCallResult<ICommonOrderBook>.CreateFrom(result);
@@ -470,7 +455,7 @@ stop_price	цена, при достижении которой активиру
             return WebCallResult<IEnumerable<ICommonRecentTrade>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<ICommonOrderId>> PlaceOrderAsync(string symbol, IExchangeClient.OrderSide side, IExchangeClient.OrderType type, decimal quantity, decimal? price = null, string accountId = null)
+        async Task<WebCallResult<ICommonOrderId>> IExchangeClient.PlaceOrderAsync(string symbol, IExchangeClient.OrderSide side, IExchangeClient.OrderType type, decimal quantity, decimal? price = null, string accountId = null)
         {
             var kunaSide = side == IExchangeClient.OrderSide.Buy ? KunaOrderSide.Buy : KunaOrderSide.Sell;
             var kunaType = type switch
@@ -483,31 +468,31 @@ stop_price	цена, при достижении которой активиру
             return WebCallResult<ICommonOrderId>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<ICommonOrder>> GetOrderAsync(string orderId, string symbol = null)
+        async Task<WebCallResult<ICommonOrder>> IExchangeClient.GetOrderAsync(string orderId, string symbol = null)
         {
             var result = await GetOrderAsync(ParseToLongOrderId(orderId));
             return WebCallResult<ICommonOrder>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<IEnumerable<ICommonTrade>>> GetTradesAsync(string orderId, string symbol)
+        async Task<WebCallResult<IEnumerable<ICommonTrade>>> IExchangeClient.GetTradesAsync(string orderId, string symbol)
         {
             var result = await GetOrderTradesAsync(symbol, ParseToLongOrderId(orderId));
             return WebCallResult<IEnumerable<ICommonTrade>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<IEnumerable<ICommonOrder>>> GetOpenOrdersAsync(string symbol = null)
+        async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetOpenOrdersAsync(string symbol = null)
         {
-            var result = await GetOrdersAsync(KunaOrderStatus.Wait, symbol);
+            var result = await GetOrdersAsync(KunaOrderStatus.Active, symbol);
             return WebCallResult<IEnumerable<ICommonOrder>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<IEnumerable<ICommonOrder>>> GetClosedOrdersAsync(string symbol = null)
+        async Task<WebCallResult<IEnumerable<ICommonOrder>>> IExchangeClient.GetClosedOrdersAsync(string symbol = null)
         {
-            var result = await GetOrdersAsync(KunaOrderStatus.Done, symbol);
+            var result = await GetOrdersAsync(KunaOrderStatus.Filled, symbol);
             return WebCallResult<IEnumerable<ICommonOrder>>.CreateFrom(result);
         }
 
-        public async Task<WebCallResult<ICommonOrderId>> CancelOrderAsync(string orderId, string symbol = null)
+        async Task<WebCallResult<ICommonOrderId>> IExchangeClient.CancelOrderAsync(string orderId, string symbol = null)
         {
             var result = await CancelOrderAsync(ParseToLongOrderId(orderId));
             return WebCallResult<ICommonOrderId>.CreateFrom(result);

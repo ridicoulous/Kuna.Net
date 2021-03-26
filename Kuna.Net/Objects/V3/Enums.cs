@@ -18,8 +18,10 @@ namespace Kuna.Net.Objects.V3
     }
     public enum KunaOrderStatus
     {
-        Wait,
-        Cancel,
-        Done
+        Active,
+        Canceled,
+        Filled,
+        PartiallyFilled,
+        Undefined
     }
 }

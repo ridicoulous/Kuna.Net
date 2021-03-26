@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V3
 {
 
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPlacedOrder :ICommonOrder, ICommonOrderId
+    public class KunaPlacedOrder : ICommonOrder, ICommonOrderId
     {
         /// <summary>
         /// The id of the order
@@ -48,17 +48,18 @@ namespace Kuna.Net.Objects.V3
         public DateTime TimestampUpdated { get; set; }
 
         /// <summary>
-        /// The amount left
-        /// </summary>
-        [ArrayProperty(6)]
-        public decimal Amount { get; set; }
-
-        /// <summary>
         /// The original amount
         /// </summary>
+        [ArrayProperty(6)]
+        public decimal AmountPlaced { get; set; }
+        /// <summary>
+        /// The amount left
+        /// </summary>
         [ArrayProperty(7)]
-        public decimal AmountOriginal { get; set; }
+        public decimal AmountLeft { get; set; }
 
+        [JsonIgnore]
+        public decimal AmountExecuted => Math.Abs(AmountPlaced) - AmountLeft;
         /// <summary>
         /// The order type
         /// </summary>
@@ -70,7 +71,6 @@ namespace Kuna.Net.Objects.V3
         /// </summary>
         [ArrayProperty(9), JsonConverter(typeof(OrderTypeConverter))]
         public KunaOrderType? TypePrevious { get; set; }
-
         /// <summary>
         /// 
         /// </summary>
@@ -89,12 +89,17 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(12)]
         public int? Flags { get; set; }
 
-
         /// <summary>
         /// The raw status string
         /// </summary>
         [ArrayProperty(13)]
-        public string StatusString { get; set; } = "";
+        public string StatusString { get; set; }
+
+        /// <summary>
+        /// Status
+        /// </summary>
+        [ArrayProperty(13), JsonConverter(typeof(KunaOrderStatusConverter))]
+        public KunaOrderStatus Status { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -118,26 +123,27 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(17)]
         public decimal? PriceAverage { get; set; }
         [JsonIgnore]
-        public KunaOrderSide OrderSide => AmountOriginal > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
+        public KunaOrderSide OrderSide => AmountPlaced > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
 
         public string CommonId => Id.ToString();
 
         public string CommonSymbol => Symbol;
 
-        public decimal CommonPrice => Price;
+        public decimal CommonPrice => Price == 0 ? PriceAverage ?? 0 : Price;
 
-        public decimal CommonQuantity => Math.Abs(AmountOriginal);
+        public decimal CommonQuantity => Math.Abs(AmountPlaced);
 
-        public string CommonStatus => StatusString;
+        public string CommonStatus => Status.ToString();
 
         public bool IsActive => CommonStatus.ToLower() == "new";
 
-        public IExchangeClient.OrderSide CommonSide => AmountOriginal > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
+        public IExchangeClient.OrderSide CommonSide => AmountPlaced > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
 
-        public IExchangeClient.OrderType CommonType => Type switch { 
-            KunaOrderType.Limit => IExchangeClient.OrderType.Limit, 
-            KunaOrderType.Market => IExchangeClient.OrderType.Market, 
-            KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market, 
+        public IExchangeClient.OrderType CommonType => Type switch
+        {
+            KunaOrderType.Limit => IExchangeClient.OrderType.Limit,
+            KunaOrderType.Market => IExchangeClient.OrderType.Market,
+            KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market,
             _ => IExchangeClient.OrderType.Other
         };
     }

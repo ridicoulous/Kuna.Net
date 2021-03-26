@@ -20,10 +20,10 @@ namespace Kuna.Net.Objects.V3
         public KunaOrderType Type { get; set; }
 
         [JsonProperty("price")]
-        public string Price { get; set; }
+        public decimal Price { get; set; }
 
         [JsonProperty("avg_execution_price")]
-        public string AvgExecutionPrice { get; set; }
+        public decimal AvgExecutionPrice { get; set; }
 
         [JsonProperty("state"), JsonConverter(typeof(OrderStatusV2Converter))]
         public KunaOrderStatus Status { get; set; }
