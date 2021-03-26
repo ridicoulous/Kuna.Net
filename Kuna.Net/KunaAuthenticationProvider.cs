@@ -55,6 +55,10 @@ namespace Kuna.Net
             if (uri.Contains("v3"))
             {                
                 var json = JsonConvert.SerializeObject(parameters.OrderBy(p => p.Key).ToDictionary(p => p.Key, p => p.Value));
+                if (string.IsNullOrEmpty(json)&&method==HttpMethod.Post)
+                {
+                    json = "{}";
+                }
                 var n = Nonce;
                 var signature = $"{uri.Split(new[] { ".io" }, StringSplitOptions.None)[1]}{n}{json}";
                 var signedData = SignV3(signature);
