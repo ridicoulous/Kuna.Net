@@ -48,17 +48,18 @@ namespace Kuna.Net.Objects.V3
         public DateTime TimestampUpdated { get; set; }
 
         /// <summary>
-        /// The amount left
-        /// </summary>
-        [ArrayProperty(6)]
-        public decimal Amount { get; set; }
-
-        /// <summary>
         /// The original amount
         /// </summary>
+        [ArrayProperty(6)]
+        public decimal AmountPlaced { get; set; }
+        /// <summary>
+        /// The amount left
+        /// </summary>
         [ArrayProperty(7)]
-        public decimal AmountOriginal { get; set; }
+        public decimal AmountLeft { get; set; }
 
+        [JsonIgnore]
+        public decimal AmountExecuted => Math.Abs(AmountPlaced) - AmountLeft;
         /// <summary>
         /// The order type
         /// </summary>
@@ -122,7 +123,7 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(17)]
         public decimal? PriceAverage { get; set; }
         [JsonIgnore]
-        public KunaOrderSide OrderSide => AmountOriginal > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
+        public KunaOrderSide OrderSide => AmountPlaced > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
 
         public string CommonId => Id.ToString();
 
@@ -130,13 +131,13 @@ namespace Kuna.Net.Objects.V3
 
         public decimal CommonPrice => Price == 0 ? PriceAverage ?? 0 : Price;
 
-        public decimal CommonQuantity => Math.Abs(AmountOriginal);
+        public decimal CommonQuantity => Math.Abs(AmountPlaced);
 
         public string CommonStatus => Status.ToString();
 
         public bool IsActive => CommonStatus.ToLower() == "new";
 
-        public IExchangeClient.OrderSide CommonSide => AmountOriginal > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
+        public IExchangeClient.OrderSide CommonSide => AmountPlaced > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
 
         public IExchangeClient.OrderType CommonType => Type switch
         {
