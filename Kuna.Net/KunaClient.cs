@@ -276,7 +276,7 @@ namespace Kuna.Net
             var request = new Dictionary<string, object>();
             string symb = symbols.AsStringParameterOrNull() ?? "ALL";
             request.AddOptionalParameter("symbols", symb);
-            return await SendRequest<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Post, ct, request, false, false);
+            return await SendRequest<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Get, ct, request, false, false);
 
         }
         public WebCallResult<KunaOrderBook> GetOrderBook(string symbol) => GetOrderBookAsync(symbol).Result;
@@ -313,6 +313,7 @@ namespace Kuna.Net
 
         public async Task<WebCallResult<IEnumerable<KunaPublicTrade>>> GetRecentPublicTradesAsync(string symbol, int limit = 25, CancellationToken ct = default)
         {
+            limit = limit > 500 ? 500 : limit;
             var parameters = new Dictionary<string, object>();
             parameters.AddParameter("limit", limit);
             return await SendRequest<IEnumerable<KunaPublicTrade>>(GetUrl(FillPathParameter(PublicTradesEndPoint, symbol), "3"), HttpMethod.Get, ct, parameters, false, false);

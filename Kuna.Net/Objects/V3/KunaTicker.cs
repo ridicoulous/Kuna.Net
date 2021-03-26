@@ -16,7 +16,7 @@ namespace Kuna.Net.Objects.V3
         /// Sum of bid sizes
         /// </summary>
         [ArrayProperty(2)]
-        public decimal liquidityBids { get; set; }
+        public decimal LiquidityBids { get; set; }
 
         [ArrayProperty(3)]
         public decimal Ask { get; set; }
@@ -24,7 +24,7 @@ namespace Kuna.Net.Objects.V3
         /// Sum of ask sizes
         /// </summary>
         [ArrayProperty(4)]
-        public decimal liquidityAsks { get; set; }
+        public decimal LiquidityAsks { get; set; }
         /// <summary>
         /// Amount that the last price has changed since yesterday
         /// </summary>
