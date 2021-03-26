@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V3
     public class KunaPublicTrade: ICommonRecentTrade
     {
         [ArrayProperty(0)]
-        public string Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// The time the trade was executed
@@ -17,10 +17,10 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(1), JsonConverter(typeof(TimestampConverter))]
         public DateTime TradeTime { get; set; }
 
-        [ArrayProperty(3)]
+        [ArrayProperty(2)]
         public decimal Quantity { get; set; }
 
-        [ArrayProperty(4)]
+        [ArrayProperty(3)]
         public decimal Price { get; set; }
 
         public KunaOrderSide Side => Quantity > 0? KunaOrderSide.Buy : KunaOrderSide.Sell;
