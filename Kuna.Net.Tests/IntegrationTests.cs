@@ -20,7 +20,7 @@ namespace Kuna.Net.Tests
         [Fact(DisplayName = "PlaceORder")]
         public void PlaceOrder()
         {
-           
+            var odfg = client.GetOrders(Objects.V3.KunaOrderStatus.Active);
             var book = client.GetOrderBook("btcusdt");
             var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
             var t = ordersss.Data.Where(o => o.Status==Objects.V3.KunaOrderStatus.Filled).ToList();
