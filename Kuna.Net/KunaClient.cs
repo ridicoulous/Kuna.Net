@@ -315,8 +315,8 @@ namespace Kuna.Net
         {
             var amount = side switch
             {
-                KunaOrderSide.Buy => quantity,
-                KunaOrderSide.Sell => quantity * -1,
+                KunaOrderSide.Buy => Math.Abs(quantity),
+                KunaOrderSide.Sell => Math.Abs(quantity) * -1,
                 _ => throw new NotImplementedException("Undefined order side. Possible either Buy or Sell")
             };
             var parameters = new Dictionary<string, object>();
