@@ -103,6 +103,8 @@ namespace Kuna.Net.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default);
+
+        Task<CallResult> GetTradesHistoryToEmail(string symbol, CancellationToken ct=default);
     }
  
 }

@@ -97,8 +97,9 @@ namespace Kuna.Net
         }
 
         public string SignV3(string toSign)
-        {           
-            return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+        {
+            lock (encryptLock)
+                return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
         }    
         public string ByteArrayToString(byte[] ba)
         {

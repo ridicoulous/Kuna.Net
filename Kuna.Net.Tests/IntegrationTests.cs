@@ -6,6 +6,9 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Logging;
 using System.Linq;
+using System.Collections.Generic;
+using CryptoExchange.Net.RateLimiter;
+using System.Threading;
 
 namespace Kuna.Net.Tests
 {
@@ -14,20 +17,31 @@ namespace Kuna.Net.Tests
         KunaClient client;
         public IntegrationTests()
         {
-           client = GetClientWithAuthentication(false);
+            client = GetClientWithAuthentication(true);
 
         }
         [Fact(DisplayName = "PlaceORder")]
         public void PlaceOrder()
         {
-           
+            
+            var tasks = new List<Task>();
+            for (int i = 0; i < 602; i++)
+            {
+                Task.Run(async()=> await client.GetOrdersAsync(Objects.V3.KunaOrderStatus.Active));
+                Thread.Sleep(5);
+                Task.Run(async () => await client.GetOrderBookAsync("dashusdt"));
+                Thread.Sleep(90);
+            }
+            //   Task.WaitAll(tasks.ToArray());
+         
+            var odfg = client.GetOrders(Objects.V3.KunaOrderStatus.Active);
             var book = client.GetOrderBook("btcusdt");
             var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
-            var t = ordersss.Data.Where(o => o.Status==Objects.V3.KunaOrderStatus.Filled).ToList();
+            var t = ordersss.Data.Where(o => o.Status == Objects.V3.KunaOrderStatus.Filled).ToList();
             var o = client.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
             if (o)
-            {               
-                var orders = client.GetOrders(Objects.V3.KunaOrderStatus.Filled,"xrpusdt",limit:1000);
+            {
+                var orders = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 1000);
                 var placed = client.GetOrder(o.Data.Id);
                 var cancel = client.CancelOrder(o.Data.Id);
                 Assert.True(orders);
@@ -92,7 +106,11 @@ namespace Kuna.Net.Tests
                 ApiCredentials = c,
                 LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
                 LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
-                IsProAccount = pro
+                IsProAccount = pro,
+                RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>() { new RateLimiterTotal(1100, TimeSpan.FromMinutes(1)) },
+                RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Fail,
+                RequestTimeout = TimeSpan.FromSeconds(4)
+
 
             });
             return client;

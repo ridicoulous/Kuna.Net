@@ -62,7 +62,7 @@ namespace Kuna.Net
         private const string ProCancelMultipleOrdersEndpoint = "auth/pro/order/cancel/multi";
         private const string ProPlaceOrderEndpoint = "auth/pro/w/order/submit";
         private const string ProOrderDetailsEndpoint = "auth/pro/r/orders/details";
- 
+
         private const string ProOrdersEndpoint = "auth/pro/r/orders";
 
         #endregion
@@ -310,13 +310,13 @@ namespace Kuna.Net
             parameters.AddParameter("limit", limit);
             return await SendRequest<IEnumerable<KunaPublicTrade>>(GetUrl(FillPathParameter(PublicTradesEndPoint, symbol), "3"), HttpMethod.Get, ct, parameters, false, false);
         }
-     
+
         public async Task<WebCallResult<KunaPlacedOrder>> PlaceOrderAsync(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price = null, decimal? stopPrice = null, CancellationToken ct = default)
         {
             var amount = side switch
             {
-                KunaOrderSide.Buy => quantity,
-                KunaOrderSide.Sell => quantity * -1,
+                KunaOrderSide.Buy => Math.Abs(quantity),
+                KunaOrderSide.Sell => Math.Abs(quantity) * -1,
                 _ => throw new NotImplementedException("Undefined order side. Possible either Buy or Sell")
             };
             var parameters = new Dictionary<string, object>();
@@ -404,7 +404,7 @@ namespace Kuna.Net
         public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
         {
             string url = IsProAccount ? ProWalletsEndpoint : WalletEndpoint;
-            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url,"3"), HttpMethod.Post, ct, null, true, false);
+            return await SendRequest<IEnumerable<KunaAccountBalance>>(GetUrl(url, "3"), HttpMethod.Post, ct, null, true, false);
         }
 
         #endregion implementing IKunaClientV3
@@ -517,6 +517,12 @@ namespace Kuna.Net
             {
                 throw new ArgumentException("Can't convert \"orderId\" to type long");
             }
+        }
+
+        public async Task<CallResult> GetTradesHistoryToEmail(string symbol, CancellationToken ct = default)
+        {
+            var request = await SendRequest<object>(GetUrl("auth/history/trades", "3"), HttpMethod.Post, default, new Dictionary<string, object>() { { "market", symbol } }, true);
+            return request;
         }
     }
 }

@@ -47,16 +47,17 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(5), JsonConverter(typeof(TimestampConverter))]
         public DateTime TimestampUpdated { get; set; }
 
+        [ArrayProperty(6)]
+        public decimal AmountLeft { get; set; }
         /// <summary>
         /// The original amount
         /// </summary>
-        [ArrayProperty(6)]
+        [ArrayProperty(7)]
         public decimal AmountPlaced { get; set; }
         /// <summary>
         /// The amount left
         /// </summary>
-        [ArrayProperty(7)]
-        public decimal AmountLeft { get; set; }
+   
 
         [JsonIgnore]
         public decimal AmountExecuted => Math.Abs(AmountPlaced) - AmountLeft;
