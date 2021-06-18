@@ -126,6 +126,8 @@ namespace Kuna.Net.Objects.V3
         [JsonIgnore]
         public KunaOrderSide OrderSide => AmountPlaced > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
 
+        [JsonIgnore]
+        public bool IsPartuallyFilled => AmountLeft > 0 && AmountExecuted > 0 ? true: false;
         public string CommonId => Id.ToString();
 
         public string CommonSymbol => Symbol;
