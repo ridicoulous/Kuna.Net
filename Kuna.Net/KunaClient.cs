@@ -350,6 +350,18 @@ namespace Kuna.Net
         }
         public WebCallResult<List<KunaPlacedOrder>> CancelOrders(List<long> orderIds) => CancelOrdersAsync(orderIds).Result;
 
+        /// <summary>
+        /// the result may be unexpected, please use one of GetActiveOrdersAsync(), GetClosedOrdersAsync(),
+        /// GetOrdersWithTradesAsync() methods
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="market"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="limit"></param>
+        /// <param name="sortDesc"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         public async Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersAsync(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
         {
             var endpoint = IsProAccount ? ProOrdersEndpoint : OrdersEndpoint;
