@@ -380,8 +380,47 @@ namespace Kuna.Net
             return result;
         }
         public WebCallResult<List<KunaPlacedOrder>> GetOrders(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null)
-   => GetOrdersAsync(state, market, from, to, limit, sortDesc).Result;
+        => GetOrdersAsync(state, market, from, to, limit, sortDesc).Result;
 
+        public async Task<WebCallResult<List<KunaPlacedOrder>>> GetActiveOrdersAsync(string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
+        => await GetOrdersAsync(KunaOrderStatus.Active, market, from, to, limit,sortDesc, ct);
+
+        public async Task<WebCallResult<List<KunaPlacedOrder>>> GetClosedOrdersAsync(string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default)
+        => await GetOrdersAsync(KunaOrderStatus.Filled, market, from, to, limit, sortDesc, ct);
+
+        public async Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersWithTradesAsync(string market = null, DateTime? from = null, DateTime? to = null, bool sortDesc = true, CancellationToken ct = default)
+        {
+            var openOrders = await GetActiveOrdersAsync(market, from, to, null, sortDesc, ct);
+            var closedOrders = await GetClosedOrdersAsync(market, from, to, null, sortDesc, ct);
+            List<KunaPlacedOrder> orders = null;
+            Error error = null;
+            System.Net.HttpStatusCode? sCode;
+            IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers;
+
+
+            if (!openOrders)
+            {
+                error = openOrders.Error;
+                sCode = openOrders.ResponseStatusCode;
+                headers = openOrders.ResponseHeaders;
+            }
+            else if (!closedOrders)
+            {
+                error = closedOrders.Error;
+                sCode = openOrders.ResponseStatusCode;
+                headers = openOrders.ResponseHeaders;
+            }
+            else
+            {
+                orders = new List<KunaPlacedOrder>(openOrders.Data?.Where(x => x.AmountExecuted > 0));
+                orders.AddRange(closedOrders.Data?.Where(x => x.AmountExecuted > 0));
+                orders = sortDesc ? orders.OrderByDescending(x => x.TimestampUpdated).ToList()
+                        : orders.OrderBy(x => x.TimestampUpdated).ToList();
+                sCode = openOrders.ResponseStatusCode;
+                headers = openOrders.ResponseHeaders;
+            }
+            return new WebCallResult<List<KunaPlacedOrder>>(sCode, headers, orders, error);
+        }
         public WebCallResult<KunaPlacedOrder> GetOrder(long id) => GetOrderAsync(id).Result;
 
         public async Task<WebCallResult<KunaPlacedOrder>> GetOrderAsync(long id, CancellationToken ct = default)
@@ -524,5 +563,6 @@ namespace Kuna.Net
             var request = await SendRequest<object>(GetUrl("auth/history/trades", "3"), HttpMethod.Post, default, new Dictionary<string, object>() { { "market", symbol } }, true);
             return request;
         }
+        
     }
 }
