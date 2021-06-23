@@ -21,7 +21,6 @@ namespace Kuna.Net.Objects.V3
         Active,
         Canceled,
         Filled,
-        PartiallyFilled,
         Undefined
     }
 }

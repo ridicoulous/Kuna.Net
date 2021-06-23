@@ -21,7 +21,6 @@ namespace Kuna.Net.Converters
 
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Filled, "EXECUTED"),
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Active, "ACTIVE"),
-            new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.PartiallyFilled, "PARTIALLYFILLED"),
             new KeyValuePair<KunaOrderStatus, string>(KunaOrderStatus.Undefined, "*")
         };
     }
