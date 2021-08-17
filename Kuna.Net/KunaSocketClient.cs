@@ -4,6 +4,7 @@ using CryptoExchange.Net.Sockets;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects;
 using Kuna.Net.Objects.V2;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using PusherClient;
 using System;
@@ -37,7 +38,7 @@ namespace Kuna.Net
        
         private void _pusherClient_ConnectionStateChanged(object sender, ConnectionState state)
         {
-            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Pusher state is {state.ToString()}");
+            log.Write(LogLevel.Debug, $"Pusher state is {state.ToString()}");
             StateChanged?.Invoke(state);
             switch (state)
             {
@@ -59,7 +60,7 @@ namespace Kuna.Net
 
         private void _pusherClient_Error(object sender, PusherException error)
         {
-            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, error.ToString());
+            log.Write(LogLevel.Error, error.ToString());
             PusherError?.Invoke(error);
         }
         #region Channels
@@ -102,7 +103,7 @@ namespace Kuna.Net
             });
 
         }
-        public override Task UnsubscribeAll()
+        public override Task UnsubscribeAllAsync()
         {
             if(_pusherClient!=null)
             {
@@ -137,12 +138,12 @@ namespace Kuna.Net
             throw new NotImplementedException();
         }
 
-        protected override Task<CallResult<bool>> AuthenticateSocket(SocketConnection s)
+        protected override Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection s)
         {
             throw new NotImplementedException();
         }
 
-        protected override Task<bool> Unsubscribe(SocketConnection connection, SocketSubscription s)
+        protected override Task<bool> UnsubscribeAsync(SocketConnection connection, SocketSubscription s)
         {
             throw new NotImplementedException();
         }   

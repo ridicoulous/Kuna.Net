@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V3
 {
 
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPlacedOrder : ICommonOrder, ICommonOrderId
+    public class KunaPlacedOrder : ICommonOrder
     {
         /// <summary>
         /// The id of the order
@@ -136,9 +136,15 @@ namespace Kuna.Net.Objects.V3
 
         public decimal CommonQuantity => Math.Abs(AmountPlaced);
 
-        public string CommonStatus => Status.ToString();
+        public IExchangeClient.OrderStatus CommonStatus => Status switch 
+        {
+            KunaOrderStatus.Active => IExchangeClient.OrderStatus.Active,
+            KunaOrderStatus.Canceled => IExchangeClient.OrderStatus.Canceled,
+            KunaOrderStatus.Filled => IExchangeClient.OrderStatus.Filled,
+            _=> throw new NotImplementedException("Undefined order status")
+        };
 
-        public bool IsActive => CommonStatus.ToLower() == "new";
+        public bool IsActive => CommonStatus == IExchangeClient.OrderStatus.Active;
 
         public IExchangeClient.OrderSide CommonSide => AmountPlaced > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
 
@@ -149,5 +155,7 @@ namespace Kuna.Net.Objects.V3
             KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market,
             _ => IExchangeClient.OrderType.Other
         };
+
+        public DateTime CommonOrderTime => TimestampCreated;
     }
 }

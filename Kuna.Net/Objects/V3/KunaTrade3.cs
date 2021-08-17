@@ -89,6 +89,8 @@ namespace Kuna.Net.Objects.V3
         public decimal CommonFee => Fee;
 
         public string CommonFeeAsset => FeeCurrency;
+
+        public DateTime CommonTradeTime => TimestampCreated;
     }
 
 
