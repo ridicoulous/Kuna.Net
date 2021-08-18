@@ -142,13 +142,13 @@ namespace Kuna.Net
                 {
                     _slim.Release();
 
-                    log.Write(LogLevel.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    log.Write(LogLevel.Debug, $"Order book was not got");
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
-                log.Write(LogLevel.Error, $"Order book was not getted cause\n{ex.ToString()}");
+                log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
                 return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
@@ -182,13 +182,13 @@ namespace Kuna.Net
                 {
                     _slim.Release();
 
-                    log.Write(LogLevel.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    log.Write(LogLevel.Debug, $"Order book was not got");
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
-                log.Write(LogLevel.Error, $"Order book was not getted cause\n{ex.ToString()}");
+                log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
 
                 return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
