@@ -9,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using CryptoExchange.Net.RateLimiter;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Kuna.Net.Tests
 {
@@ -104,8 +105,10 @@ namespace Kuna.Net.Tests
             var client = new KunaClient(new KunaClientOptions()
             {
                 ApiCredentials = c,
-                LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
-                LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
+
+                LogLevel = LogLevel.Debug,
+                // LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
+                LogWriters = new List<ILogger>() { new DebugLogger()},
                 IsProAccount = pro,
                 RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>() { new RateLimiterTotal(1100, TimeSpan.FromMinutes(1)) },
                 RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Fail,

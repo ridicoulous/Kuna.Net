@@ -78,15 +78,19 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(10)]
         public string FeeCurrency { get; set; } = "";
 
+        [JsonIgnore]
+        KunaOrderSide Side  => ExecutedAmount > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
         public string CommonId => Id.ToString();
 
         public decimal CommonPrice => ExecutedPrice;
 
-        public decimal CommonQuantity => ExecutedAmount;
+        public decimal CommonQuantity => Math.Abs(ExecutedAmount);
 
         public decimal CommonFee => Fee;
 
         public string CommonFeeAsset => FeeCurrency;
+
+        public DateTime CommonTradeTime => TimestampCreated;
     }
 
 

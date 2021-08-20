@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V3
 {
 
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPlacedOrder : ICommonOrder, ICommonOrderId
+    public class KunaPlacedOrder : ICommonOrder
     {
         /// <summary>
         /// The id of the order
@@ -60,7 +60,7 @@ namespace Kuna.Net.Objects.V3
    
 
         [JsonIgnore]
-        public decimal AmountExecuted => Math.Abs(AmountPlaced) - AmountLeft;
+        public decimal AmountExecuted => Math.Abs(AmountPlaced) - Math.Abs(AmountLeft);
         /// <summary>
         /// The order type
         /// </summary>
@@ -124,8 +124,10 @@ namespace Kuna.Net.Objects.V3
         [ArrayProperty(17)]
         public decimal? PriceAverage { get; set; }
         [JsonIgnore]
-        public KunaOrderSide OrderSide => AmountPlaced > 0 ? KunaOrderSide.Buy : KunaOrderSide.Sell;
+        public KunaOrderSide OrderSide => AmountPlaced < 0 || AmountLeft < 0 ? KunaOrderSide.Sell : KunaOrderSide.Buy;
 
+        [JsonIgnore]
+        public bool IsPartiallyFilled => AmountLeft != 0 && AmountExecuted != 0 ? true: false;
         public string CommonId => Id.ToString();
 
         public string CommonSymbol => Symbol;
@@ -134,11 +136,22 @@ namespace Kuna.Net.Objects.V3
 
         public decimal CommonQuantity => Math.Abs(AmountPlaced);
 
-        public string CommonStatus => Status.ToString();
+        public IExchangeClient.OrderStatus CommonStatus => Status switch 
+        {
+            KunaOrderStatus.Active => IExchangeClient.OrderStatus.Active,
+            KunaOrderStatus.Canceled => IExchangeClient.OrderStatus.Canceled,
+            KunaOrderStatus.Filled => IExchangeClient.OrderStatus.Filled,
+            _=> throw new NotImplementedException("Undefined order status")
+        };
 
-        public bool IsActive => CommonStatus.ToLower() == "new";
+        public bool IsActive => CommonStatus == IExchangeClient.OrderStatus.Active;
 
-        public IExchangeClient.OrderSide CommonSide => AmountPlaced > 0 ? IExchangeClient.OrderSide.Buy : IExchangeClient.OrderSide.Sell;
+        public IExchangeClient.OrderSide CommonSide => OrderSide switch
+        {
+            KunaOrderSide.Buy => IExchangeClient.OrderSide.Buy,
+            KunaOrderSide.Sell => IExchangeClient.OrderSide.Sell,
+            _=> throw new NotImplementedException("Undefined order side")
+        };
 
         public IExchangeClient.OrderType CommonType => Type switch
         {
@@ -147,5 +160,7 @@ namespace Kuna.Net.Objects.V3
             KunaOrderType.MarketByQuote => IExchangeClient.OrderType.Market,
             _ => IExchangeClient.OrderType.Other
         };
+
+        public DateTime CommonOrderTime => TimestampCreated;
     }
 }

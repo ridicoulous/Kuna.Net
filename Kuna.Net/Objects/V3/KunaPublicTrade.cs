@@ -27,7 +27,7 @@ namespace Kuna.Net.Objects.V3
 
         public decimal CommonPrice => Price;
 
-        public decimal CommonQuantity => Quantity;
+        public decimal CommonQuantity => Math.Abs(Quantity);
 
         public DateTime CommonTradeTime => TradeTime;
     }
