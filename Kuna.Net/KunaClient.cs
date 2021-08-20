@@ -518,7 +518,6 @@ namespace Kuna.Net
                 throw new ArgumentException("Can't convert \"orderId\" to type long");
             }
         }
-
         public async Task<CallResult> GetTradesHistoryToEmail(string symbol, CancellationToken ct = default)
         {
             var request = await SendRequest<object>(GetUrl("auth/history/trades", "3"), HttpMethod.Post, default, new Dictionary<string, object>() { { "market", symbol } }, true);
