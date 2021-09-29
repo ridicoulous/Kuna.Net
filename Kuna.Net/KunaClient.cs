@@ -29,7 +29,8 @@ namespace Kuna.Net
         public KunaClient(KunaClientOptions options, string clientName = "KunaApiClient") : base(clientName, options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
             IsProAccount = options.IsProAccount;
-            postParametersPosition = PostParameters.InUri;
+            // postParametersPosition = PostParameters.InUri;
+           // ParameterPositions = new Dictionary<HttpMethod, HttpMethodParameterPosition>();
             requestBodyFormat = RequestBodyFormat.Json;
         }
         #region Endpoints
@@ -209,54 +210,11 @@ namespace Kuna.Net
         #region BaseMethodOverride
 
 
-        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization, int requestId)
-        {
-            if (parameters == null)
-                parameters = new Dictionary<string, object>();
-            var uriString = uri.ToString();
-
-            if (uriString.Contains("v2"))
-            {
-                if (authProvider != null && signed)
-                    parameters = authProvider.AddAuthenticationToParameters(new Uri(uriString).PathAndQuery, method, parameters, signed, postParametersPosition, arraySerialization);
-
-            }
-            if ((method == HttpMethod.Get || method == HttpMethod.Delete || postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
-            {
-                uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
-            }
-            var request = RequestFactory.Create(method, uriString, requestId);
-            request.Accept = Constants.JsonContentHeader;
-            request.Method = method;
-            if (uriString.Contains("v3"))
-            {
-                if (authProvider != null)
-                {
-                    var headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed, postParametersPosition, arraySerialization);
-                    foreach (var header in headers)
-                    {
-                        request.AddHeader(header.Key, header.Value);
-                    }
-                }
-            }
-            if ((method == HttpMethod.Post || method == HttpMethod.Put) && postParametersPosition != PostParameters.InUri)
-            {
-                WriteParamBody(request, parameters, requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader);
-            }
-
-            return request;
-        }
+       
 
         protected Uri GetUrl(string endpoint, string version = null)
         {
-            if (version != null)
-            {
-                postParametersPosition = PostParameters.InBody;
-            }
-            else
-            {
-                postParametersPosition = PostParameters.InUri;
-            }
+           
             return version == null ? new Uri($"{BaseAddress}{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
 
         }
@@ -330,7 +288,7 @@ namespace Kuna.Net
             parameters.AddOptionalParameter("stop_price", stopPrice);
 
             string url = IsProAccount ? ProPlaceOrderEndpoint : V3PlaceOrderEndpoint;
-            var request = await SendRequestAsync<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false, PostParameters.InBody);
+            var request = await SendRequestAsync<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false,  HttpMethodParameterPosition.InBody);
             if (request.Success)
             {
                 OnOrderPlaced?.Invoke(request.Data);
@@ -343,7 +301,7 @@ namespace Kuna.Net
         public async Task<WebCallResult<KunaCanceledOrder>> CancelOrderAsync(long orderId, CancellationToken ct = default)
         {
             string url = IsProAccount ? ProCancelOrderEndpoint : V3CancelOrderEndpoint;
-            var result = await SendRequestAsync<KunaCanceledOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_id", orderId } }, true, false, PostParameters.InBody);
+            var result = await SendRequestAsync<KunaCanceledOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_id", orderId } }, true, false, HttpMethodParameterPosition.InBody);
             if (result.Success)
             {
                 OnOrderCanceled?.Invoke(result.Data);
@@ -357,7 +315,7 @@ namespace Kuna.Net
         public async Task<WebCallResult<List<KunaPlacedOrder>>> CancelOrdersAsync(List<long> orderIds, CancellationToken ct = default)
         {
             string url = IsProAccount ? ProCancelMultipleOrdersEndpoint : V3CancelOrderEndpoint + "/multi";
-            var result = await SendRequestAsync<List<KunaPlacedOrder>>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_ids", JsonConvert.SerializeObject(orderIds) } }, true, false, PostParameters.InBody);
+            var result = await SendRequestAsync<List<KunaPlacedOrder>>(GetUrl(url, "3"), HttpMethod.Post, ct, new Dictionary<string, object>() { { "order_ids", JsonConvert.SerializeObject(orderIds) } }, true, false, HttpMethodParameterPosition.InBody);
             if (result.Success)
             {
                 foreach (var order in result.Data)
