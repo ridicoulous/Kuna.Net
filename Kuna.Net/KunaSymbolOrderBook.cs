@@ -6,6 +6,7 @@ using CryptoExchange.Net.Sockets;
 using Kuna.Net.Converters;
 using Kuna.Net.Objects;
 using Kuna.Net.Objects.V2;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -64,7 +65,7 @@ namespace Kuna.Net
 
         private void Catch(Task arg1, object arg2)
         {
-            log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, "Infinite task was canceled with status:\n" + arg2.ToString());
+            log.Write(LogLevel.Debug, "Infinite task was canceled with status:\n" + arg2.ToString());
         }
 
         private void Run()
@@ -141,13 +142,13 @@ namespace Kuna.Net
                 {
                     _slim.Release();
 
-                    log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    log.Write(LogLevel.Debug, $"Order book was not got");
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
-                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
+                log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
                 return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
@@ -181,13 +182,13 @@ namespace Kuna.Net
                 {
                     _slim.Release();
 
-                    log.Write(CryptoExchange.Net.Logging.LogVerbosity.Debug, $"Order book was not getted");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not getted: {result.ReasonPhrase}"));
+                    log.Write(LogLevel.Debug, $"Order book was not got");
+                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
-                log.Write(CryptoExchange.Net.Logging.LogVerbosity.Error, $"Order book was not getted cause\n{ex.ToString()}");
+                log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
 
                 return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
@@ -201,7 +202,7 @@ namespace Kuna.Net
             httpClient?.Dispose();
         }
 
-        protected override async Task<CallResult<bool>> DoResync()
+        protected override async Task<CallResult<bool>> DoResyncAsync()
         {
             // throw new NotImplementedException();
 
@@ -209,7 +210,7 @@ namespace Kuna.Net
             // return new CallResult<bool>(true,null);
         }
         WebsocketFactory wf = new WebsocketFactory();
-        protected override async Task<CallResult<UpdateSubscription>> DoStart()
+        protected override async Task<CallResult<UpdateSubscription>> DoStartAsync()
         {
             Run();
                

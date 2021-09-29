@@ -9,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using CryptoExchange.Net.RateLimiter;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Kuna.Net.Tests
 {
@@ -17,35 +18,14 @@ namespace Kuna.Net.Tests
         KunaClient client;
         public IntegrationTests()
         {
-            client = GetClientWithAuthentication(true);
+            client = GetClientWithAuthentication(false);
 
         }
         [Fact(DisplayName = "PlaceORder")]
         public void PlaceOrder()
         {
-            
-            var tasks = new List<Task>();
-            for (int i = 0; i < 602; i++)
-            {
-                Task.Run(async()=> await client.GetOrdersAsync(Objects.V3.KunaOrderStatus.Active));
-                Thread.Sleep(5);
-                Task.Run(async () => await client.GetOrderBookAsync("dashusdt"));
-                Thread.Sleep(90);
-            }
-            //   Task.WaitAll(tasks.ToArray());
-         
-            var odfg = client.GetOrders(Objects.V3.KunaOrderStatus.Active);
-            var book = client.GetOrderBook("btcusdt");
-            var ordersss = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 100);
-            var t = ordersss.Data.Where(o => o.Status == Objects.V3.KunaOrderStatus.Filled).ToList();
-            var o = client.PlaceOrder("btcusdt", Objects.V3.KunaOrderSide.Buy, Objects.V3.KunaOrderType.Limit, 1, 1);
-            if (o)
-            {
-                var orders = client.GetOrders(Objects.V3.KunaOrderStatus.Filled, "xrpusdt", limit: 1000);
-                var placed = client.GetOrder(o.Data.Id);
-                var cancel = client.CancelOrder(o.Data.Id);
-                Assert.True(orders);
-            }
+
+            Assert.True(true);
 
         }
         [Fact(DisplayName = "GetMarketInfo")]
@@ -104,8 +84,10 @@ namespace Kuna.Net.Tests
             var client = new KunaClient(new KunaClientOptions()
             {
                 ApiCredentials = c,
-                LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug,
-                LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
+
+                LogLevel = LogLevel.Debug,
+                // LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
+                LogWriters = new List<ILogger>() { new DebugLogger()},
                 IsProAccount = pro,
                 RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>() { new RateLimiterTotal(1100, TimeSpan.FromMinutes(1)) },
                 RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Fail,
