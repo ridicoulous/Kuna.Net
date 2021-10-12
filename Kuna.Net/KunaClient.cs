@@ -21,16 +21,14 @@ namespace Kuna.Net
 {
     public class KunaClient : RestClient, IKunaClientV2, IKunaClientV3
     {
-        private readonly bool IsProAccount;
-        public KunaClient() : base("KunaApiClient", new KunaClientOptions(), null)
+        private bool IsProAccount;
+        public KunaClient() : base("Kuna", new KunaClientOptions(), null)
         {
 
         }
-        public KunaClient(KunaClientOptions options, string clientName = "KunaApiClient") : base(clientName, options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
+        public KunaClient(KunaClientOptions options, string exchangeName = "Kuna") : base(exchangeName, options, options.ApiCredentials == null ? null : new KunaAuthenticationProvider(options.ApiCredentials))
         {
-            IsProAccount = options.IsProAccount;
-            // postParametersPosition = PostParameters.InUri;
-           // ParameterPositions = new Dictionary<HttpMethod, HttpMethodParameterPosition>();
+            IsProAccount = options.IsProAccount;   
             requestBodyFormat = RequestBodyFormat.Json;
         }
         #region Endpoints
@@ -549,6 +547,10 @@ namespace Kuna.Net
             var request = await SendRequestAsync<object>(GetUrl("auth/history/trades", "3"), HttpMethod.Post, default, new Dictionary<string, object>() { { "market", symbol } }, true);
             return request;
         }
-        
+
+        public void SetProAccount(bool isProAccountEnabled)
+        {
+            IsProAccount = isProAccountEnabled;
+        }
     }
 }
