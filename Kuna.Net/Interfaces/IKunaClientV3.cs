@@ -10,6 +10,7 @@ namespace Kuna.Net.Interfaces
 {
     public interface IKunaClientV3 : IExchangeClient
     {
+        void SetProAccount(bool isProAccountEnabled);
         WebCallResult<DateTime?> GetServerTime();
         Task<WebCallResult<DateTime?>> GetServerTimeAsync(CancellationToken ct = default);
         WebCallResult<IEnumerable<KunaTradingPair>> GetTradingPairs();

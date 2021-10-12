@@ -24,7 +24,7 @@ fixed / in base address</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="4.2.2" />
+    <PackageReference Include="CryptoExchange.Net" Version="4.2.8" />
     <PackageReference Include="Pusher.NetStandard" Version="0.5.9" />
   </ItemGroup>
 
