@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
-    <Copyright>ridicoulous</Copyright>
+    <Copyright>ridicoulous, alokym86</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/ridicoulous/Kuna.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ridicoulous/Kuna.Net</RepositoryUrl>
@@ -16,6 +16,7 @@
     <Authors>ridicoulous, alokym86</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>
+      10/27/2021 - turn off pro account on error
       10/12/2021 - pro account managing
       9/29/2021 - major base library update
       05/14/2021 - base lib update

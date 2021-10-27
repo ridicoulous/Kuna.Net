@@ -76,6 +76,8 @@ Other CryptoExchange.Net implementations:
 </table>
 
 ## Changelog
+* 10/27/2021 
+  * turn off pro account on error
 * 9/29/2021 
     * major base library update
 * 05/14/2021 
