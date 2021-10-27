@@ -3,11 +3,13 @@ using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
+using CryptoExchange.Net.RateLimiter;
 using Kuna.Net.Converters;
 using Kuna.Net.Helpers;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects.V2;
 using Kuna.Net.Objects.V3;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,6 +24,9 @@ namespace Kuna.Net
     public class KunaClient : RestClient, IKunaClientV2, IKunaClientV3
     {
         private bool IsProAccount;
+        private const int ProTotalRateLimit = 1200;
+        private const int RegularTotalRateLimit = 600;
+        private int? userDefinedTotalRateLimit = null;
         public KunaClient() : base("Kuna", new KunaClientOptions(), null)
         {
 
@@ -30,6 +35,8 @@ namespace Kuna.Net
         {
             IsProAccount = options.IsProAccount;   
             requestBodyFormat = RequestBodyFormat.Json;
+            OnError = HandleProAccountEndpointError;
+            AddRateLimiter(new RateLimiterTotal(TotalRateLimit.Value, TimeSpan.FromMinutes(1)));
         }
         #region Endpoints
         private const string LatestVersion = "3";
@@ -64,10 +71,27 @@ namespace Kuna.Net
 
         private const string ProOrdersEndpoint = "auth/pro/r/orders";
 
+        #endregion
+
+        /// <summary>
+        /// Rate limit value for CryptoExchange.Net.RateLimiter.RateLimiterTotal class
+        /// </summary>
+        public int? TotalRateLimit
+        {
+            get
+            {
+                return userDefinedTotalRateLimit ?? (IsProAccount ? ProTotalRateLimit : RegularTotalRateLimit);
+            }
+            set
+            {
+                userDefinedTotalRateLimit = value;
+                UpdateRateLimiters();
+            }
+        }
         public event Action<ICommonOrderId> OnOrderPlaced;
         public event Action<ICommonOrderId> OnOrderCanceled;
+        public event Action<string> OnError;
 
-        #endregion
         public CallResult<DateTime> GetServerTimeV2() => GetServerTimeV2Async().Result;
         public async Task<CallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default)
         {
@@ -228,29 +252,47 @@ namespace Kuna.Net
             var request = new Dictionary<string, object>();
             string symb = symbols.AsStringParameterOrNull() ?? "ALL";
             request.AddOptionalParameter("symbols", symb);
-            return await SendRequestAsync<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Get, ct, request, false, false);
-
+            var result = await SendRequestAsync<IEnumerable<KunaTicker>>(GetUrl(TickersEndpoint, "3"), HttpMethod.Get, ct, request, false, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
         public WebCallResult<KunaOrderBook> GetOrderBook(string symbol) => GetOrderBookAsync(symbol).Result;
         public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, CancellationToken ct = default)
         {
             string url = IsProAccount ? ProBookEnpoint : OrderBookEndpoint;
             var result = await SendRequestAsync<IEnumerable<KunaOrderBookEntry>>(GetUrl(FillPathParameter(url, symbol), "3"), IsProAccount ? HttpMethod.Post : HttpMethod.Get, ct, null, IsProAccount).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
             return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result ? new KunaOrderBook(result.Data) : null, result.Error);
         }
 
         public WebCallResult<DateTime?> GetServerTime() => GetServerTimeAsync().Result;
         public async Task<WebCallResult<DateTime?>> GetServerTimeAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<KunaTimestampResponse>(GetUrl(ServerTimeEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
-            return new WebCallResult<DateTime?>(result.ResponseStatusCode, result.ResponseHeaders, result.Data?.CurrentTime, result.Error);
+            var tmpResult = await SendRequestAsync<KunaTimestampResponse>(GetUrl(ServerTimeEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
+            var result = new WebCallResult<DateTime?>(tmpResult.ResponseStatusCode, tmpResult.ResponseHeaders, tmpResult.Data?.CurrentTime, tmpResult.Error);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
 
         public WebCallResult<IEnumerable<KunaTradingPair>> GetTradingPairs() => GetTradingPairsAsync().Result;
 
         public async Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync(CancellationToken ct = default)
         {
-            return await SendRequestAsync<IEnumerable<KunaTradingPair>>(GetUrl(TradingPairsEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
+            var result =  await SendRequestAsync<IEnumerable<KunaTradingPair>>(GetUrl(TradingPairsEndpoint, "3"), HttpMethod.Get, ct, null, false, false).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
 
         public WebCallResult<List<KunaCurrency>> GetCurrencies(bool? privileged = null) => GetCurrenciesAsync(privileged, default).Result;
@@ -258,7 +300,12 @@ namespace Kuna.Net
         {
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("privileged", privileged);
-            return await SendRequestAsync<List<KunaCurrency>>(GetUrl(CurrenciesEndpoint, "3"), HttpMethod.Get, ct, request, false, false);
+            var result =  await SendRequestAsync<List<KunaCurrency>>(GetUrl(CurrenciesEndpoint, "3"), HttpMethod.Get, ct, request, false, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
         public WebCallResult<IEnumerable<KunaPublicTrade>> GetRecentPublicTrades(string symbol, int limit = 25) => GetRecentPublicTradesAsync(symbol, limit).Result;
 
@@ -267,7 +314,12 @@ namespace Kuna.Net
             limit = limit > 500 ? 500 : limit;
             var parameters = new Dictionary<string, object>();
             parameters.AddParameter("limit", limit);
-            return await SendRequestAsync<IEnumerable<KunaPublicTrade>>(GetUrl(FillPathParameter(PublicTradesEndPoint, symbol), "3"), HttpMethod.Get, ct, parameters, false, false);
+            var result = await SendRequestAsync<IEnumerable<KunaPublicTrade>>(GetUrl(FillPathParameter(PublicTradesEndPoint, symbol), "3"), HttpMethod.Get, ct, parameters, false, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
 
         public async Task<WebCallResult<KunaPlacedOrder>> PlaceOrderAsync(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price = null, decimal? stopPrice = null, CancellationToken ct = default)
@@ -286,12 +338,16 @@ namespace Kuna.Net
             parameters.AddOptionalParameter("stop_price", stopPrice);
 
             string url = IsProAccount ? ProPlaceOrderEndpoint : V3PlaceOrderEndpoint;
-            var request = await SendRequestAsync<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false,  HttpMethodParameterPosition.InBody);
-            if (request.Success)
+            var result = await SendRequestAsync<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false,  HttpMethodParameterPosition.InBody);
+            if (result.Success)
             {
-                OnOrderPlaced?.Invoke(request.Data);
+                OnOrderPlaced?.Invoke(result.Data);
             }
-            return request;
+            else 
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
 
         public WebCallResult<KunaPlacedOrder> PlaceOrder(string symbol, KunaOrderSide side, KunaOrderType orderType, decimal quantity, decimal? price = null, decimal? stopPrice = null) => PlaceOrderAsync(symbol, side, orderType, quantity, price, stopPrice).Result;
@@ -303,6 +359,10 @@ namespace Kuna.Net
             if (result.Success)
             {
                 OnOrderCanceled?.Invoke(result.Data);
+            }
+            else
+            {
+                OnError?.Invoke(result.Error.Message);
             }
             return result;
         }
@@ -320,6 +380,10 @@ namespace Kuna.Net
                 {
                     OnOrderCanceled?.Invoke(order);
                 }
+            }
+            else
+            {
+                OnError?.Invoke(result.Error.Message);
             }
             return result;
         }
@@ -364,6 +428,10 @@ namespace Kuna.Net
             if (sortDesc.HasValue)
                 parameters.AddOptionalParameter("sort", sortDesc.Value ? -1 : 1);
             var result = await SendRequestAsync<List<KunaPlacedOrder>>(url, HttpMethod.Post, ct, parameters, true, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
             return result;
         }
         public WebCallResult<List<KunaPlacedOrder>> GetOrders(KunaOrderStatus state, string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null)
@@ -416,6 +484,10 @@ namespace Kuna.Net
             var parameters = new Dictionary<string, object>();
             parameters.AddParameter("id", id);
             var result = await SendRequestAsync<KunaPlacedOrder>(GetUrl(url, "3"), HttpMethod.Post, ct, parameters, true, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
             return result;
         }
 
@@ -424,13 +496,22 @@ namespace Kuna.Net
         {
             var url = GetUrl($"auth/r/order/{market}:{id}/trades", "3");
             var result = await SendRequestAsync<List<KunaTrade>>(url, HttpMethod.Post, ct, new Dictionary<string, object>(), true, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
             return result;
         }
         public WebCallResult<IEnumerable<KunaAccountBalance>> GetBalances() => GetBalancesAsync().Result;
         public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
         {
             string url = IsProAccount ? ProWalletsEndpoint : WalletEndpoint;
-            return await SendRequestAsync<IEnumerable<KunaAccountBalance>>(GetUrl(url, "3"), HttpMethod.Post, ct, null, true, false);
+            var result =await SendRequestAsync<IEnumerable<KunaAccountBalance>>(GetUrl(url, "3"), HttpMethod.Post, ct, null, true, false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
         }
 
         #endregion implementing IKunaClientV3
@@ -551,6 +632,31 @@ namespace Kuna.Net
         public void SetProAccount(bool isProAccountEnabled)
         {
             IsProAccount = isProAccountEnabled;
+            UpdateRateLimiters();
         }
+
+        private void HandleProAccountEndpointError(string errorMessage)
+        {
+            if (string.IsNullOrEmpty(errorMessage)) {
+                return;
+            }
+            if (errorMessage.Contains("for_pro_members_only", StringComparison.OrdinalIgnoreCase))
+            {
+                SetProAccount(false);
+                log.Write(LogLevel.Warning, "You are not Pro, forcibly turn off the Pro endpoints");
+            }
+        }
+
+        private void UpdateRateLimiters()
+        {
+            var shouldBeExist = RateLimiters.Where(l => l.GetType() != typeof(RateLimiterTotal));
+            RemoveRateLimiters();
+            foreach (var l in shouldBeExist)
+            {
+                AddRateLimiter(l);
+            }
+            AddRateLimiter(new RateLimiterTotal(TotalRateLimit.Value, TimeSpan.FromMinutes(1)));
+        }
+
     }
 }
