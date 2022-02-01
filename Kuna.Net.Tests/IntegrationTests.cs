@@ -33,6 +33,22 @@ namespace Kuna.Net.Tests
             Assert.True(cancel);
 
         }
+        [Fact(DisplayName = "Bulk")]
+
+        public async Task BulkTest()
+        {
+            var activeOrders = await client.ClientV3.GetActiveOrdersAsync();
+            Assert.True(activeOrders);
+            //var closed = await client.ClientV3.GetClosedOrdersAsync();
+            //Assert.True(closed);
+            //var trades = await client.ClientV3.GetOrdersWithTradesAsync("btcusdt");
+            //Assert.True(trades);
+            var recentTrades = await client.ClientV3.GetRecentPublicTradesAsync("btcusdt");
+            Assert.True(recentTrades);
+            
+
+        }
+
         [Fact(DisplayName = "GetMarketInfo")]
         public void ShouldGetMarketInfo()
         {
