@@ -136,7 +136,8 @@ namespace Kuna.Net.Objects.V3
             {
                 OnError?.Invoke(result.Error.Message);
             }
-            return new WebCallResult<KunaOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, null, null, null, null, null, null, result ? new KunaOrderBook(result.Data) : null, error: result.Error);
+            
+            return WebCallResultMappings.Map(result,x=>new KunaOrderBook(x.Data));
         }
 
         public WebCallResult<DateTime> GetServerTime() => GetServerTimeAsync().Result;
