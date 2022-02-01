@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>3.0.2</Version>
+    <Version>4.0.0-beta1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous, alokym86</Copyright>
@@ -16,6 +16,7 @@
     <Authors>ridicoulous, alokym86</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>
+		01/02/2022 - base lib major upgrade
       10/27/2021 - turn off pro account on error
       10/12/2021 - pro account managing
       9/29/2021 - major base library update
@@ -26,7 +27,7 @@ fixed / in base address</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="4.2.8" />
+    <PackageReference Include="CryptoExchange.Net" Version="5.0.0-beta5" />
     <PackageReference Include="Pusher.NetStandard" Version="0.5.9" />
   </ItemGroup>
 

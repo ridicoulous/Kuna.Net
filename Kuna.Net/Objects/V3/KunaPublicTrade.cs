@@ -1,12 +1,12 @@
 using System;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
+
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaPublicTrade: ICommonRecentTrade
+    public class KunaPublicTrade
     {
         [ArrayProperty(0)]
         public long Id { get; set; }
@@ -14,7 +14,7 @@ namespace Kuna.Net.Objects.V3
         /// <summary>
         /// The time the trade was executed
         /// </summary>
-        [ArrayProperty(1), JsonConverter(typeof(TimestampConverter))]
+        [ArrayProperty(1), JsonConverter(typeof(DateTimeConverter))]
         public DateTime TradeTime { get; set; }
 
         [ArrayProperty(2)]

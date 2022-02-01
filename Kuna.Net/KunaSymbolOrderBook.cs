@@ -1,4 +1,5 @@
 ﻿using CryptoExchange.Net;
+using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.OrderBook;
@@ -33,7 +34,7 @@ namespace Kuna.Net
         public delegate void OrderBookUpdated();
        // public event OrderBookUpdated OnOrderBookUpdate;
         private CancellationTokenSource cancellationToken;
-        public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base(symbol, options)
+        public KunaSymbolOrderBook(string symbol, KunaSymbolOrderBookOptions options) : base($"Kuna-{symbol}",symbol, options)
         {
             _useSocketClient = false;
             _responseTimeout = options.ResponseTimeout;
@@ -45,7 +46,7 @@ namespace Kuna.Net
             _orderBookLimit = options.EntriesCount;
             v3 = options.Usev3;
         }
-        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaSymbolOrderBookOptions options) : base(symbol, options)
+        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaSymbolOrderBookOptions options) : base($"Kuna-{symbol}",symbol, options)
         {
             v3 = options.Usev3;
             _useSocketClient = true;
@@ -136,21 +137,21 @@ namespace Kuna.Net
                    // OnOrderBookUpdate?.Invoke();
                     _slim.Release();
 
-                    return new CallResult<bool>(true, null);
+                    return new CallResult<bool>(true);
                 }
                 else
                 {
                     _slim.Release();
 
                     log.Write(LogLevel.Debug, $"Order book was not got");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
+                    return new CallResult<bool>( new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
             {
                 log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
-                return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
+                return new CallResult<bool>(new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
         }
 
@@ -176,14 +177,14 @@ namespace Kuna.Net
                     LastUpdate = DateTime.UtcNow; 
                     _slim.Release();
 
-                    return new CallResult<bool>(true, null);
+                    return new CallResult<bool>(true);
                 }
                 else
                 {
                     _slim.Release();
 
                     log.Write(LogLevel.Debug, $"Order book was not got");
-                    return new CallResult<bool>(false, new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
+                    return new CallResult<bool>( new KunaApiCallErrorV2((int)result.StatusCode, $"Order book was not got: {result.ReasonPhrase}"));
                 }
             }
             catch (Exception ex)
@@ -191,7 +192,7 @@ namespace Kuna.Net
                 log.Write(LogLevel.Error, $"Order book was not got cause\n{ex.ToString()}");
                 _slim.Release();
 
-                return new CallResult<bool>(false, new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
+                return new CallResult<bool>(new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
         }
         public override void Dispose()
@@ -214,13 +215,24 @@ namespace Kuna.Net
         {
             Run();
                
-            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, wf.CreateWebsocket(log, "wss://echo.websocket.org")), null), null);
+            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, new KunaSocketApiClient(null,null), wf.CreateWebsocket(log, "wss://echo.websocket.org")),null));
         }
 
     }
+    public class KunaSocketApiClient : SocketApiClient
+    {
+        public KunaSocketApiClient(BaseClientOptions options, ApiClientOptions apiOptions) : base(options, apiOptions)
+        {
+        }
+
+        protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
+        {
+            return new KunaAuthenticationProvider(credentials);
+        }
+    }
     public class FakeConnection : SocketConnection
     {
-        public FakeConnection(SocketClient client, IWebsocket socket) : base(client, socket)
+        public FakeConnection(BaseSocketClient client, SocketApiClient client1, IWebsocket socket) : base(client, client1, socket)
         {
         }
     }

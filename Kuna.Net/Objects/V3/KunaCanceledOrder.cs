@@ -1,5 +1,4 @@
 ﻿using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +7,7 @@ using System.Text;
 
 namespace Kuna.Net.Objects.V3
 {
-    public  class KunaCanceledOrder: ICommonOrderId
+    public  class KunaCanceledOrder
     {
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -31,7 +30,7 @@ namespace Kuna.Net.Objects.V3
         [JsonProperty("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("timestamp"),JsonConverter(typeof(TimestampConverter))]
+        [JsonProperty("timestamp"),JsonConverter(typeof(DateTimeConverter))]
         public DateTime Timestamp { get; set; }
 
         [JsonProperty("original_amount")]

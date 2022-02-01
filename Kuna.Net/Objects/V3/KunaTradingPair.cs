@@ -1,10 +1,10 @@
 using System;
-using CryptoExchange.Net.ExchangeInterfaces;
+
 using Kuna.Net.Objects.V2;
 
 namespace Kuna.Net.Objects.V3
 {
-    public class KunaTradingPair : KunaTraidingPairV2, ICommonSymbol
+    public class KunaTradingPair : KunaTraidingPairV2
     {
         public string CommonName => Pair;
 

@@ -45,7 +45,7 @@ namespace Kuna.Net
             encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
 
-        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
+        public  Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (!signed)
                 return new Dictionary<string, string>();
@@ -71,7 +71,7 @@ namespace Kuna.Net
             return result;
         }
 
-        public override Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
+        public  Dictionary<string, object> AddAuthenticationToParameters(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (!signed)
                 return parameters;       
@@ -107,8 +107,41 @@ namespace Kuna.Net
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
-        }        
-      
+        }
 
+        public override void AuthenticateRequest(RestApiClient apiClient, Uri uri, HttpMethod method, Dictionary<string, object> providedParameters,
+            bool auth, ArrayParametersSerialization arraySerialization,
+            HttpMethodParameterPosition parameterPosition, out SortedDictionary<string, object> uriParameters, out SortedDictionary<string, object> bodyParameters, out Dictionary<string, string> headers)
+        {
+            var uriParam = new SortedDictionary<string, object>();
+            bodyParameters = new();
+            uriParameters = new();
+            headers = new();
+            if (parameterPosition == HttpMethodParameterPosition.InBody && method == HttpMethod.Post)
+            {
+                bodyParameters = new SortedDictionary<string, object>(providedParameters);
+            }
+            if (parameterPosition == HttpMethodParameterPosition.InUri && method == HttpMethod.Get)
+                uriParam = new SortedDictionary<string, object>(providedParameters);
+
+            if(auth)
+            {
+                if (uri.PathAndQuery.Contains("v3"))
+                {
+                    headers = AddAuthenticationToHeaders(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                }
+                else
+                {
+                    var uriAuthParam  = AddAuthenticationToParameters(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                    foreach(var p in uriAuthParam)
+                    {
+                        uriParam.Add(p.Key, p.Value);
+                    }
+
+                }
+            }
+            uriParameters = uriParam;
+            
+        }
     }
 }

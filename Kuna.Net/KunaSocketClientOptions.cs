@@ -5,10 +5,11 @@ using System.Text;
 
 namespace Kuna.Net
 {
-    public class KunaSocketClientOptions : SocketClientOptions
+    public class KunaSocketClientOptions : BaseSocketClientOptions
     {
-        public KunaSocketClientOptions(string baseAddress) : base(baseAddress)
+        public KunaSocketClientOptions(string baseAddress) //: base(baseAddress)
         {
+            
         }
     }
 }

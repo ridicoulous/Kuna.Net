@@ -266,3 +266,5 @@ __pycache__/
 *keys.json
 */.vscode/launch.json
 */.vscode/tasks.json
+
+Kuna.Net.Tests/keys.json

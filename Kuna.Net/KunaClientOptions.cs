@@ -4,17 +4,12 @@ using System.Net.Http;
 
 namespace Kuna.Net
 {
-    public class KunaClientOptions : RestClientOptions
+    public class KunaClientOptions : BaseRestClientOptions 
     {
         public bool IsProAccount { get; set; }
-        public KunaClientOptions(HttpClient httpClient, bool isPro = false) :base(httpClient,"https://kuna.io/api/v2")
+        public KunaClientOptions(bool isPro = false)
         {
             IsProAccount = isPro;
-        }
-        public KunaClientOptions(bool isPro=false, string baseAddress= "https://kuna.io/api/v2", TimeSpan? timeout=null) :base(baseAddress)
-        {
-            IsProAccount = isPro;
-            this.RequestTimeout = timeout?? TimeSpan.FromMilliseconds(3000);
-        }
+        }     
     }
 }

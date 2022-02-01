@@ -1,4 +1,5 @@
 ﻿using CryptoExchange.Net;
+using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
 using Kuna.Net.Interfaces;
@@ -14,21 +15,21 @@ using System.Threading.Tasks;
 namespace Kuna.Net
 {
     /*wss://pusher.kuna.io/app/4b6a8b2c758be4e58868?protocol=7&client=js&version=3.0.0&flash=false*/
-    public class KunaSocketClient : SocketClient, IKunaSocketClientV2
+    public class KunaSocketClient : BaseSocketClient, ISocketClient, IKunaSocketClientV2
     {
         private readonly Pusher _pusherClient;
         public delegate void OnStateChanged(ConnectionState state);
         public event OnStateChanged StateChanged;
         public delegate void OnPusherError(PusherException ex);
         public event OnPusherError PusherError;
-        public KunaSocketClient( ) : base("KunaSocketClient",new KunaSocketClientOptions("wss://echo.websocket.org"), null)
+        public KunaSocketClient( ) : base("KunaSocketClient",new KunaSocketClientOptions("wss://echo.websocket.org"))
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() {  Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();
             _pusherClient.Error += _pusherClient_Error;
             _pusherClient.ConnectionStateChanged += _pusherClient_ConnectionStateChanged;
         }
-        public KunaSocketClient(KunaSocketClientOptions options):base("KunaSocketClient", options,null)
+        public KunaSocketClient(KunaSocketClientOptions options):base("KunaSocketClient", options)
         {
             _pusherClient = new Pusher("4b6a8b2c758be4e58868", new PusherOptions() {  Encrypted = true, Endpoint = "pusher.kuna.io", ProtocolNumber = 7, Version = "3.0.0" });
             _pusherClient.Connect();
@@ -91,7 +92,19 @@ namespace Kuna.Net
             });
 
         }
-
+        protected static string FillPathParameter(string path, params string[] values)
+        {
+            foreach (var value in values)
+            {
+                var index = path.IndexOf("{}", StringComparison.Ordinal);
+                if (index >= 0)
+                {
+                    path = path.Remove(index, 2);
+                    path = path.Insert(index, value);
+                }
+            }
+            return path;
+        }
         public void SubscribeToTradesV2(string market, Action<KunaTradeEventV2,string> onUpdate)
         {
             var _myChannel = _pusherClient.Subscribe(FillPathParameter(MarketTradesChannel, market));
@@ -128,15 +141,7 @@ namespace Kuna.Net
             throw new NotImplementedException();
         }
 
-        protected override bool MessageMatchesHandler(JToken message, object request)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override bool MessageMatchesHandler(JToken message, string identifier)
-        {
-            throw new NotImplementedException();
-        }
+      
 
         protected override Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection s)
         {
@@ -146,6 +151,16 @@ namespace Kuna.Net
         protected override Task<bool> UnsubscribeAsync(SocketConnection connection, SocketSubscription s)
         {
             throw new NotImplementedException();
-        }   
+        }
+
+        protected override bool MessageMatchesHandler(SocketConnection socketConnection, JToken message, object request)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool MessageMatchesHandler(SocketConnection socketConnection, JToken message, string identifier)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoExchange.Net.ExchangeInterfaces;
+
+using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
+using Kuna.Net.Objects.V2;
 using Kuna.Net.Objects.V3;
 
 namespace Kuna.Net.Interfaces
 {
-    public interface IKunaClientV3 : IExchangeClient
+    public interface IKunaApiClientV3 : ISpotClient
     {
         void SetProAccount(bool isProAccountEnabled);
-        WebCallResult<DateTime?> GetServerTime();
-        Task<WebCallResult<DateTime?>> GetServerTimeAsync(CancellationToken ct = default);
+        WebCallResult<DateTime> GetServerTime();
+        Task<WebCallResult<DateTime>> GetServerTimeAsync(CancellationToken ct = default);
         WebCallResult<IEnumerable<KunaTradingPair>> GetTradingPairs();
         Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync(CancellationToken ct = default);
         /// <summary>
@@ -112,6 +114,7 @@ namespace Kuna.Net.Interfaces
         Task<WebCallResult<List<KunaPlacedOrder>>> GetClosedOrdersAsync(string market = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool? sortDesc = null, CancellationToken ct = default);
 
         Task<WebCallResult<List<KunaPlacedOrder>>> GetOrdersWithTradesAsync(string market = null, DateTime? from = null, DateTime? to = null, bool sortDesc = true, CancellationToken ct = default);
+        Task<CallResult<List<KunaOhclvV2>>> GetCandlesHistoryV2Async(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
     }
  
 }

@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
+
 using CryptoExchange.Net.Interfaces;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
-    public class KunaOrderBook : ICommonOrderBook
+    public class KunaOrderBook 
     {
         public KunaOrderBook(List<KunaOrderBookEntry> asks, List<KunaOrderBookEntry> bids)
         {
