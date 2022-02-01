@@ -113,17 +113,35 @@ namespace Kuna.Net
             bool auth, ArrayParametersSerialization arraySerialization,
             HttpMethodParameterPosition parameterPosition, out SortedDictionary<string, object> uriParameters, out SortedDictionary<string, object> bodyParameters, out Dictionary<string, string> headers)
         {
-            headers= null;
-            bodyParameters= null;
-            uriParameters= null;
-            if (uri.PathAndQuery.Contains("v3"))
+            var uriParam = new SortedDictionary<string, object>();
+            bodyParameters = new();
+            uriParameters = new();
+            headers = new();
+            if (parameterPosition == HttpMethodParameterPosition.InBody && method == HttpMethod.Post)
             {
-                headers = AddAuthenticationToHeaders(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);              
+                bodyParameters = new SortedDictionary<string, object>(providedParameters);
             }
-            else
+            if (parameterPosition == HttpMethodParameterPosition.InUri && method == HttpMethod.Get)
+                uriParam = new SortedDictionary<string, object>(providedParameters);
+
+            if(auth)
             {
-                uriParameters = new SortedDictionary<string, object>(AddAuthenticationToParameters(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization));
+                if (uri.PathAndQuery.Contains("v3"))
+                {
+                    headers = AddAuthenticationToHeaders(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                }
+                else
+                {
+                    var uriAuthParam  = AddAuthenticationToParameters(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                    foreach(var p in uriAuthParam)
+                    {
+                        uriParam.Add(p.Key, p.Value);
+                    }
+
+                }
             }
+            uriParameters = uriParam;
+            
         }
     }
 }

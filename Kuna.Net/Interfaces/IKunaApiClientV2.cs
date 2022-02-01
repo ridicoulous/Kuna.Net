@@ -9,8 +9,8 @@ namespace Kuna.Net.Interfaces
 {
     public interface IKunaApiClientV2
     {
-        CallResult<DateTime> GetServerTimeV2();
-        Task<CallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default);
+        WebCallResult<DateTime> GetServerTimeV2();
+        Task<WebCallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default);
 
         CallResult<KunaTickerInfoV2> GetMarketInfoV2(string market);
         Task<CallResult<KunaTickerInfoV2>> GetMarketInfoV2Async(string market, CancellationToken ct = default);
@@ -40,9 +40,8 @@ namespace Kuna.Net.Interfaces
         CallResult<List<KunaTradeV2>> GetMyTradesV2(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc");
         Task<CallResult<List<KunaTradeV2>>> GetMyTradesV2Async(string market, DateTime? fromDate = null, long? fromId = null, long? toId = null, int limit = 1000, string sort = "asc", CancellationToken ct = default);
 
-        CallResult<List<KunaOhclvV2>> GetCandlesHistoryV2(string symbol, int resolution, DateTime from, DateTime to);
-
-        Task<CallResult<List<KunaOhclvV2>>> GetCandlesHistoryV2Async(string symbol, int resolution, DateTime from, DateTime to, CancellationToken token = default);
+     
+      
 
 
 

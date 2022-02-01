@@ -1,6 +1,7 @@
 ﻿using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Converters;
+using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using Kuna.Net.Converters;
 using Kuna.Net.Interfaces;
@@ -26,48 +27,55 @@ namespace Kuna.Net.Objects.V2
         private const string SingleOrderV2Endpoint = "order";
         private const string CancelOrderEndpoint = "order/delete";
         private const string MyTradesEndpoint = "trades/my";
-        private const string CandlesHistoryEndpoint = "tv/history";
 
         private readonly KunaClient _kunaClient;
+        private readonly Log _log;
+        
+        internal static TimeSyncState TimeSyncState = new TimeSyncState();
 
-        public KunaV2ApiClient(BaseRestClientOptions options, RestApiClientOptions apiOptions) : base(options, apiOptions)
+        public KunaV2ApiClient(Log log, KunaClient baseClient, KunaClientOptions options, KunaApiClientOptions apiOptions) : base(options, apiOptions)
         {
+            _log=log;
+            _kunaClient= baseClient;
+
         }
-        protected override TimeSyncInfo GetTimeSyncInfo()
-        {
-            throw new NotImplementedException();
-        }
+        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSyncState);
 
         public override TimeSpan GetTimeOffset()
-        {
-            throw new NotImplementedException();
-        }
+            => TimeSyncState.TimeOffset;
 
-        protected override Task<WebCallResult<DateTime>> GetServerTimestampAsync()
+        protected override async Task<WebCallResult<DateTime>> GetServerTimestampAsync()
         {
-            throw new NotImplementedException();
+            return await GetServerTimeV2Async();
         }
-
         protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
         {
-            throw new NotImplementedException();
+            return new KunaAuthenticationProvider(credentials);
         }
 
-        protected Uri GetUrl(string endpoint, string version = null)
+        protected Uri GetUrl(string endpoint)
         {
-            return version == null ? new Uri($"{BaseAddress}{endpoint}") : new Uri($"https://api.kuna.io/v{version}/{endpoint}");
+            return new Uri($"{BaseAddress}{endpoint}");
         }
         private async Task<WebCallResult<T>> SendRequestAsync<T>(Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> request, bool signed) where T : class
         {
             return await _kunaClient.SendRequestInternal<T>(this, uri, method, ct, request, signed);
         }
-        public CallResult<DateTime> GetServerTimeV2() => GetServerTimeV2Async().Result;
-        public async Task<CallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default)
+        public WebCallResult<DateTime> GetServerTimeV2() => GetServerTimeV2Async().Result;
+        public async Task<WebCallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default)
         {
             var result = await SendRequestAsync<string>(GetUrl(ServerTimeEndpoint), HttpMethod.Get, ct, null, false).ConfigureAwait(false);
-            long seconds = long.Parse(result.Data);
-            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
-            return new CallResult<DateTime>(dateTime);
+            if(result)
+            {
+                long seconds = long.Parse(result.Data);
+                var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds);
+                return new WebCallResult<DateTime>(null, null, null, null, null, null, null, null, dateTime, result.Error);
+            }
+            else
+            {
+                return new WebCallResult<DateTime>(new ServerError("Can not get time from server"));
+            }
+         
         }
         public CallResult<KunaTickerInfoV2> GetMarketInfoV2(string market) => GetMarketInfoV2Async(market).Result;
         public async Task<CallResult<KunaTickerInfoV2>> GetMarketInfoV2Async(string market, CancellationToken ct = default)
@@ -190,32 +198,8 @@ namespace Kuna.Net.Objects.V2
 
             }
         }
-        public async Task<CallResult<List<KunaOhclvV2>>> GetCandlesHistoryV2Async(string symbol, int resolution, DateTime from, DateTime to, CancellationToken ct = default)
-        {
-            var parameters = new Dictionary<string, object>() {
-                { "symbol", symbol }, { "resolution", resolution },
-                { "from", JsonConvert.SerializeObject(from, new DateTimeConverter()) },
-                { "to", JsonConvert.SerializeObject(to, new DateTimeConverter()) } };
-            var result = await SendRequestAsync<TradingViewOhclvV2>(GetUrl(CandlesHistoryEndpoint, "3"), HttpMethod.Get, ct, parameters, false).ConfigureAwait(false);
-            if (result)
-            {
-                List<KunaOhclvV2> data = null;
-                if (result.Success)
-                {
-                    data = new List<KunaOhclvV2>();
-                    var t = result.Data;
-                    for (int i = 0; i < result.Data.Closes.Count; i++)
-                    {
-                        var candle = new KunaOhclvV2(t.Timestamps[i], t.Opens[i], t.Highs[i], t.Lows[i], t.Closes[i], t.Volumes[i]);
-                        data.Add(candle);
-                    }
-                }
-                return new CallResult<List<KunaOhclvV2>>(data);
-            }
-            return new CallResult<List<KunaOhclvV2>>(result.Error);
-
-        }
-        public CallResult<List<KunaOhclvV2>> GetCandlesHistoryV2(string symbol, int resolution, DateTime from, DateTime to) => GetCandlesHistoryV2Async(symbol, resolution, from, to).Result;
+      
+        
         /// <summary>
         /// Fill parameters in a path. Parameters are specified by '{}' and should be specified in occuring sequence
         /// </summary>

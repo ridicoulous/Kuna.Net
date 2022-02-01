@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using CryptoExchange.Net.Authentication;
 
 namespace Kuna.Net.Tests
 {
@@ -21,11 +22,15 @@ namespace Kuna.Net.Tests
             client = GetClientWithAuthentication(false);
 
         }
-        [Fact(DisplayName = "PlaceORder")]
-        public void PlaceOrder()
+        [Fact(DisplayName = "PlaceOrder")]
+        public  async Task PlaceOrder()
         {
+            var order = await client.ClientV3.PlaceOrderAsync("btcusdt", Objects.V3.KunaOrderSide.Sell, Objects.V3.KunaOrderType.Limit, 0.00001m, 188888m);
 
-            Assert.True(true);
+            Assert.True(order);
+
+            var cancel = await client.CommonSpotClient.CancelOrderAsync(order.Data.Id.ToString());
+            Assert.True(cancel);
 
         }
         [Fact(DisplayName = "GetMarketInfo")]
@@ -56,7 +61,7 @@ namespace Kuna.Net.Tests
 
         public void ShouldGetAccountInfo()
         {
-            var accountData = client.Client.GetBalances();
+            var accountData = client.ClientV3.GetBalances();
             Assert.True(accountData);
             accountData.Data.ShouldNotBeNull();
         }
@@ -67,38 +72,39 @@ namespace Kuna.Net.Tests
             var date = new DateTime(2020, 01, 01);
             var date1 = date.AddDays(-1);
             var date2 = date.AddDays(0);
-            var history = await client.ClientV2.GetCandlesHistoryV2Async("btcusd", 60, date1, date2);
+            var history = await client.ClientV3.GetCandlesHistoryV2Async("btcusd", 60, date1, date2);
 
             Assert.True(history);
             history.Data.ShouldNotBeNull();
-            history.Data.Count.ShouldBe(25);
-            history.Error.ShouldBeNull();
+            //history.Data.Count.ShouldBe(25);
+            //history.Error.ShouldBeNull();
         }
 
         private KunaClient GetClientWithAuthentication(bool pro)
         {
-            //var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
-            //var key = config["key"];
-            //var secret = config["secret"];
-            //var r = new RateLimiterTotal()
+            var config = new ConfigurationBuilder().AddJsonFile("keys.json").Build();
+            var key = config["key"];
+            var secret = config["secret"];
+            
 
-            //CryptoExchange.Net.Authentication.ApiCredentials c = string.IsNullOrEmpty(key) ? null : new CryptoExchange.Net.Authentication.ApiCredentials(key, secret);
-            //var client = new KunaClient(new KunaClientOptions()
-            //{
-            //    ApiCredentials = c,
+            ApiCredentials c = string.IsNullOrEmpty(key) ? null : new CryptoExchange.Net.Authentication.ApiCredentials(key, secret);
+            var client = new KunaClient(new KunaClientOptions()
+            {
+                ApiCredentials = c,
 
-            //    LogLevel = LogLevel.Debug,
-            //    // LogWriters = new System.Collections.Generic.List<System.IO.TextWriter>() { new DebugTextWriter(), new ThreadSafeFileWriter("debug-client.log") },
-            //    LogWriters = new List<ILogger>() { new DebugLogger()},
-            //    IsProAccount = pro,
-            //    //RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>() { new RateLimiterTotal(1100, TimeSpan.FromMinutes(1)) },
-            //    //RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Fail,
-            //    RequestTimeout = TimeSpan.FromSeconds(4)
+                LogLevel = LogLevel.Debug,
+                
+                LogWriters = new List<ILogger>() { new DebugLogger() , new ConsoleLogger() },
+                IsProAccount = pro,
+                //RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>() { new RateLimiterTotal(1100, TimeSpan.FromMinutes(1)) },
+                //RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Fail,
+                RequestTimeout = TimeSpan.FromSeconds(4)
 
 
-            //});
-            //return client;
-            return null;
+            });
+            
+            return client;
+            
         }
     }
 }
