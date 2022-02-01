@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using CryptoExchange.Net.ExchangeInterfaces;
+
+using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using Kuna.Net.Objects.V3;
 
 namespace Kuna.Net.Interfaces
 {
-    public interface IKunaClientV3 : IExchangeClient
+    public interface IKunaApiClientV3 : ISpotClient
     {
         void SetProAccount(bool isProAccountEnabled);
         WebCallResult<DateTime?> GetServerTime();

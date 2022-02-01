@@ -1,11 +1,11 @@
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
+
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaTicker: ICommonTicker
+    public class KunaTicker
     {
         [ArrayProperty(0)]
         public string Symbol { get; set; }

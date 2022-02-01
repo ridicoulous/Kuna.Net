@@ -21,7 +21,7 @@ namespace Kuna.Net.Objects.V2
         [JsonProperty("type"), JsonConverter(typeof(OrderSideConverter))]
         public KunaOrderSideV2 Type { get; set; }
 
-        [JsonProperty("date"), JsonConverter(typeof(TimestampSecondsConverter))]
+        [JsonProperty("date"), JsonConverter(typeof(DateTimeConverter))]
         public DateTime Date { get; set; }
 
         [JsonProperty("price"), JsonConverter(typeof(StringToDecimalConverter))]

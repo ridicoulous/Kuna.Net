@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Kuna.Net.Interfaces
 {
-    public interface IKunaClientV2
+    public interface IKunaApiClientV2
     {
         CallResult<DateTime> GetServerTimeV2();
         Task<CallResult<DateTime>> GetServerTimeV2Async(CancellationToken ct = default);

@@ -1,11 +1,10 @@
 using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V3
 {
     [JsonConverter(typeof(ArrayConverter))]
-    public class KunaAccountBalance: ICommonBalance
+    public class KunaAccountBalance
     {
         [ArrayProperty(0)]
         public string WalletType { get; set; }

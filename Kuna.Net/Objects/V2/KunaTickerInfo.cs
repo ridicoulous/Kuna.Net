@@ -6,7 +6,7 @@ namespace Kuna.Net.Objects.V2
 {
     public class KunaTickerInfoV2
     {
-        [JsonProperty("at"), JsonConverter(typeof(TimestampConverter))]
+        [JsonProperty("at"), JsonConverter(typeof(DateTimeConverter))]
         public DateTime ServerTime { get; set; }
         [JsonProperty("ticker")]
         public KunaTickerV2 Ticker { get; set; }
