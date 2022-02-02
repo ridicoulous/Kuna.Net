@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>4.0.0-beta1</Version>
+    <Version>4.0.0-beta2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous, alokym86</Copyright>
