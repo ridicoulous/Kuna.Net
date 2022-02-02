@@ -215,11 +215,11 @@ namespace Kuna.Net
         {
             Run();
                
-            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, new KunaSocketApiClient(null,null), wf.CreateWebsocket(log, "wss://echo.websocket.org")),null));
+            return new CallResult<UpdateSubscription>(new UpdateSubscription(new FakeConnection(_kunaSocketClient, new KunaSocketApiClient(new FakeBaseOpts(),new FakeApiOpts()), wf.CreateWebsocket(log, "wss://echo.websocket.org")),null));
         }
 
     }
-    public class KunaSocketApiClient : SocketApiClient
+    internal class KunaSocketApiClient : SocketApiClient
     {
         public KunaSocketApiClient(BaseClientOptions options, ApiClientOptions apiOptions) : base(options, apiOptions)
         {
@@ -230,10 +230,18 @@ namespace Kuna.Net
             return new KunaAuthenticationProvider(credentials);
         }
     }
-    public class FakeConnection : SocketConnection
+    internal class FakeConnection : SocketConnection
     {
         public FakeConnection(BaseSocketClient client, SocketApiClient client1, IWebsocket socket) : base(client, client1, socket)
         {
         }
+    }
+    internal class FakeBaseOpts : BaseClientOptions
+    {
+
+    }
+    internal class FakeApiOpts : ApiClientOptions
+    {
+
     }
 }

@@ -37,6 +37,8 @@ namespace Kuna.Net.Tests
 
         public async Task BulkTest()
         {
+            var book = await client.CommonSpotClient.GetOrderBookAsync("btcusdt");
+            Assert.True(book);
             var activeOrders = await client.ClientV3.GetActiveOrdersAsync();
             Assert.True(activeOrders);
             //var closed = await client.ClientV3.GetClosedOrdersAsync();
