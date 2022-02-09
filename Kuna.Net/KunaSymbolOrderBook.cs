@@ -203,7 +203,7 @@ namespace Kuna.Net
             httpClient?.Dispose();
         }
 
-        protected override async Task<CallResult<bool>> DoResyncAsync()
+        protected override async Task<CallResult<bool>> DoResyncAsync(CancellationToken ct=default)
         {
             // throw new NotImplementedException();
 
@@ -211,7 +211,7 @@ namespace Kuna.Net
             // return new CallResult<bool>(true,null);
         }
         WebsocketFactory wf = new WebsocketFactory();
-        protected override async Task<CallResult<UpdateSubscription>> DoStartAsync()
+        protected override async Task<CallResult<UpdateSubscription>> DoStartAsync(CancellationToken ct = default)
         {
             Run();
                
