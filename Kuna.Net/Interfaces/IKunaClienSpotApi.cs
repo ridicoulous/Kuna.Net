@@ -1,7 +1,4 @@
-﻿using CryptoExchange.Net.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CryptoExchange.Net.Interfaces.CommonClients;
 
 namespace Kuna.Net.Interfaces
 {

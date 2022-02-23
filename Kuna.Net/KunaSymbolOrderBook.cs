@@ -4,8 +4,6 @@ using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.OrderBook;
 using CryptoExchange.Net.Sockets;
-using Kuna.Net.Converters;
-using Kuna.Net.Objects;
 using Kuna.Net.Objects.V2;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

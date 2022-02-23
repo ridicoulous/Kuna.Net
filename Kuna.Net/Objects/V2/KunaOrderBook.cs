@@ -1,6 +1,5 @@
 ﻿using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
-using CryptoExchange.Net.OrderBook;
 using Kuna.Net.Converters;
 using Newtonsoft.Json;
 using System.Collections.Generic;

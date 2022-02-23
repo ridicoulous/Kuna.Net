@@ -1,8 +1,6 @@
 ﻿using CryptoExchange.Net.Converters;
 using Kuna.Net.Objects.V2;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kuna.Net.Converters
 {

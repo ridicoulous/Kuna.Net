@@ -1,6 +1,4 @@
-﻿using CryptoExchange.Net.Converters;
-using Kuna.Net.Converters;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace Kuna.Net.Objects.V2

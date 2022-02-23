@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kuna.Net.Objects.V2
+﻿namespace Kuna.Net.Objects.V2
 {
     public enum KunaOrderSideV2
     {
