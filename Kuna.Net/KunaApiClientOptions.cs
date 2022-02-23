@@ -1,6 +1,5 @@
 ﻿using CryptoExchange.Net.Objects;
 using System;
-using System.Net.Http;
 
 namespace Kuna.Net
 {

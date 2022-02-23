@@ -1,14 +1,10 @@
-using Kuna.Net.Interfaces;
 using System;
 using Xunit;
 using Shouldly;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Logging;
-using System.Linq;
 using System.Collections.Generic;
-
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using CryptoExchange.Net.Authentication;
 

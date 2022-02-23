@@ -1,8 +1,6 @@
 ﻿using Kuna.Net.Converters;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kuna.Net.Objects.V2
 {

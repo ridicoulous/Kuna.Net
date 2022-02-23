@@ -1,10 +1,5 @@
-﻿using CryptoExchange.Net.Objects;
-using CryptoExchange.Net.Sockets;
-using Kuna.Net.Objects;
-using Kuna.Net.Objects.V2;
+﻿using Kuna.Net.Objects.V2;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Kuna.Net.Interfaces
 {
