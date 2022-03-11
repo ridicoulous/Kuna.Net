@@ -193,13 +193,13 @@ namespace Kuna.Net
                 return new CallResult<bool>(new KunaApiCallErrorV2(-13, $"{ex.ToString()}"));
             }
         }
-        public override void Dispose()
-        {
-            processBuffer.Clear();
-            asks.Clear();
-            bids.Clear();
-            httpClient?.Dispose();
-        }
+        //public  void Dispose()
+        //{
+        //    processBuffer.Clear();
+        //    asks.Clear();
+        //    bids.Clear();
+        //    httpClient?.Dispose();
+        //}
 
         protected override async Task<CallResult<bool>> DoResyncAsync(CancellationToken ct=default)
         {

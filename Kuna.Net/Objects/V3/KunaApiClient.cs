@@ -57,7 +57,7 @@ namespace Kuna.Net.Objects.V3
         private const int RegularTotalRateLimit = 600;
         private int? userDefinedTotalRateLimit = null;
         private readonly TimeSyncInfo _timeSyncInfo;
-        internal static TimeSyncState TimeSyncState = new TimeSyncState();
+        internal static TimeSyncState TimeSyncState = new TimeSyncState("kuna-api-v3");
 
         private readonly Log _log;
         public string ExchangeName => "Kuna";
@@ -430,7 +430,7 @@ namespace Kuna.Net.Objects.V3
             foreach (var limit in newLimits)
                 this.Options.RateLimiters.Add(limit);
         }
-        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSyncState);
+        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
 
         public override TimeSpan GetTimeOffset()
             => TimeSyncState.TimeOffset;
