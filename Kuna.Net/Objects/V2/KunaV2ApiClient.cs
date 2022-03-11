@@ -30,7 +30,7 @@ namespace Kuna.Net.Objects.V2
         private readonly KunaClient _kunaClient;
         private readonly Log _log;
         
-        internal static TimeSyncState TimeSyncState = new TimeSyncState();
+        internal static TimeSyncState TimeSyncState = new TimeSyncState("kuna-api-v2");
 
         public KunaV2ApiClient(Log log, KunaClient baseClient, KunaClientOptions options, KunaApiClientOptions apiOptions) : base(options, apiOptions)
         {
@@ -38,7 +38,7 @@ namespace Kuna.Net.Objects.V2
             _kunaClient= baseClient;
 
         }
-        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSyncState);
+        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
 
         public override TimeSpan GetTimeOffset()
             => TimeSyncState.TimeOffset;
