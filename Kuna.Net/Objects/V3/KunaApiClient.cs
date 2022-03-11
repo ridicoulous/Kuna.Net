@@ -66,6 +66,8 @@ namespace Kuna.Net.Objects.V3
         {
             _log = log;
             _kunaClient = baseClient;
+            IsProAccount=options.IsProAccount;
+            UpdateRateLimiters();
             OnError = HandleProAccountEndpointError;
 
         }
