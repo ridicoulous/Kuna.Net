@@ -1,21 +1,19 @@
 ﻿using CryptoExchange.Net.Objects;
+using Kuna.Net.Interfaces;
+using Kuna.Net.Objects.V3;
+using System;
 using System.Net.Http;
 
 namespace Kuna.Net
 {
     public class KunaSymbolOrderBookOptions : OrderBookOptions
     {
-        public readonly int EntriesCount;
-        public readonly int UpdateTimeout;
-        public readonly int ResponseTimeout;
-        public readonly bool Usev3;
-        public readonly HttpClient HttpClient;
-        public KunaSymbolOrderBookOptions(string name, int limit = 100, int? timeout = 300, int? responseTimeout = 3, bool v3=false) //: base(name, false,false)
+        public readonly TimeSpan UpdateTimeout;
+        public readonly IKunaClient? KunaClient;
+        public KunaSymbolOrderBookOptions(IKunaClient? kunaApiClient=null, TimeSpan? timeout = null)
         {
-            EntriesCount = limit;
-            Usev3 = v3;
-            UpdateTimeout = timeout ?? 300;
-            ResponseTimeout = responseTimeout ?? 3;            
+            KunaClient = kunaApiClient;
+            UpdateTimeout = timeout ?? TimeSpan.FromSeconds(1.75);
         }
     }
 }

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>4.1.0</Version>
+    <Version>4.1.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous, alokym86</Copyright>
@@ -16,6 +16,7 @@
     <Authors>ridicoulous, alokym86</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>
+		6/14/2022 - minor improvements. 
 		01/02/2022 - base lib major upgrade
       10/27/2021 - turn off pro account on error
       10/12/2021 - pro account managing
