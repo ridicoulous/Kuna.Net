@@ -38,7 +38,7 @@ namespace Kuna.Net.Objects.V2
             _kunaClient= baseClient;
 
         }
-        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
+        public override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
 
         public override TimeSpan GetTimeOffset()
             => TimeSyncState.TimeOffset;
