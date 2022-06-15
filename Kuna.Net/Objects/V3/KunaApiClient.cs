@@ -430,7 +430,7 @@ namespace Kuna.Net.Objects.V3
             foreach (var limit in newLimits)
                 this.Options.RateLimiters.Add(limit);
         }
-        protected override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
+        public override TimeSyncInfo GetTimeSyncInfo() => new TimeSyncInfo(_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
 
         public override TimeSpan GetTimeOffset()
             => TimeSyncState.TimeOffset;
