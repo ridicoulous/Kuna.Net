@@ -1,7 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Kuna.Net.Interfaces;
 using Kuna.Net;
-IKunaClient kunaClient = new KunaClient();
+IKunaClient kunaClient = new KunaClient(new KunaClientOptions() );
+var or = kunaClient.ClientV2.GetMyOrdersV2("btcusdt",Kuna.Net.Objects.V2.KunaOrderStateV2.Done);
+var trades = kunaClient.ClientV2.GetMyTradesV2("btcusdt");
+
 var book = new KunaSymbolOrderBook("btcusdt", new KunaSocketClient(), new KunaSymbolOrderBookOptions(kunaClient, TimeSpan.FromSeconds(1)));
 book.OnBestOffersChanged += Book_OnBestOffersChanged;
 
