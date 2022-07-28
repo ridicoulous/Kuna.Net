@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>4.1.2</Version>
+    <Version>4.1.3</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>c# api wrapper for kuna.io crypto exchange</Description>
     <Copyright>ridicoulous, alokym86</Copyright>
@@ -28,8 +28,9 @@ fixed / in base address</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="5.1.12" />
+    <PackageReference Include="CryptoExchange.Net" Version="5.2.3" />
     <PackageReference Include="Pusher.NetStandard" Version="0.5.9" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
