@@ -6,7 +6,7 @@ namespace Kuna.Net
     public class KunaApiClientOptions : RestApiClientOptions
     {
         public bool IsProAccount { get; set; }
-        public KunaApiClientOptions(bool isPro = false, bool newVersion = true) : base(newVersion ? "https://api.kuna.io/v3/" : "https://kuna.io/api/v2/")
+        public KunaApiClientOptions(bool isPro = false, bool newVersion = true) : base(newVersion ?  "https://api.kuna.io/" : "https://api.kuna.io/v3/")
         {
             IsProAccount = isPro;
             if (newVersion)

@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Kuna.Net.Objects.V3
 {
-    public class KunaApiClient : RestApiClient, IKunaApiClientV3
+    public class KunaV3ApiClient : RestApiClient, IKunaApiClientV3
     {
         #region endpoints
         private const string ServerTimeEndpoint = "timestamp";
@@ -62,7 +62,7 @@ namespace Kuna.Net.Objects.V3
         private readonly Log _log;
         public string ExchangeName => "Kuna";
 
-        public KunaApiClient(Log log, KunaClient baseClient, KunaClientOptions options, KunaApiClientOptions apiOptions) : base(options, apiOptions)
+        public KunaV3ApiClient(Log log, KunaClient baseClient, KunaClientOptions options, KunaApiClientOptions apiOptions) : base(options, apiOptions)
         {
             _log = log;
             _kunaClient = baseClient;
@@ -559,8 +559,7 @@ namespace Kuna.Net.Objects.V3
 
         public async Task<WebCallResult<Order>> GetOrderAsync(string orderId, string symbol = null, CancellationToken ct = default)
         {
-            long id = 0;
-            if (long.TryParse(orderId, out id))
+            if (long.TryParse(orderId, out long id))
             {
                 var order = await GetOrderAsync(id);
                 Func<WebCallResult<KunaPlacedOrder>, Order> map = x => new Order()

@@ -44,7 +44,7 @@ namespace Kuna.Net
             encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
 
-        public  Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
+        public  Dictionary<string, string> AddAuthenticationToHeadersV3(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (!signed)
                 return new Dictionary<string, string>();
@@ -66,7 +66,37 @@ namespace Kuna.Net
                 result.Add("kun-nonce", n);
                 result.Add("kun-signature", signedData.ToLower());
             }
+            return result;
+        }
 
+        public  Dictionary<string, string> AddAuthenticationToHeadersV4(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization, bool isPro)
+        {
+            if (!signed)
+                return new Dictionary<string, string>();
+
+            var result = new Dictionary<string, string>();            
+            var json = JsonConvert.SerializeObject(parameters);
+            if (string.IsNullOrEmpty(json))
+            {
+                json = "{}";
+            }
+
+            if(Credentials.PrivateKey is not null)
+            {
+                result.Add("api-key", Credentials.PrivateKey.Key.ToString());
+            }
+            else
+            {
+                result.Add("public-key", Credentials.Key.GetString());
+                var n = Nonce;
+                result.Add("signature", SignV3($"{uri.PathAndQuery}{n}{json}").ToLower());
+                result.Add("nonce", n);
+            }
+            // add spec header for pro account requests
+            if (isPro)
+            {
+                result.Add("account", "pro");
+            }
             return result;
         }
 
@@ -112,7 +142,13 @@ namespace Kuna.Net
             bool auth, ArrayParametersSerialization arraySerialization,
             HttpMethodParameterPosition parameterPosition, out SortedDictionary<string, object> uriParameters, out SortedDictionary<string, object> bodyParameters, out Dictionary<string, string> headers)
         {
-            var uriParam = new SortedDictionary<string, object>();
+            // var uriParam = new SortedDictionary<string, object>();
+            var isProV4 = false;
+            if (providedParameters.Contains(Objects.V4.KunaV4ApiClient.IsProParameter))
+            {
+                isProV4 = true;
+                providedParameters.Remove(Objects.V4.KunaV4ApiClient.IsProParameter.Key);
+            }
             bodyParameters = new();
             uriParameters = new();
             headers = new();
@@ -121,25 +157,29 @@ namespace Kuna.Net
                 bodyParameters = new SortedDictionary<string, object>(providedParameters);
             }
             if (parameterPosition == HttpMethodParameterPosition.InUri && method == HttpMethod.Get)
-                uriParam = new SortedDictionary<string, object>(providedParameters);
+                uriParameters = new SortedDictionary<string, object>(providedParameters);
 
             if(auth)
             {
                 if (uri.PathAndQuery.Contains("v3"))
                 {
-                    headers = AddAuthenticationToHeaders(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                    headers = AddAuthenticationToHeadersV3(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
+                }
+                else if (uri.AbsolutePath.Contains("v4"))
+                {
+                    headers = AddAuthenticationToHeadersV4(uri, method, providedParameters, auth, parameterPosition, arraySerialization, isProV4);
                 }
                 else
                 {
                     var uriAuthParam  = AddAuthenticationToParameters(uri.ToString(), method, providedParameters, auth, parameterPosition, arraySerialization);
                     foreach(var p in uriAuthParam)
                     {
-                        uriParam.Add(p.Key, p.Value);
+                        uriParameters.Add(p.Key, p.Value);
                     }
 
                 }
             }
-            uriParameters = uriParam;
+            // uriParameters = uriParam;
             
         }
     }
