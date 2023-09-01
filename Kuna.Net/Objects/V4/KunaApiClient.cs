@@ -9,7 +9,6 @@ using CryptoExchange.Net.Objects;
 using Kuna.Net.Converters;
 using Kuna.Net.Helpers;
 using Kuna.Net.Interfaces;
-using Kuna.Net.Objects.V3;
 using Kuna.Net.Objects.V4.Requests;
 using Newtonsoft.Json;
 using System;
@@ -56,7 +55,7 @@ namespace Kuna.Net.Objects.V4
         private const int ProTotalRateLimit = 1200;
         private const int RegularTotalRateLimit = 600;
         private int? userDefinedTotalRateLimit = null;
-        internal static TimeSyncState TimeSyncState = new TimeSyncState("kuna-api");
+        internal static TimeSyncState TimeSyncState = new ("kuna-api");
         public event Action<string> OnError;
         public event Action<OrderId> OnOrderPlaced;
         public event Action<OrderId> OnOrderCanceled;
@@ -166,11 +165,11 @@ namespace Kuna.Net.Objects.V4
         /// <param name="type"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<List<KunaCurrencyV4>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaCurrencyV4>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default)
         {
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("type", type);
-            return await SendRequestAsync<List<KunaCurrencyV4>>(CurrenciesEndpoint, HttpMethod.Get, request, false, ct);
+            return await SendRequestAsync<IEnumerable<KunaCurrencyV4>>(CurrenciesEndpoint, HttpMethod.Get, request, false, ct);
 
         }
 
@@ -215,9 +214,9 @@ namespace Kuna.Net.Objects.V4
         }
 
 
-        public async Task<WebCallResult<List<KunaCancelBulkOrderResponse>>> CancelOrdersAsync(IEnumerable<Guid> orderIds, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaCancelBulkOrderResponse>>> CancelOrdersAsync(IEnumerable<Guid> orderIds, CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<List<KunaCancelBulkOrderResponse>>(CancelMultipleOrderEndpoint,
+            var result = await SendRequestAsync<IEnumerable<KunaCancelBulkOrderResponse>>(CancelMultipleOrderEndpoint,
                 HttpMethod.Post, new Dictionary<string, object>()
                 {
                     { "orderIds", orderIds }
@@ -248,7 +247,7 @@ namespace Kuna.Net.Objects.V4
         /// To get active orders, please use GetActiveOrdersAsync() method.</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<List<KunaOrderV4>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatusV4? status = null, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatusV4? status = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             if (markets?.Any() == true)
@@ -261,7 +260,7 @@ namespace Kuna.Net.Objects.V4
             parameters.AddOptionalParameter("start", from);
             parameters.AddOptionalParameter("end", to);
             parameters.AddOptionalParameter("status", status);
-            return await SendRequestAsync<List<KunaOrderV4>>(OrdersEndpoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaOrderV4>>(OrdersEndpoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -277,7 +276,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="sortDesc"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<List<KunaOrderV4>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             if (markets?.Any() == true)
@@ -289,7 +288,7 @@ namespace Kuna.Net.Objects.V4
             parameters.AddOptionalParameter("limit", limit);
             parameters.AddOptionalParameter("start", from);
             parameters.AddOptionalParameter("end", to);
-            return await SendRequestAsync<List<KunaOrderV4>>(ActiveOrdersEndpoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaOrderV4>>(ActiveOrdersEndpoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -321,7 +320,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<List<KunaTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
         {
             Dictionary<string, object> parameters = new();
             parameters.AddOptionalParameter("pair", market);
@@ -329,7 +328,7 @@ namespace Kuna.Net.Objects.V4
             if (!sortDesc)
                 parameters.AddOptionalParameter("sort", "asc");
 
-            return await SendRequestAsync<List<KunaTradeV4>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaTradeV4>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -339,295 +338,21 @@ namespace Kuna.Net.Objects.V4
         /// <param name="orderId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<List<KunaTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
         {
-            return await SendRequestAsync<List<KunaTradeV4>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaTradeV4>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
         }
         #endregion Trading API
 
-        // public WebCallResult<IEnumerable<KunaAccountBalance>> GetBalances() => GetBalancesAsync().Result;
-        // public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
-        // {
-        //     string url = IsProAccount ? ProWalletsEndpoint : WalletEndpoint;
-        //     return await SendRequestAsync<IEnumerable<KunaAccountBalance>>(GetUrl(url), HttpMethod.Post, ct, new Dictionary<string, object>(), true);
-
-        // }
-
-        // public async Task<CallResult> GetTradesHistoryToEmail(string symbol, CancellationToken ct = default)
-        // {
-        //     var request = await SendRequestAsync<object>(GetUrl("auth/history/trades"), HttpMethod.Post, default, new Dictionary<string, object>() { { "market", symbol } }, true);
-        //     return request;
-        // }
-
-        // public async Task<WebCallResult<OrderId>> PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price = null, string accountId = null, string clientOrderId = null, CancellationToken ct = default)
-        // {
-
-        //     var kunaSide = side == CommonOrderSide.Sell ? KunaOrderSide.Sell : KunaOrderSide.Buy;
-        //     var kunaType = type == CommonOrderType.Limit ? KunaOrderType.Limit : KunaOrderType.Market;
-        //     var order = await PlaceOrderAsync(symbol, kunaSide, kunaType, quantity, price, null, ct);
-
-        //     Func<WebCallResult<KunaPlacedOrder>, OrderId> map = x => new OrderId() { Id = x.Data.Id.ToString(), SourceObject = x.Data };
-
-        //     return WebCallResultMappings.Map(order, map);
-        // }
-
-        // public string GetSymbolName(string baseAsset, string quoteAsset)
-        // {
-        //     return baseAsset.ToLower() + quoteAsset.ToLower();
-        // }
-
-        // public async Task<WebCallResult<IEnumerable<Symbol>>> GetSymbolsAsync(CancellationToken ct = default)
-        // {
-        //     var markets = await GetTradingPairsAsync();
-
-        //     Func<WebCallResult<IEnumerable<KunaTradingPair>>, IEnumerable<Symbol>> map = x => x.Data.Select(x => new Symbol()
-        //     {
-        //         MinTradeQuantity = x.CommonMinimumTradeSize,
-        //         Name = x.CommonName,
-        //         PriceDecimals = 1 / x.QuotePrecision,
-        //         PriceStep = x.CommonMinimumTradeSize,
-        //         QuantityDecimals = 1 / x.BasePrecision,
-        //         QuantityStep = x.CommonMinimumTradeSize,
-        //         SourceObject = x
-        //     }).ToList();
-
-        //     return WebCallResultMappings.Map(markets, map);
-        // }
-
-        // public async Task<WebCallResult<Ticker>> GetTickerAsync(string symbol, CancellationToken ct = default)
-        // {
-        //     var result = await GetTickersAsync(default, symbol);
-        //     Func<WebCallResult<IEnumerable<KunaTicker>>, Ticker> map = x => new Ticker()
-        //     {
-        //         SourceObject = x,
-        //         HighPrice = x.Data.FirstOrDefault()?.CommonHigh ?? 0,
-        //         LastPrice = x.Data.FirstOrDefault()?.LastPrice ?? 0,
-        //         LowPrice = x.Data.FirstOrDefault()?.Low ?? 0,
-        //         Price24H = x.Data.FirstOrDefault()?.PriceDiffPercent,
-        //         Symbol = x.Data.FirstOrDefault()?.Symbol,
-        //         Volume = x.Data.FirstOrDefault()?.Volume
-        //     };
-        //     return WebCallResultMappings.Map(result, map);
-        // }
-
-        // async Task<WebCallResult<IEnumerable<Ticker>>> IBaseRestClient.GetTickersAsync(CancellationToken ct = default)
-        // {
-        //     var result = await this.GetTickersAsync(ct);
-        //     Func<WebCallResult<IEnumerable<KunaTicker>>, IEnumerable<Ticker>> map = t => t.Data.Select(x => new Ticker()
-        //     {
-        //         SourceObject = x,
-        //         HighPrice = x.CommonHigh,
-        //         LastPrice = x.LastPrice,
-        //         LowPrice = x.Low,
-        //         Price24H = x.PriceDiffPercent,
-        //         Symbol = x.Symbol,
-        //         Volume = x.Volume
-        //     }).ToList();
-        //     return result.As<IEnumerable<Ticker>>(result.Data.Select(x => new Ticker()
-        //     {
-        //         SourceObject = x,
-        //         HighPrice = x.CommonHigh,
-        //         LastPrice = x.LastPrice,
-        //         LowPrice = x.Low,
-        //         Price24H = x.LastPrice,
-        //         Symbol = x.Symbol,
-        //         Volume = x.Volume
-        //     }));
-        // }
-
-
-        // public Task<WebCallResult<IEnumerable<Kline>>> GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime = null, DateTime? endTime = null, int? limit = null, CancellationToken ct = default)
-        // {
-        //     throw new NotImplementedException();
-        // }
-
-        // async Task<WebCallResult<OrderBook>> IBaseRestClient.GetOrderBookAsync(string symbol, CancellationToken ct = default)
-        // {
-        //     var book = await GetOrderBookAsync(symbol);
-        //     Func<WebCallResult<KunaOrderBook>, OrderBook> map = x => new OrderBook()
-        //     {
-        //         Asks = x.Data.Asks.OrderBy(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
-        //         Bids = x.Data.Bids.OrderByDescending(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
-        //         SourceObject = x.Data,
-        //     };
-        //     return WebCallResultMappings.Map(book, map);
-        // }
-
-        // public Task<WebCallResult<IEnumerable<Trade>>> GetRecentTradesAsync(string symbol, CancellationToken ct = default)
-        // {
-        //     throw new NotImplementedException();
-        // }
-
-        // async Task<WebCallResult<IEnumerable<Balance>>> IBaseRestClient.GetBalancesAsync(string accountId = null, CancellationToken ct = default)
-        // {
-        //     var balances = await GetBalancesAsync();
-        //     Func<WebCallResult<IEnumerable<KunaAccountBalance>>, IEnumerable<Balance>> map = x => x.Data.Select(b => new Balance()
-        //     {
-        //         Asset = b.CommonAsset,
-        //         Available = b.Available,
-        //         SourceObject = b,
-        //         Total = b.Total
-        //     });
-        //     return WebCallResultMappings.Map(balances, map);
-        // }
-
-        // public async Task<WebCallResult<Order>> GetOrderAsync(string orderId, string symbol = null, CancellationToken ct = default)
-        // {
-        //     long id = 0;
-        //     if (long.TryParse(orderId, out id))
-        //     {
-        //         var order = await GetOrderAsync(id);
-        //         Func<WebCallResult<KunaPlacedOrder>, Order> map = x => new Order()
-        //         {
-        //             Id = x.Data.Id.ToString(),
-        //             Price = x.Data.Price,
-        //             Quantity = x.Data.AmountPlaced,
-        //             QuantityFilled = x.Data.AmountExecuted,
-        //             Side = x.Data.OrderSide == KunaOrderSide.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
-        //             SourceObject = x.Data,
-        //             Status = x.Data.Status switch
-        //             {
-
-        //                 KunaOrderStatus.Active => CommonOrderStatus.Active,
-        //                 KunaOrderStatus.Canceled => CommonOrderStatus.Canceled,
-        //                 KunaOrderStatus.Filled => CommonOrderStatus.Filled,
-        //                 KunaOrderStatus.Undefined => CommonOrderStatus.Canceled,
-        //                 _ => CommonOrderStatus.Canceled
-
-        //             },
-        //             Symbol = x.Data.Symbol,
-        //             Timestamp = x.Data.TimestampCreated,
-        //             Type = x.Data.Type switch
-        //             {
-        //                 KunaOrderType.Limit => CommonOrderType.Limit,
-        //                 KunaOrderType.Market => CommonOrderType.Market,
-        //                 KunaOrderType.MarketByQuote => CommonOrderType.Market,
-        //                 KunaOrderType.StopLimit => CommonOrderType.Other,
-        //                 _ => CommonOrderType.Other
-        //             },
-
-        //         };
-        //         return WebCallResultMappings.Map(order, map);
-        //     }
-        //     return new WebCallResult<Order>(new ServerError($"Can not parse id {orderId}"));
-
-        // }
-
-        // public async Task<WebCallResult<IEnumerable<UserTrade>>> GetOrderTradesAsync(string orderId, string symbol = null, CancellationToken ct = default)
-        // {
-        //     long id = 0;
-        //     if (long.TryParse(orderId, out id))
-        //     {
-        //         var orderTrades = await GetOrderTradesAsync(symbol, id);
-        //         Func<WebCallResult<List<KunaTrade>>, IEnumerable<UserTrade>> map = x => x.Data.Select(c => new UserTrade()
-        //         {
-        //             Fee = c.Fee,
-        //             Id = c.Id.ToString(),
-        //             OrderId = c.OrderId.ToString(),
-        //             Price = c.ExecutedPrice,
-        //             Quantity = c.ExecutedAmount,
-        //             SourceObject = c,
-        //             Symbol = c.Pair,
-        //             Timestamp = c.CommonTradeTime
-        //         });
-        //     }
-        //     return new WebCallResult<IEnumerable<UserTrade>>(new ServerError($"Can not parse id {orderId}"));
-        // }
-
-        // public async Task<WebCallResult<IEnumerable<Order>>> GetOpenOrdersAsync(string symbol = null, CancellationToken ct = default)
-        // {
-        //     var result = await GetActiveOrdersAsync(symbol);
-        //     Func<WebCallResult<List<KunaPlacedOrder>>, IEnumerable<Order>> map = t => t.Data.Select(x => new Order()
-        //     {
-        //         SourceObject = x,
-        //         Id = x.Id.ToString(),
-        //         Price = x.Price,
-        //         Quantity = x.AmountPlaced,
-        //         QuantityFilled = x.AmountExecuted,
-        //         Side = x.OrderSide == KunaOrderSide.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
-        //         Status = x.Status switch
-        //         {
-        //             KunaOrderStatus.Active => CommonOrderStatus.Active,
-        //             KunaOrderStatus.Canceled => CommonOrderStatus.Canceled,
-        //             KunaOrderStatus.Filled => CommonOrderStatus.Filled,
-        //             KunaOrderStatus.Undefined => CommonOrderStatus.Canceled,
-        //             _ => CommonOrderStatus.Canceled
-        //         },
-        //         Symbol = x.Symbol,
-        //         Type = x.Type switch
-        //         {
-        //             KunaOrderType.Limit => CommonOrderType.Limit,
-        //             KunaOrderType.Market => CommonOrderType.Market,
-        //             KunaOrderType.MarketByQuote => CommonOrderType.Market,
-        //             KunaOrderType.StopLimit => CommonOrderType.Other,
-        //             _ => CommonOrderType.Other
-        //         },
-        //         Timestamp = x.TimestampCreated
-        //     }).ToList();
-        //     return WebCallResultMappings.Map(result, map);
-        // }
-
-        // public async Task<WebCallResult<IEnumerable<Order>>> GetClosedOrdersAsync(string symbol = null, CancellationToken ct = default)
-        // {
-        //     var result = await GetClosedOrdersAsync(symbol, null, null, 1000, true);
-        //     Func<WebCallResult<List<KunaPlacedOrder>>, IEnumerable<Order>> map = t => t.Data.Select(x => new Order()
-        //     {
-        //         SourceObject = x,
-        //         Id = x.Id.ToString(),
-        //         Price = x.Price,
-        //         Quantity = x.AmountPlaced,
-        //         QuantityFilled = x.AmountExecuted,
-        //         Side = x.OrderSide == KunaOrderSide.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
-        //         Status = x.Status switch
-        //         {
-        //             KunaOrderStatus.Active => CommonOrderStatus.Active,
-        //             KunaOrderStatus.Canceled => CommonOrderStatus.Canceled,
-        //             KunaOrderStatus.Filled => CommonOrderStatus.Filled,
-        //             KunaOrderStatus.Undefined => CommonOrderStatus.Canceled,
-        //             _ => CommonOrderStatus.Canceled
-        //         }
-        //     }).ToList();
-        //     return WebCallResultMappings.Map(result, map);
-        // }
-
-        // public async Task<WebCallResult<OrderId>> CancelOrderAsync(string orderId, string symbol = null, CancellationToken ct = default)
-        // {
-        //     long id = 0;
-        //     if (long.TryParse(orderId, out id))
-        //     {
-        //         var cancel = await CancelOrderAsync(id);
-        //         Func<WebCallResult<KunaCanceledOrder>, OrderId> map = x => new OrderId() { SourceObject = x, Id = x.Data.Id.ToString() };
-        //         return WebCallResultMappings.Map(cancel, map);
-        //     }
-        //     return new WebCallResult<OrderId>(new ServerError($"Can not parse id {orderId}"));
-        // }
-        // public async Task<CallResult<List<KunaOhclvV2>>> GetCandlesHistoryV2Async(string symbol, int resolution, DateTime from, DateTime to, CancellationToken ct = default)
-        // {
-        //     var parameters = new Dictionary<string, object>() {
-        //         { "symbol", symbol }, { "resolution", resolution },
-        //         { "from", JsonConvert.SerializeObject(from, new DateTimeConverter()) },
-        //         { "to", JsonConvert.SerializeObject(to, new DateTimeConverter()) } };
-        //     var result = await SendRequestAsync<TradingViewOhclvV2>(GetUrl(CandlesHistoryEndpoint), HttpMethod.Get, ct, parameters, false).ConfigureAwait(false);
-        //     if (result)
-        //     {
-        //         List<KunaOhclvV2> data = null;
-        //         if (result.Success)
-        //         {
-        //             data = new List<KunaOhclvV2>();
-        //             var t = result.Data;
-        //             for (int i = 0; i < result.Data.Closes.Count; i++)
-        //             {
-        //                 var candle = new KunaOhclvV2(t.Timestamps[i], t.Opens[i], t.Highs[i], t.Lows[i], t.Closes[i], t.Volumes[i]);
-        //                 data.Add(candle);
-        //             }
-        //         }
-        //         return new CallResult<List<KunaOhclvV2>>(data);
-        //     }
-        //     return new CallResult<List<KunaOhclvV2>>(result.Error);
-
-        // }
-
-
+        /// <summary>
+        /// Review account wallets balance. Returns an array of the balances of all your wallets.
+        /// </summary>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
+        {
+            return await SendRequestAsync<IEnumerable<KunaAccountBalance>>(WalletEndpoint, HttpMethod.Post, null, true, ct);
+        }
 
         public void SetProAccount(bool isProAccountEnabled)
         {
@@ -667,7 +392,167 @@ namespace Kuna.Net.Objects.V4
         where T : class
         {
             var result = await SendRequestAsync<T>(GetUrl(endpoint), method, ct, parameters, signed).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                OnError?.Invoke(result.Error.Message);
+            }
+            return result;
+        }
 
+        async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string accountId, string clientOrderId, CancellationToken ct)
+        {
+            var kunaOrdSide = side == CommonOrderSide.Buy ? KunaOrderSideV4.Bid : KunaOrderSideV4.Ask;
+            PlaceOrderRequestV4 reqparam = type switch
+            {
+                CommonOrderType.Limit => PlaceOrderRequestV4.LimitOrder(symbol, quantity, kunaOrdSide, price.Value, clientOrderId == null ? null : Guid.Parse(clientOrderId)),
+                CommonOrderType.Market => PlaceOrderRequestV4.MarketOrder(symbol, quantity, kunaOrdSide, id: clientOrderId == null ? null : Guid.Parse(clientOrderId)),
+                _ => throw new ArgumentException($"Unsupported order type {type}")
+            };
+            var result = await PlaceOrderAsync(reqparam, ct);
+            return WebCallResultMappings.Map(result, resp  => new OrderId() { Id = resp.Data?.Id.ToString(), SourceObject = resp.Data });
+        }
+
+
+        string IBaseRestClient.GetSymbolName(string baseAsset, string quoteAsset)
+        {
+            return $"{baseAsset}_{quoteAsset}";
+        }
+
+        async Task<WebCallResult<IEnumerable<Symbol>>> IBaseRestClient.GetSymbolsAsync(CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(await GetTradingPairsAsync(),
+                                             resp => resp.Data?.Select(p => new Symbol() {
+                                                                        SourceObject = p,
+                                                                        Name = p.Pair,
+                                                                        MinTradeQuantity = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),// this isn't always true
+                                                                        PriceDecimals = p.QuoteAsset.Precision,
+                                                                        PriceStep = (decimal)Math.Pow(0.1, p.QuoteAsset.Precision),
+                                                                        QuantityDecimals = p.BaseAsset.Precision,
+                                                                        QuantityStep = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),
+                                                                    }));
+        }
+
+
+        async Task<WebCallResult<Ticker>> IBaseRestClient.GetTickerAsync(string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(await GetTickersAsync(ct, symbol),
+                                              resp => resp.Data?.Select(t => new Ticker()
+                                              {
+                                                  SourceObject = t,
+                                                  Symbol = t.Pair,
+                                                  HighPrice = t.High,
+                                                  LowPrice = t.Low,
+                                                  Price24H = t.Price - t.PriceChange,
+                                                  Volume = t.BaseVolume,
+                                                  LastPrice = t.Price,
+                                              }).FirstOrDefault());
+        }
+
+        async Task<WebCallResult<IEnumerable<Ticker>>> IBaseRestClient.GetTickersAsync(CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(await GetTickersAsync(ct),
+                                             resp => resp.Data?.Select(t => new Ticker()
+                                             {
+                                                 SourceObject = t,
+                                                 Symbol = t.Pair,
+                                                 HighPrice = t.High,
+                                                 LowPrice = t.Low,
+                                                 Price24H = t.Price - t.PriceChange,
+                                                 Volume = t.BaseVolume,
+                                                 LastPrice = t.Price,
+                                             }));
+        }
+
+        Task<WebCallResult<IEnumerable<Kline>>> IBaseRestClient.GetKlinesAsync(string symbol, TimeSpan timespan, DateTime? startTime, DateTime? endTime, int? limit, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        async Task<WebCallResult<OrderBook>> IBaseRestClient.GetOrderBookAsync(string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(
+                await GetOrderBookAsync(symbol, null, ct),
+                resp => new OrderBook()
+                {
+                    SourceObject = resp.Data,
+                    Asks = resp.Data.Asks.OrderBy(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
+                    Bids = resp.Data.Bids.OrderByDescending(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
+                });
+}
+
+        async Task<WebCallResult<IEnumerable<Trade>>> IBaseRestClient.GetRecentTradesAsync(string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(
+                await GetRecentPublicTradesAsync(symbol, ct: ct),
+                resp => resp.Data?.Select(t => new Trade()
+                {
+                    SourceObject = t,
+                    Symbol = t.Pair,
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Timestamp = t.CreatedAt.DateTime,
+                }));
+        }
+
+        async Task<WebCallResult<IEnumerable<Balance>>> IBaseRestClient.GetBalancesAsync(string accountId, CancellationToken ct)
+        {
+            var balances = await GetBalancesAsync();
+            static IEnumerable<Balance> map(WebCallResult<IEnumerable<KunaAccountBalance>> x) => x.Data.Select(b => new Balance()
+            {
+                SourceObject = b,
+                Asset = b.Currency,
+                Available = b.Balance - b.LockBalance,
+                Total = b.Balance
+            });
+            return WebCallResultMappings.Map(balances, map);
+        }
+
+        async Task<WebCallResult<Order>> IBaseRestClient.GetOrderAsync(string orderId, string symbol, CancellationToken ct)
+        {
+            var order = await GetOrderAsync(Guid.Parse(orderId));
+            static Order map(WebCallResult<KunaOrderV4> x) => x.Data?.ConvertToCryptoExchangeOrder();
+            return WebCallResultMappings.Map(order, map);
+        }
+
+        async Task<WebCallResult<IEnumerable<UserTrade>>> IBaseRestClient.GetOrderTradesAsync(string orderId, string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(
+                await GetOrderTradesAsync(Guid.Parse(orderId), ct: ct),
+                resp => resp.Data?.Select(t => new UserTrade()
+                {
+                    SourceObject = t,
+                    Fee = t.Fee,
+                    FeeAsset = t.FeeCurrency,
+                    Id = t.Id.ToString(),
+                    OrderId = t.OrderId.ToString(),
+                    Price = t.Price,
+                    Quantity = t.Quantity,
+                    Symbol = t.Pair,
+                    Timestamp = t.CreatedAt.DateTime
+                })
+            );  
+        }
+
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetOpenOrdersAsync(string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(
+                await GetActiveOrdersAsync(new[] { symbol }, ct: ct),
+                resp => resp.Data?.Select(t => t.ConvertToCryptoExchangeOrder())
+            );
+        }
+
+        async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetClosedOrdersAsync(string symbol, CancellationToken ct)
+        {
+            return WebCallResultMappings.Map(
+                await GetOrdersAsync(new[] { symbol }, status: KunaOrderStatusV4.Closed, ct: ct),
+                resp => resp.Data?.Select(t => t.ConvertToCryptoExchangeOrder())
+            );
+        }
+
+        async Task<WebCallResult<OrderId>> IBaseRestClient.CancelOrderAsync(string orderId, string symbol, CancellationToken ct)
+        {
+            var result = await CancelOrderAsync(Guid.Parse(orderId), ct);
+            return WebCallResultMappings.Map(result, resp => new OrderId() { Id = orderId, SourceObject = resp.Data });
         }
     }
 }

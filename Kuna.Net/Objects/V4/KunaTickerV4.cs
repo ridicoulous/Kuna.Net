@@ -14,7 +14,7 @@ namespace Kuna.Net.Objects.V4
         public decimal Price { get; set; }
 
         [JsonProperty("equivalentPrice")]
-        public decimal EquivalentPrice { get; set; }
+        public decimal? EquivalentPrice { get; set; }
 
         [JsonProperty("high")]
         public decimal High { get; set; }

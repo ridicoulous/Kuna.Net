@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CryptoExchange.Net.CommonObjects;
+using Kuna.Net.Objects.V4;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Helpers
@@ -65,6 +67,40 @@ namespace Kuna.Net.Helpers
             {
                 throw ex;
             }
+        }
+        public static Order ConvertToCryptoExchangeOrder(this KunaOrderV4 source)
+        {
+            if (source is null)
+                return null;
+
+            return new()
+            {
+                SourceObject = source,
+                Id = source.Id.ToString(),
+                Price = source.Price,
+                Quantity = source.Quantity,
+                QuantityFilled = source.ExecutedQuantity,
+                Side = source.Side == KunaOrderSideV4.Bid ? CommonOrderSide.Buy : CommonOrderSide.Sell,
+                Status = source.Status switch
+                {
+                    KunaOrderStatusV4.Canceled => CommonOrderStatus.Canceled,
+                    KunaOrderStatusV4.Expired => CommonOrderStatus.Canceled,
+                    KunaOrderStatusV4.Rejected => CommonOrderStatus.Canceled,
+                    KunaOrderStatusV4.Closed => CommonOrderStatus.Filled,
+                    KunaOrderStatusV4.Open => CommonOrderStatus.Active,
+                    KunaOrderStatusV4.Pending => CommonOrderStatus.Active,
+                    KunaOrderStatusV4.WaitStop => CommonOrderStatus.Active,
+                    _ => CommonOrderStatus.Canceled
+                },
+                Symbol = source.Pair,
+                Timestamp = source.UpdatedAt.DateTime,
+                Type = source.Type switch
+                {
+                    KunaOrderTypeV4.Limit => CommonOrderType.Limit,
+                    KunaOrderTypeV4.Market => CommonOrderType.Market,
+                    _ => CommonOrderType.Other,
+                }
+            };
         }
     }
 }

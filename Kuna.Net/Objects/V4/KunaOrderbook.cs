@@ -10,10 +10,10 @@ namespace Kuna.Net.Objects.V4
     public class KunaOrderBookV4 
     {
         [JsonProperty("asks")]
-        public List<KunaOrderBookEntryV4> Asks { get; set; }
+        public IEnumerable<KunaOrderBookEntryV4> Asks { get; set; }
 
         [JsonProperty("bids")]
-        public List<KunaOrderBookEntryV4> Bids { get; set; }
+        public IEnumerable<KunaOrderBookEntryV4> Bids { get; set; }
 
     }
 
