@@ -22,7 +22,7 @@ namespace Kuna.Net.Objects.V4
 {
     public class KunaV4ApiClient : KunaBaseApiClient, IKunaApiClientV4
     {
-        internal static readonly KeyValuePair<string, object> IsProParameter = new ("isPro", "true");
+        internal static readonly KeyValuePair<string, object> ProParameter = new ("isPro", "true");
 
         #region endpoints
 
@@ -32,7 +32,7 @@ namespace Kuna.Net.Objects.V4
         private const string TickersEndpointAuth = "markets/private/tickers";
         private const string OrderBookEndpoint = "order/public/book/{pair}";
         private const string OrderBookEndpointAuth = "order/public/book/{pair}";
-        private const string FeeEndpoint = "/public/fees"; // not implemented yet
+        // private const string FeeEndpoint = "/public/fees"; // not implemented yet
         private const string WalletEndpoint = "private/getBalance";
         private const string CancelMultipleOrderEndpoint = "order/private/cancel/multi";
         private const string PlaceOrderEndpoint = "order/private/create";
@@ -47,9 +47,7 @@ namespace Kuna.Net.Objects.V4
         private const string PublicTradesEndPointAuth = "trade/private/book/{pairs}";
         private const string UserTradesEndPoint = "trade/private/history";
         private const string OrderTradesEndPoint = "order/private/{id}/trades";
-        // private const string ProOrdersEndpoint = "auth/pro/r/orders";
-        private const string NotImplementedYet0 = "private/me";
-        // private const string CandlesHistoryEndpoint = "tv/history";
+        // private const string NotImplementedYet0 = "private/me";
         #endregion        
         private bool IsProAccount;
         private const int ProTotalRateLimit = 1200;
@@ -391,12 +389,12 @@ namespace Kuna.Net.Objects.V4
         private async Task<WebCallResult<T>> SendRequestAsync<T>(string endpoint, HttpMethod method, Dictionary<string, object> parameters, bool signed, CancellationToken ct)
         where T : class
         {
-            var result = await SendRequestAsync<T>(GetUrl(endpoint), method, ct, parameters, signed).ConfigureAwait(false);
+            var result = await SendRequestAsync<KunaV4BaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed).ConfigureAwait(false);
             if (!result.Success)
             {
                 OnError?.Invoke(result.Error.Message);
             }
-            return result;
+            return result.As(result.Data.Data);
         }
 
         async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string accountId, string clientOrderId, CancellationToken ct)
@@ -421,15 +419,16 @@ namespace Kuna.Net.Objects.V4
         async Task<WebCallResult<IEnumerable<Symbol>>> IBaseRestClient.GetSymbolsAsync(CancellationToken ct)
         {
             return WebCallResultMappings.Map(await GetTradingPairsAsync(),
-                                             resp => resp.Data?.Select(p => new Symbol() {
-                                                                        SourceObject = p,
-                                                                        Name = p.Pair,
-                                                                        MinTradeQuantity = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),// this isn't always true
-                                                                        PriceDecimals = p.QuoteAsset.Precision,
-                                                                        PriceStep = (decimal)Math.Pow(0.1, p.QuoteAsset.Precision),
-                                                                        QuantityDecimals = p.BaseAsset.Precision,
-                                                                        QuantityStep = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),
-                                                                    }));
+                                             resp => resp.Data?.Select(p => new Symbol()
+                                             {
+                                                 SourceObject = p,
+                                                 Name = p.Pair,
+                                                 MinTradeQuantity = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),// this isn't always true
+                                                 PriceDecimals = p.QuoteAsset.Precision,
+                                                 PriceStep = (decimal)Math.Pow(0.1, p.QuoteAsset.Precision),
+                                                 QuantityDecimals = p.BaseAsset.Precision,
+                                                 QuantityStep = (decimal)Math.Pow(0.1, p.BaseAsset.Precision),
+                                             }));
         }
 
 
@@ -478,7 +477,7 @@ namespace Kuna.Net.Objects.V4
                     Asks = resp.Data.Asks.OrderBy(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
                     Bids = resp.Data.Bids.OrderByDescending(p => p.Price).Select(a => new OrderBookEntry() { Price = a.Price, Quantity = a.Quantity }),
                 });
-}
+        }
 
         async Task<WebCallResult<IEnumerable<Trade>>> IBaseRestClient.GetRecentTradesAsync(string symbol, CancellationToken ct)
         {

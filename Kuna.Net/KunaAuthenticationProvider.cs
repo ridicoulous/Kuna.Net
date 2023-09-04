@@ -144,10 +144,10 @@ namespace Kuna.Net
         {
             // var uriParam = new SortedDictionary<string, object>();
             var isProV4 = false;
-            if (providedParameters.Contains(Objects.V4.KunaV4ApiClient.IsProParameter))
+            if (providedParameters.Contains(Objects.V4.KunaV4ApiClient.ProParameter))
             {
                 isProV4 = true;
-                providedParameters.Remove(Objects.V4.KunaV4ApiClient.IsProParameter.Key);
+                providedParameters.Remove(Objects.V4.KunaV4ApiClient.ProParameter.Key);
             }
             bodyParameters = new();
             uriParameters = new();
