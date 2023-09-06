@@ -20,10 +20,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Kuna.Net\Kuna.Net.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="keys.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
