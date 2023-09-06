@@ -14,8 +14,8 @@ namespace Kuna.Net
 {
     public class KunaAuthenticationProvider : AuthenticationProvider
     {
-        private readonly HMACSHA256 encryptor;
-        private HMACSHA384 encryptorv3;
+        // private readonly HMACSHA256 encryptor;
+        // private HMACSHA384 encryptorv3;
 
         private readonly object encryptLock = new object();
 
@@ -36,12 +36,13 @@ namespace Kuna.Net
                 }
             }
         }
-        ApiCredentials creds;
-        public KunaAuthenticationProvider(ApiCredentials credentials) : base(credentials)
+        
+        private readonly bool useSingleApiKey;
+        public KunaAuthenticationProvider(ApiCredentials credentials, bool useSingleApiKey = false) : base(credentials)
         {
-            creds = credentials;
-            encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
-            encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
+            this.useSingleApiKey = useSingleApiKey;
+            // encryptor = new HMACSHA256(Encoding.ASCII.GetBytes(credentials.Secret.GetString()));
+            // encryptorv3 = new HMACSHA384(Encoding.ASCII.GetBytes(creds.Secret.GetString()));
         }
 
         public  Dictionary<string, string> AddAuthenticationToHeadersV3(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization)
@@ -77,9 +78,9 @@ namespace Kuna.Net
             var result = new Dictionary<string, string>();            
             var json = JsonConvert.SerializeObject(parameters);
 
-            if(Credentials.PrivateKey is not null)
+            if(useSingleApiKey)
             {
-                result.Add("api-key", Credentials.PrivateKey.Key.ToString());
+                result.Add("api-key", Credentials.Secret.GetString());
             }
             else
             {
@@ -112,10 +113,7 @@ namespace Kuna.Net
                 var signData = method + "|";
                 signData += uri + "|";
                 signData += paramString;
-                byte[] signBytes;
-                lock (encryptLock)
-                    signBytes = encryptor.ComputeHash(Encoding.UTF8.GetBytes(signData));
-                parameters.Add("signature", ByteArrayToString(signBytes));
+                parameters.Add("signature", SignHMACSHA256(signData));
             }
 
             return parameters;
@@ -124,15 +122,8 @@ namespace Kuna.Net
         public string SignV3(string toSign)
         {
             lock (encryptLock)
-                return ByteArrayToString(encryptorv3.ComputeHash(Encoding.UTF8.GetBytes(toSign)));
+                return SignHMACSHA384(toSign);
         }    
-        public string ByteArrayToString(byte[] ba)
-        {
-            StringBuilder hex = new StringBuilder(ba.Length * 2);
-            foreach (byte b in ba)
-                hex.AppendFormat("{0:x2}", b);
-            return hex.ToString();
-        }
 
         public override void AuthenticateRequest(RestApiClient apiClient, Uri uri, HttpMethod method, Dictionary<string, object> providedParameters,
             bool auth, ArrayParametersSerialization arraySerialization,

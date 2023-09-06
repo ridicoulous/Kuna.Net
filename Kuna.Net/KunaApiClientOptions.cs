@@ -9,10 +9,7 @@ namespace Kuna.Net
         public KunaApiClientOptions(bool isPro = false, bool newVersion = true) : base(newVersion ?  "https://api.kuna.io/" : "https://api.kuna.io/v3/")
         {
             IsProAccount = isPro;
-            if (newVersion)
-            {
-                RateLimiters.Add(new RateLimiter().AddTotalRateLimit(isPro ? 1200 : 600, TimeSpan.FromMinutes(1)));
-            }
+            RateLimiters.Add(new RateLimiter().AddTotalRateLimit(isPro ? 1200 : 600, TimeSpan.FromMinutes(1)));
         }
     }
 }

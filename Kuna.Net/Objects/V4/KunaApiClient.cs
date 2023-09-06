@@ -50,6 +50,7 @@ namespace Kuna.Net.Objects.V4
         // private const string NotImplementedYet0 = "private/me";
         #endregion        
         private bool IsProAccount;
+        private readonly bool useSingleApiKey;
         private const int ProTotalRateLimit = 1200;
         private const int RegularTotalRateLimit = 600;
         private int? userDefinedTotalRateLimit = null;
@@ -67,7 +68,7 @@ namespace Kuna.Net.Objects.V4
             UpdateRateLimiters();
             OnError += HandleProAccountEndpointError;
             versionSuffix = "v4";
-
+            useSingleApiKey = options.UseSingleApiKey;
         }
 
         /// <summary>
@@ -99,7 +100,7 @@ namespace Kuna.Net.Objects.V4
 
         protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
         {
-            return new KunaAuthenticationProvider(credentials);
+            return new KunaAuthenticationProvider(credentials, useSingleApiKey);
         }
 
         #region Public API
