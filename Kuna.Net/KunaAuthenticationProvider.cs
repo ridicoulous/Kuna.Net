@@ -69,17 +69,13 @@ namespace Kuna.Net
             return result;
         }
 
-        public  Dictionary<string, string> AddAuthenticationToHeadersV4(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization, bool isPro)
+        public  Dictionary<string, string> AddAuthenticationToHeadersV4(Uri uri, HttpMethod method, SortedDictionary<string, object> parameters, bool signed, HttpMethodParameterPosition postParameterPosition, ArrayParametersSerialization arraySerialization, bool isPro)
         {
             if (!signed)
                 return new Dictionary<string, string>();
 
             var result = new Dictionary<string, string>();            
             var json = JsonConvert.SerializeObject(parameters);
-            if (string.IsNullOrEmpty(json))
-            {
-                json = "{}";
-            }
 
             if(Credentials.PrivateKey is not null)
             {
@@ -142,13 +138,11 @@ namespace Kuna.Net
             bool auth, ArrayParametersSerialization arraySerialization,
             HttpMethodParameterPosition parameterPosition, out SortedDictionary<string, object> uriParameters, out SortedDictionary<string, object> bodyParameters, out Dictionary<string, string> headers)
         {
-            // var uriParam = new SortedDictionary<string, object>();
-            var isProV4 = false;
-            if (providedParameters.Contains(Objects.V4.KunaV4ApiClient.ProParameter))
-            {
-                isProV4 = true;
-                providedParameters.Remove(Objects.V4.KunaV4ApiClient.ProParameter.Key);
-            }
+            var isProV4 = providedParameters.Remove(Objects.V4.KunaV4ApiClient.ProParameter.Key);
+
+            //I guess it can be removed successfully after updating base lib
+            providedParameters = providedParameters.OrderBy(p => p.Key).ToDictionary(k => k.Key, v => v.Value);
+
             bodyParameters = new();
             uriParameters = new();
             headers = new();
@@ -167,7 +161,7 @@ namespace Kuna.Net
                 }
                 else if (uri.AbsolutePath.Contains("v4"))
                 {
-                    headers = AddAuthenticationToHeadersV4(uri, method, providedParameters, auth, parameterPosition, arraySerialization, isProV4);
+                    headers = AddAuthenticationToHeadersV4(uri, method, bodyParameters, auth, parameterPosition, arraySerialization, isProV4);
                 }
                 else
                 {

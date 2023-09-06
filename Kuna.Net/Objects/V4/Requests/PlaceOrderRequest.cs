@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Kuna.Net.Objects.V3;
 using Newtonsoft.Json;
 
@@ -17,6 +18,7 @@ namespace Kuna.Net.Objects.V4.Requests
         /// <summary>
         /// id must be a UUID format. If you do not specify id, it will be generated automatically.
         /// </summary>
+        [JsonProperty("id")]
         public Guid? Id { get; private set;}
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace Kuna.Net.Objects.V4.Requests
         /// Precision depends on the asset as per Get all traded markets endpoint.
         /// </summary>
         [JsonProperty("quantity")]
-        public decimal? Quantity { get; private set;}
+        public string Quantity { get; private set;}
 
         /// <summary>
         /// The max quantity of the quote asset to use for selling/buying (e.g. for BTC_USDT trading pair, USDT is the quote asset).
@@ -44,20 +46,20 @@ namespace Kuna.Net.Objects.V4.Requests
         /// Precision depends on the asset as per Get all traded markets endpoint.
         /// </summary>
         [JsonProperty("quoteQuantity")]
-        public decimal QuoteQuantity { get; private set;}
+        public string QuoteQuantity { get; private set;}
 
         /// <summary>
         /// It is a trigger for the limit price: 
         /// when the coin's market price reaches stopPrice, a limit order is automatically placed.
         /// </summary>
         [JsonProperty("stopPrice")]
-        public decimal? StopPrice { get; private set;}
+        public string StopPrice { get; private set;}
 
         /// <summary>
         /// Order price. Required for limit order types
         /// </summary>
         [JsonProperty("price")]
-        public decimal? Price { get; private set;}
+        public string Price { get; private set;}
 
         [JsonProperty("orderSide")]
         public KunaOrderSideV4 Side { get; private set; }
@@ -67,8 +69,8 @@ namespace Kuna.Net.Objects.V4.Requests
             return new PlaceOrderRequestV4(symbol, orderSide, id)
             {
                 Type = KunaOrderTypeV4.Limit,
-                Quantity = amount,
-                Price = price,
+                Quantity = amount.ToString(CultureInfo.InvariantCulture),
+                Price = price.ToString(CultureInfo.InvariantCulture),
             };
         }
         /// <summary>
@@ -88,9 +90,9 @@ namespace Kuna.Net.Objects.V4.Requests
                 Type = KunaOrderTypeV4.Market,
             };
             if (isAmountPerQuoteAsset)
-                req.QuoteQuantity = amount;
+                req.QuoteQuantity = amount.ToString(CultureInfo.InvariantCulture);
             else
-                req.Quantity = amount;
+                req.Quantity = amount.ToString(CultureInfo.InvariantCulture);
 
             return req;
         }
@@ -100,9 +102,9 @@ namespace Kuna.Net.Objects.V4.Requests
             return new PlaceOrderRequestV4(symbol, orderSide, id)
             {
                 Type = KunaOrderTypeV4.StopLossLimit,
-                Price = price,
-                StopPrice = triggerPrice,
-                Quantity = amount,
+                Price = price.ToString(CultureInfo.InvariantCulture),
+                StopPrice = triggerPrice.ToString(CultureInfo.InvariantCulture),
+                Quantity = amount.ToString(CultureInfo.InvariantCulture),
             };
         }
 
@@ -111,9 +113,9 @@ namespace Kuna.Net.Objects.V4.Requests
             return new PlaceOrderRequestV4(symbol, orderSide, id)
             {
                 Type = KunaOrderTypeV4.TakeProfitLimit,
-                Price = price,
-                StopPrice = triggerPrice,
-                Quantity = amount,
+                Price = price.ToString(CultureInfo.InvariantCulture),
+                StopPrice = triggerPrice.ToString(CultureInfo.InvariantCulture),
+                Quantity = amount.ToString(CultureInfo.InvariantCulture),
             };
         }
     }

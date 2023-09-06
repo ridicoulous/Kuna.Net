@@ -23,7 +23,7 @@ namespace Kuna.Net
         {
             ClientV2 = AddApiClient(new KunaV2ApiClient(log, this, exchangeOptions, DefaultOptionsV2));
             ClientV3 = AddApiClient(new KunaV3ApiClient(log, this, exchangeOptions, DefaultOptions));
-            ClientV4 = AddApiClient(new KunaV4ApiClient(log, this, DefaultBaseOptions, DefaultOptions));
+            ClientV4 = AddApiClient(new KunaV4ApiClient(log, this, exchangeOptions, DefaultOptions));
         }
 
         public KunaClient() : this(DefaultBaseOptions)

@@ -31,7 +31,7 @@ namespace Kuna.Net.Objects.V4
         private const string TickersEndpoint = "markets/public/tickers";
         private const string TickersEndpointAuth = "markets/private/tickers";
         private const string OrderBookEndpoint = "order/public/book/{pair}";
-        private const string OrderBookEndpointAuth = "order/public/book/{pair}";
+        private const string OrderBookEndpointAuth = "order/private/book/{pair}";
         // private const string FeeEndpoint = "/public/fees"; // not implemented yet
         private const string WalletEndpoint = "private/getBalance";
         private const string CancelMultipleOrderEndpoint = "order/private/cancel/multi";
@@ -141,7 +141,6 @@ namespace Kuna.Net.Objects.V4
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("level", (int?) level);
             return await SendRequestAsync<KunaOrderBookV4>(FillPathParameter(url, symbol), HttpMethod.Get, request, CanBeSigned, ct);
-            // return WebCallResultMappings.Map(result, x => new KunaOrderBookV4(x.Data));
         }
 
         /// <summary>
@@ -175,7 +174,7 @@ namespace Kuna.Net.Objects.V4
         /// Get a list of trades by pair (e.g. BTC_USDT). Returns a list of trades,
         /// newest first, 100 trades maximum, but not more than specified by the limit parameter.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">required</param>
         /// <param name="limit">1-100, default 25, maximum 100</param>
         /// <param name="ct"></param>
         /// <returns></returns>
@@ -349,7 +348,7 @@ namespace Kuna.Net.Objects.V4
         /// <returns></returns>
         public async Task<WebCallResult<IEnumerable<KunaAccountBalance>>> GetBalancesAsync(CancellationToken ct = default)
         {
-            return await SendRequestAsync<IEnumerable<KunaAccountBalance>>(WalletEndpoint, HttpMethod.Post, null, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaAccountBalance>>(WalletEndpoint, HttpMethod.Get, null, true, ct);
         }
 
         public void SetProAccount(bool isProAccountEnabled)
@@ -389,12 +388,17 @@ namespace Kuna.Net.Objects.V4
         private async Task<WebCallResult<T>> SendRequestAsync<T>(string endpoint, HttpMethod method, Dictionary<string, object> parameters, bool signed, CancellationToken ct)
         where T : class
         {
+            if (signed && IsProAccount) 
+            {
+                parameters ??= new Dictionary<string, object>();
+                parameters.Add(ProParameter.Key, ProParameter.Value);
+            }
             var result = await SendRequestAsync<KunaV4BaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed).ConfigureAwait(false);
             if (!result.Success)
             {
                 OnError?.Invoke(result.Error.Message);
             }
-            return result.As(result.Data.Data);
+            return result.As(result.Data?.Data);
         }
 
         async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string accountId, string clientOrderId, CancellationToken ct)
