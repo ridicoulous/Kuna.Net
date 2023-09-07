@@ -259,33 +259,11 @@ namespace Kuna.Net.Tests
         public async Task TestPro()
         {
             // Arrange 
-            var reqNumb = 700;
-            var expectedSuccessfullyExecutedAmount = reqNumb * 0.99;
+            var reqNumb = 400;
+            var expectedSuccessfullyExecutedAmount = reqNumb;
             var tasks = new Task<CryptoExchange.Net.Objects.WebCallResult<IEnumerable<KunaTradeV4>>>[reqNumb];
             var watch = Stopwatch.StartNew();
             // Act
-            // var config = new ConfigurationBuilder().AddJsonFile("keys.json", optional: true).Build();
-            // var key = config["key"];
-            // var secret = config["secret"];
-            // var singleKey = config["sinle-api-key"];
-
-            // KunaApiCredentials? cred = null;
-            // if (!string.IsNullOrEmpty(singleKey))
-            // {
-            //     cred = new KunaApiCredentials(singleKey);
-            // }
-            // if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(secret))
-            // {
-            //     cred = new KunaApiCredentials(key, secret);
-            // }
-            // var apiClient = (KunaV4ApiClient)new KunaClient(
-            //     new KunaClientOptions()
-            //     {
-            //         LogLevel = LogLevel.Trace,
-            //         IsProAccount = true,
-            //         ApiCredentials = cred
-            //     }).ClientV4;
-
             for (var i = 0; i < reqNumb; i++)
             {
                 tasks[i] = _apiClient.GetOrderTradesAsync(ordId);
@@ -293,7 +271,7 @@ namespace Kuna.Net.Tests
             }
             await Task.WhenAll(tasks);
             watch.Stop();
-            var done = tasks.Select(t => t.Result.Success).Count();
+            var done = tasks.Where(t => t.Result.Success).Count();
             // Assert
             Assert.True(done > expectedSuccessfullyExecutedAmount);
         }

@@ -52,7 +52,7 @@ namespace Kuna.Net.Objects.V4
         private bool isProAccount;
         private readonly bool useSingleApiKey;
         private const int ProTotalRateLimit = 1200;
-        private const int RegularTotalRateLimit = 600;
+        private const int RegularTotalRateLimit = 300;
         private int? userDefinedTotalRateLimit = null;
         internal static TimeSyncState TimeSyncState = new ("kuna-api");
         public event Action<string> OnError;
@@ -66,7 +66,7 @@ namespace Kuna.Net.Objects.V4
             _kunaClient = baseClient;
             isProAccount=options.IsProAccount;
             UpdateRateLimiters();
-            OnError += HandleProAccountEndpointError;
+            // OnError += HandleProAccountEndpointError; //unsuported with v4
             versionSuffix = "v4";
             useSingleApiKey = options.UseSingleApiKey;
         }
@@ -358,18 +358,18 @@ namespace Kuna.Net.Objects.V4
             UpdateRateLimiters();
         }
 
-        private void HandleProAccountEndpointError(string errorMessage)
-        {
-            if (string.IsNullOrEmpty(errorMessage))
-            {
-                return;
-            }
-            if (errorMessage.Contains("for_pro_members_only", StringComparison.OrdinalIgnoreCase))
-            {
-                SetProAccount(false);
-                //log.Write(LogLevel.Warning, "You are not Pro, forcibly turn off the Pro endpoints");
-            }
-        }
+        // private void HandleProAccountEndpointError(string errorMessage)
+        // {
+        //     if (string.IsNullOrEmpty(errorMessage))
+        //     {
+        //         return;
+        //     }
+        //     if (errorMessage.Contains("for_pro_members_only", StringComparison.OrdinalIgnoreCase))
+        //     {
+        //         SetProAccount(false);
+        //         //log.Write(LogLevel.Warning, "You are not Pro, forcibly turn off the Pro endpoints");
+        //     }
+        // }
 
         private void UpdateRateLimiters()
         {
