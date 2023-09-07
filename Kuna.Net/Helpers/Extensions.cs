@@ -48,10 +48,10 @@ namespace Kuna.Net.Helpers
                     {
                         value = value as decimal?;
                     }
-                    if (value.GetType().IsEnum)
-                    {
-                        value = value?.ToString();
-                    }
+                    // if (value.GetType().IsEnum)
+                    // {
+                    //     value = value?.ToString();
+                    // }
                     if (value is DateTime || value is DateTime?)
                     {
                         value = ((DateTime)value).ToString("o", System.Globalization.CultureInfo.InvariantCulture);
@@ -80,7 +80,7 @@ namespace Kuna.Net.Helpers
                 Price = source.Price,
                 Quantity = source.Quantity,
                 QuantityFilled = source.ExecutedQuantity,
-                Side = source.Side == KunaOrderSideV4.Bid ? CommonOrderSide.Buy : CommonOrderSide.Sell,
+                Side = source.Side == KunaOrderSideV4.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
                 Status = source.Status switch
                 {
                     KunaOrderStatusV4.Canceled => CommonOrderStatus.Canceled,

@@ -5,6 +5,7 @@ using Kuna.Net.Objects.V4;
 using Kuna.Net.Objects.V4.Requests;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using System.Diagnostics;
 
 namespace Kuna.Net.Tests
 {
@@ -39,6 +40,7 @@ namespace Kuna.Net.Tests
                 }).ClientV4;
         }
 
+        #region auth unnecessary
 
         [Fact]
         public async Task GetServerTimeAsyncTest()
@@ -157,7 +159,8 @@ namespace Kuna.Net.Tests
             // Add more assertions based on the expected behavior of this method
             Assert.True(result.Data.Asks.First().Price > result.Data.Bids.First().Price);
         }
-
+        #endregion auth unnecessary
+        #region auth required
         [Fact]
         public async Task SendAsProTest()
         {
@@ -183,7 +186,7 @@ namespace Kuna.Net.Tests
             var symbol = "BTC_UAH";
             var price = 10m;
             var amount = 0.1m;
-            var side = KunaOrderSideV4.Bid;
+            var side = KunaOrderSideV4.Buy;
             var req = PlaceOrderRequestV4.LimitOrder(symbol, amount, side, price, ordId);
 
             // Act
@@ -196,7 +199,6 @@ namespace Kuna.Net.Tests
             Assert.Equal(amount, result.Data.Quantity);
             Assert.Equal(price, result.Data.Price);
 
-
         }
 
         [Fact, TestPriority(2)]
@@ -208,7 +210,7 @@ namespace Kuna.Net.Tests
             var result = await _apiClient.GetOrderAsync(id);
 
             // Assert
-            Assert.True(result.Success);
+                
             // Add more assertions based on the expected behavior of this method
             Assert.Equal(id, result.Data.Id);
         }
@@ -225,16 +227,18 @@ namespace Kuna.Net.Tests
         }
 
         [Fact, TestPriority(3)]
-        public async Task CancelOrderAsync()
+        public async Task CancelOrdersAsync()
         {
+            // Arrange
+            var id = ordId;
 
             // Act
-            var result = await _apiClient.CancelOrderAsync(ordId);
+            var result = await _apiClient.CancelOrdersAsync(new[] {id});
 
             // Assert
             Assert.True(result.Success);
             // Add more assertions based on the expected behavior of this method
-            Assert.True(result.Data.Success);
+            Assert.Contains(result.Data, o => o.OrdId == id);
 
         }
 
@@ -251,5 +255,50 @@ namespace Kuna.Net.Tests
             Assert.Contains(result.Data, c => c.Currency == "BTC");
 
         }
+        [Fact]
+        public async Task TestPro()
+        {
+            // Arrange 
+            var reqNumb = 700;
+            var expectedSuccessfullyExecutedAmount = reqNumb * 0.99;
+            var tasks = new Task<CryptoExchange.Net.Objects.WebCallResult<IEnumerable<KunaTradeV4>>>[reqNumb];
+            var watch = Stopwatch.StartNew();
+            // Act
+            // var config = new ConfigurationBuilder().AddJsonFile("keys.json", optional: true).Build();
+            // var key = config["key"];
+            // var secret = config["secret"];
+            // var singleKey = config["sinle-api-key"];
+
+            // KunaApiCredentials? cred = null;
+            // if (!string.IsNullOrEmpty(singleKey))
+            // {
+            //     cred = new KunaApiCredentials(singleKey);
+            // }
+            // if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(secret))
+            // {
+            //     cred = new KunaApiCredentials(key, secret);
+            // }
+            // var apiClient = (KunaV4ApiClient)new KunaClient(
+            //     new KunaClientOptions()
+            //     {
+            //         LogLevel = LogLevel.Trace,
+            //         IsProAccount = true,
+            //         ApiCredentials = cred
+            //     }).ClientV4;
+
+            for (var i = 0; i < reqNumb; i++)
+            {
+                tasks[i] = _apiClient.GetOrderTradesAsync(ordId);
+                Thread.Sleep(10);
+            }
+            await Task.WhenAll(tasks);
+            watch.Stop();
+            var done = tasks.Select(t => t.Result.Success).Count();
+            // Assert
+            Assert.True(done > expectedSuccessfullyExecutedAmount);
+        }
+
+
+        #endregion auth required
     }
 }

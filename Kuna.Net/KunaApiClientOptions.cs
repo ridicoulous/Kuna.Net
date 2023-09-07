@@ -5,11 +5,9 @@ namespace Kuna.Net
 {
     public class KunaApiClientOptions : RestApiClientOptions
     {
-        public bool IsProAccount { get; set; }
-        public KunaApiClientOptions(bool isPro = false, bool newVersion = true) : base(newVersion ?  "https://api.kuna.io/" : "https://api.kuna.io/v3/")
+        // public bool IsProAccount { get; set; }
+        public KunaApiClientOptions() : base("https://api.kuna.io/")
         {
-            IsProAccount = isPro;
-            RateLimiters.Add(new RateLimiter().AddTotalRateLimit(isPro ? 1200 : 600, TimeSpan.FromMinutes(1)));
         }
     }
 }

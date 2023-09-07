@@ -14,7 +14,7 @@ namespace Kuna.Net
             set
             {
                 base.ApiCredentials = value;
-                UseSingleApiKey = value.UseSingleApiKey;
+                UseSingleApiKey = value?.UseSingleApiKey ?? false;
             }
         }
         public KunaClientOptions(bool isPro = false)

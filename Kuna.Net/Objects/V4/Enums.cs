@@ -1,4 +1,9 @@
-﻿namespace Kuna.Net.Objects.V4
+﻿using System.Runtime.Serialization;
+using Kuna.Net.Converters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace Kuna.Net.Objects.V4
 {
     // 5, 10, 20, 50, 100, 500, 1000
     public enum OrderBookLevel
@@ -11,11 +16,14 @@
         FiveHundred = 500,
         OneThousand = 1000,
     }
+    
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum CurrencyType
     {
         Fiat,
         Crypto
     }
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum KunaOrderTypeV4
     {
         Limit,
@@ -24,16 +32,20 @@
         TakeProfitLimit
     }
 
+    // [JsonConverter(typeof(OrderSideConverter))]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum KunaOrderSideV4
     {
         /// <summary>
         /// for buying base asset
         /// </summary>
-        Bid,
+        [EnumMember(Value = "Bid")]
+        Buy,
         /// <summary>
         /// for selling base asset
         /// </summary>
-        Ask
+        [EnumMember(Value = "Ask")]
+        Sell
     }
     public enum KunaOrderStatusV4
     {

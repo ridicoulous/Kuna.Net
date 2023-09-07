@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using Kuna.Net.Objects.V3;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4.Requests

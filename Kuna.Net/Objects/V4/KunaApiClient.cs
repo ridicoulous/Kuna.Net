@@ -49,7 +49,7 @@ namespace Kuna.Net.Objects.V4
         private const string OrderTradesEndPoint = "order/private/{id}/trades";
         // private const string NotImplementedYet0 = "private/me";
         #endregion        
-        private bool IsProAccount;
+        private bool isProAccount;
         private readonly bool useSingleApiKey;
         private const int ProTotalRateLimit = 1200;
         private const int RegularTotalRateLimit = 600;
@@ -64,7 +64,7 @@ namespace Kuna.Net.Objects.V4
         {
             _log = log;
             _kunaClient = baseClient;
-            IsProAccount=options.IsProAccount;
+            isProAccount=options.IsProAccount;
             UpdateRateLimiters();
             OnError += HandleProAccountEndpointError;
             versionSuffix = "v4";
@@ -78,7 +78,7 @@ namespace Kuna.Net.Objects.V4
         {
             get
             {
-                return userDefinedTotalRateLimit ?? (IsProAccount ? ProTotalRateLimit : RegularTotalRateLimit);
+                return userDefinedTotalRateLimit ?? (isProAccount ? ProTotalRateLimit : RegularTotalRateLimit);
             }
             set
             {
@@ -354,7 +354,7 @@ namespace Kuna.Net.Objects.V4
 
         public void SetProAccount(bool isProAccountEnabled)
         {
-            IsProAccount = isProAccountEnabled;
+            isProAccount = isProAccountEnabled;
             UpdateRateLimiters();
         }
 
@@ -375,21 +375,23 @@ namespace Kuna.Net.Objects.V4
         {
             // this.Options.RateLimiters.RemoveAll(c => c.ToString() == "TotalRateLimiter");
 
-            this.Options.RateLimiters.Clear();
+            Options.RateLimiters.Clear();
             var newLimits = new List<IRateLimiter>
                 {
                     new RateLimiter()
-                    .AddTotalRateLimit(TotalRateLimit.Value, TimeSpan.FromMinutes(1))
-                    .AddPartialEndpointLimit("/public/", 1 , TimeSpan.FromMinutes(1), countPerEndpoint:true, ignoreOtherRateLimits: true)
+                    .AddTotalRateLimit(TotalRateLimit.Value, TimeSpan.FromMinutes(1)),
+                    //this doesn;t work, maybe updating base lib will hendle this
+                    new RateLimiter()
+                    .AddPartialEndpointLimit("public", 60 , TimeSpan.FromMinutes(1), countPerEndpoint:false)
                 };
             foreach (var limit in newLimits)
-                this.Options.RateLimiters.Add(limit);
+                Options.RateLimiters.Add(limit);
         }
 
         private async Task<WebCallResult<T>> SendRequestAsync<T>(string endpoint, HttpMethod method, Dictionary<string, object> parameters, bool signed, CancellationToken ct)
         where T : class
         {
-            if (signed && IsProAccount) 
+            if (signed && isProAccount) 
             {
                 parameters ??= new Dictionary<string, object>();
                 parameters.Add(ProParameter.Key, ProParameter.Value);
@@ -404,7 +406,7 @@ namespace Kuna.Net.Objects.V4
 
         async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string accountId, string clientOrderId, CancellationToken ct)
         {
-            var kunaOrdSide = side == CommonOrderSide.Buy ? KunaOrderSideV4.Bid : KunaOrderSideV4.Ask;
+            var kunaOrdSide = side == CommonOrderSide.Buy ? KunaOrderSideV4.Buy : KunaOrderSideV4.Sell;
             PlaceOrderRequestV4 reqparam = type switch
             {
                 CommonOrderType.Limit => PlaceOrderRequestV4.LimitOrder(symbol, quantity, kunaOrdSide, price.Value, clientOrderId == null ? null : Guid.Parse(clientOrderId)),

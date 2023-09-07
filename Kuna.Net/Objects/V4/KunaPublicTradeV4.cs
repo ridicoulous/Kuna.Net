@@ -1,5 +1,4 @@
 using System;
-using Kuna.Net.Objects.V3;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
