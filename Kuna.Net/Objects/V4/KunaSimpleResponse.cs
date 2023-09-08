@@ -11,7 +11,7 @@ namespace Kuna.Net.Objects.V4
     
     public class KunaCancelBulkOrderResponse : KunaSimpleResponse
     {
-        [JsonProperty("id")]
+        [JsonProperty("orderId")]
         public Guid OrdId { get; set; }
     }
 

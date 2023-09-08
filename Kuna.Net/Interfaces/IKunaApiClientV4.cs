@@ -17,18 +17,6 @@ namespace Kuna.Net.Interfaces
         int? TotalRateLimit { get; set; }
 
         /// <summary>
-        /// Gets time synchronization information.
-        /// </summary>
-        /// <returns>Time synchronization information.</returns>
-        TimeSyncInfo GetTimeSyncInfo();
-
-        /// <summary>
-        /// Gets the time offset.
-        /// </summary>
-        /// <returns>Time offset.</returns>
-        TimeSpan GetTimeOffset();
-
-        /// <summary>
         /// Gets the server time asynchronously.
         /// </summary>
         /// <param name="ct">Cancellation token.</param>

@@ -1,24 +1,22 @@
-﻿using CryptoExchange.Net;
+﻿using System.Net.Http;
+using CryptoExchange.Net;
 using CryptoExchange.Net.Interfaces.CommonClients;
-using CryptoExchange.Net.Objects;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects.V4;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Kuna.Net
 {
     public class KunaClient : BaseRestClient, IKunaClient
     {
         private static readonly KunaApiClientOptions DefaultOptions = new();
-        private static readonly KunaClientOptions DefaultBaseOptions = new(false);
+        private static readonly KunaRestOptions DefaultBaseOptions = new(false);
 
-        public KunaClient(KunaClientOptions exchangeOptions) : base("Kuna", exchangeOptions)
+        public KunaClient(KunaRestOptions exchangeOptions, ILoggerFactory logger = null, HttpClient httpClient = null) : base(logger, "Kuna")
         {
-            ClientV4 = AddApiClient(new KunaV4ApiClient(log, this, exchangeOptions, DefaultOptions));
+            var options = exchangeOptions ?? DefaultBaseOptions;
+            Initialize(options);
+            ClientV4 = AddApiClient(new KunaV4RestApiClient(_logger, httpClient, "https://api.kuna.io/", options, DefaultOptions));
         }
 
         public KunaClient() : this(DefaultBaseOptions)
@@ -32,18 +30,6 @@ namespace Kuna.Net
 
         public ISpotClient CommonSpotClient => ClientV4;
 
-        internal async Task<WebCallResult<T>> SendRequestInternal<T>(RestApiClient apiClient,
-                                                                     Uri uri,
-                                                                     HttpMethod method,
-                                                                     CancellationToken cancellationToken,
-                                                                     Dictionary<string, object>? parameters = null,
-                                                                     bool signed = false,
-                                                                     HttpMethodParameterPosition? postPosition = null,
-                                                                     ArrayParametersSerialization? arraySerialization = null,
-                                                                     int weight = 1) where T : class
-        {
-            return await base.SendRequestAsync<T>(apiClient, uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, requestWeight: weight);
-        }
 
     }
 }

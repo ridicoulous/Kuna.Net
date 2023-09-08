@@ -4,23 +4,23 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoExchange.Net;
-using CryptoExchange.Net.CommonObjects;
-using CryptoExchange.Net.Interfaces.CommonClients;
 using CryptoExchange.Net.Objects;
+using CryptoExchange.Net.Objects.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Kuna.Net
 {
-    public abstract class KunaBaseApiClient : RestApiClient
+    public abstract class KunaBaseRestApiClient : RestApiClient
     {
-        protected KunaClient _kunaClient;
+        // protected KunaClient _kunaClient;
         protected string versionSuffix = string.Empty;
 
         public virtual string ExchangeName => "Kuna";
 
-        protected KunaBaseApiClient(BaseRestClientOptions options, RestApiClientOptions apiOptions) : base(options, apiOptions)
+        protected KunaBaseRestApiClient(ILogger logger, HttpClient? httpClient, string baseAddress, RestExchangeOptions options, RestApiOptions apiOptions) 
+            : base(logger, httpClient, baseAddress, options, apiOptions)
         {
         }
-
         /// <summary>
         /// Whether or not the request can be signed
         /// </summary>
@@ -29,10 +29,10 @@ namespace Kuna.Net
         {
             return new Uri($"{BaseAddress}{(string.IsNullOrEmpty(versionSuffix)? string.Empty : $"{versionSuffix}/" )}{endpoint}");
         }
-        protected async Task<WebCallResult<T>> SendRequestAsync<T>(Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> request, bool signed, HttpMethodParameterPosition? position = null) where T : class
-        {
-            return await _kunaClient.SendRequestInternal<T>(this, uri, method, ct, request, signed, position);
-        }
+        // protected async Task<WebCallResult<T>> SendRequestAsync<T>(Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> request, bool signed, HttpMethodParameterPosition? position = null, Dictionary<string, string> additionalHeaders = null) where T : class
+        // {
+        //     return await base.SendRequestAsync<T>(uri, method, ct, request, signed, position, additionalHeaders: additionalHeaders);
+        // }
 
         /// <summary>
         /// Fill parameters in a path. Parameters are specified by '{}' and should be specified in occuring sequence

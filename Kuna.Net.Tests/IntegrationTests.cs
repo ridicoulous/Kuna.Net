@@ -1,11 +1,11 @@
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Kuna.Net;
 using Kuna.Net.Objects.V4;
 using Kuna.Net.Objects.V4.Requests;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using System.Diagnostics;
+using CryptoExchange.Net.Objects;
+using CryptoExchange.Net.Interfaces.CommonClients;
 
 namespace Kuna.Net.Tests
 {
@@ -14,8 +14,8 @@ namespace Kuna.Net.Tests
     ordererAssemblyName: "Kuna.Net.Tests")]
     public class KunaV4ApiClientIntegrationTests
     {
-        private readonly KunaV4ApiClient _apiClient;
-        private static readonly Guid ordId = Guid.NewGuid();
+        private readonly KunaV4RestApiClient _apiClient;
+        private readonly static Guid ordId = Guid.NewGuid();
         public KunaV4ApiClientIntegrationTests()
         {
             var config = new ConfigurationBuilder().AddJsonFile("keys.json", optional: true).Build();
@@ -32,12 +32,21 @@ namespace Kuna.Net.Tests
             {
                 cred = new KunaApiCredentials(key, secret);
             }
-            _apiClient = (KunaV4ApiClient)new KunaClient(
-                new KunaClientOptions()
+            var loggerFactory = LoggerFactory.Create(builder =>
+              {
+                  builder
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .AddProvider(new TraceLoggerProvider());
+              });
+            _apiClient = (KunaV4RestApiClient)new KunaClient(
+                new KunaRestOptions()
                 {
-                    LogLevel = LogLevel.Trace,
+                    OutputOriginalData = true,
+                    // IsProAccount = true,
                     ApiCredentials = cred
-                }).ClientV4;
+                },
+                loggerFactory
+            ).ClientV4;
         }
 
         #region auth unnecessary
@@ -46,7 +55,7 @@ namespace Kuna.Net.Tests
         public async Task GetServerTimeAsyncTest()
         {
             // Arrange
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
             // Act
             var result = await _apiClient.GetServerTimeAsync();
 
@@ -120,7 +129,7 @@ namespace Kuna.Net.Tests
         {
             // Arrange
             var pair = "BTC_UAH";
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
             // Act
             var result = await _apiClient.GetRecentPublicTradesAsync(pair);
 
@@ -171,12 +180,12 @@ namespace Kuna.Net.Tests
             _apiClient.SetProAccount(true);
             var result = await _apiClient.GetOrderBookAsync(pair, OrderBookLevel.Twenty);
             _apiClient.SetProAccount(false);
-            var proHeaderEntry = result.RequestHeaders?.FirstOrDefault(kv => kv.Key == "account");
+            var proHeaderEntry = result.RequestHeaders?.FirstOrDefault(kv => kv.Key == KunaV4RestApiClient.ProParameter.Key);
             // Assert
             Assert.True(result.Success);
 
             // Add more assertions based on the expected behavior of this method
-            Assert.Contains(proHeaderEntry.Value.Value, p => p.Equals("pro"));
+            Assert.Contains(proHeaderEntry.Value.Value, p => p.Equals(KunaV4RestApiClient.ProParameter.Value));
         }
 
         [Fact, TestPriority(1)]
@@ -210,7 +219,8 @@ namespace Kuna.Net.Tests
             var result = await _apiClient.GetOrderAsync(id);
 
             // Assert
-                
+            Assert.True(result.Success);
+
             // Add more assertions based on the expected behavior of this method
             Assert.Equal(id, result.Data.Id);
         }
@@ -233,6 +243,7 @@ namespace Kuna.Net.Tests
             var id = ordId;
 
             // Act
+            // var result = await _apiClient.CancelOrdersAsync(new[] {id});
             var result = await _apiClient.CancelOrdersAsync(new[] {id});
 
             // Assert
@@ -256,14 +267,28 @@ namespace Kuna.Net.Tests
 
         }
         [Fact]
+        public async Task IBaseRestClientGetBalancesAsync()
+        {
+
+            // Act
+            var result = await ((IBaseRestClient) _apiClient).GetBalancesAsync();
+
+            // Assert
+            Assert.True(result.Success);
+            // Add more assertions based on the expected behavior of this method
+            Assert.Contains(result.Data, c => c.Asset == "BTC");
+        }
+
+        [Fact, TestPriority(99)]
         public async Task TestPro()
         {
             // Arrange 
             var reqNumb = 400;
             var expectedSuccessfullyExecutedAmount = reqNumb;
-            var tasks = new Task<CryptoExchange.Net.Objects.WebCallResult<IEnumerable<KunaTradeV4>>>[reqNumb];
+            var tasks = new Task<WebCallResult<IEnumerable<KunaTradeV4>>>[reqNumb];
             var watch = Stopwatch.StartNew();
             // Act
+            _apiClient.SetProAccount(true);
             for (var i = 0; i < reqNumb; i++)
             {
                 tasks[i] = _apiClient.GetOrderTradesAsync(ordId);
@@ -273,7 +298,10 @@ namespace Kuna.Net.Tests
             watch.Stop();
             var done = tasks.Where(t => t.Result.Success).Count();
             // Assert
-            Assert.True(done > expectedSuccessfullyExecutedAmount);
+            // expect that all the responses were successfully completed
+            Assert.True(done >= expectedSuccessfullyExecutedAmount);
+            // and that all the responses were sent in a minute (ratelimeter should allow 1200req/min)
+            Assert.True(watch.ElapsedMilliseconds < 1000*60);
         }
 
 

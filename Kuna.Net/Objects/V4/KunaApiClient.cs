@@ -1,16 +1,13 @@
 ﻿using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.CommonObjects;
-using CryptoExchange.Net.Converters;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Interfaces.CommonClients;
-using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
-using Kuna.Net.Converters;
 using Kuna.Net.Helpers;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects.V4.Requests;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +17,9 @@ using System.Threading.Tasks;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaV4ApiClient : KunaBaseApiClient, IKunaApiClientV4
+    public class KunaV4RestApiClient : KunaBaseRestApiClient, IKunaApiClientV4
     {
-        internal static readonly KeyValuePair<string, object> ProParameter = new ("isPro", "true");
+        internal static readonly KeyValuePair<string, string> ProParameter = new ("account", "pro");
 
         #region endpoints
 
@@ -50,7 +47,7 @@ namespace Kuna.Net.Objects.V4
         // private const string NotImplementedYet0 = "private/me";
         #endregion        
         private bool isProAccount;
-        private readonly bool useSingleApiKey;
+        // private readonly bool useSingleApiKey;
         private const int ProTotalRateLimit = 1200;
         private const int RegularTotalRateLimit = 300;
         private int? userDefinedTotalRateLimit = null;
@@ -58,17 +55,15 @@ namespace Kuna.Net.Objects.V4
         public event Action<string> OnError;
         public event Action<OrderId> OnOrderPlaced;
         public event Action<OrderId> OnOrderCanceled;
-        private readonly Log _log;
 
-        public KunaV4ApiClient(Log log, KunaClient baseClient, KunaClientOptions options, KunaApiClientOptions apiOptions) : base(options, apiOptions)
+        public KunaV4RestApiClient(ILogger logger, HttpClient? httpClient, string baseAddress, KunaRestOptions options, KunaApiClientOptions apiOptions)
+            : base(logger, httpClient, baseAddress, options, apiOptions)
         {
-            _log = log;
-            _kunaClient = baseClient;
             isProAccount=options.IsProAccount;
             UpdateRateLimiters();
             // OnError += HandleProAccountEndpointError; //unsuported with v4
             versionSuffix = "v4";
-            useSingleApiKey = options.UseSingleApiKey;
+            // useSingleApiKey = options.UseSingleApiKey;
         }
 
         /// <summary>
@@ -88,9 +83,9 @@ namespace Kuna.Net.Objects.V4
         }
 
 
-        public override TimeSyncInfo GetTimeSyncInfo() => new (_log, false, TimeSpan.FromSeconds(600), TimeSyncState);
+        public override TimeSyncInfo GetTimeSyncInfo() => new (_logger, false, TimeSpan.FromSeconds(600), TimeSyncState);
 
-        public override TimeSpan GetTimeOffset()
+        public override TimeSpan? GetTimeOffset()
             => TimeSyncState.TimeOffset;
 
         protected override async Task<WebCallResult<DateTime>> GetServerTimestampAsync()
@@ -100,7 +95,7 @@ namespace Kuna.Net.Objects.V4
 
         protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
         {
-            return new KunaAuthenticationProvider(credentials, useSingleApiKey);
+            return new KunaAuthenticationProvider(credentials, ((KunaRestOptions) ClientOptions).UseSingleApiKey);
         }
 
         #region Public API
@@ -108,7 +103,7 @@ namespace Kuna.Net.Objects.V4
         {
             WebCallResult<KunaTimestampResponse> tmpResult = await SendRequestAsync<KunaTimestampResponse>(ServerTimeEndpoint, HttpMethod.Get, null, false, ct);
 
-            return new WebCallResult<DateTime>(tmpResult.ResponseStatusCode, tmpResult.ResponseHeaders, null, null, null, null, null, null, tmpResult.Data.CurrentTime, tmpResult.Error);
+            return tmpResult.As(tmpResult.Data.CurrentTime);
         }
         /// <summary>
         /// Not implemented yet!!!
@@ -373,30 +368,23 @@ namespace Kuna.Net.Objects.V4
 
         private void UpdateRateLimiters()
         {
-            // this.Options.RateLimiters.RemoveAll(c => c.ToString() == "TotalRateLimiter");
-
-            Options.RateLimiters.Clear();
-            var newLimits = new List<IRateLimiter>
-                {
+            ApiOptions.RateLimiters.Clear();
+            ApiOptions.RateLimiters.Add(
                     new RateLimiter()
-                    .AddTotalRateLimit(TotalRateLimit.Value, TimeSpan.FromMinutes(1)),
-                    //this doesn;t work, maybe updating base lib will hendle this
-                    new RateLimiter()
-                    .AddPartialEndpointLimit("public", 60 , TimeSpan.FromMinutes(1), countPerEndpoint:false)
-                };
-            foreach (var limit in newLimits)
-                Options.RateLimiters.Add(limit);
+                    .AddTotalRateLimit(TotalRateLimit.Value, TimeSpan.FromMinutes(1))
+                    .AddPartialEndpointLimit("public/", 60, TimeSpan.FromMinutes(1), ignoreOtherRateLimits: true)
+            );
         }
 
         private async Task<WebCallResult<T>> SendRequestAsync<T>(string endpoint, HttpMethod method, Dictionary<string, object> parameters, bool signed, CancellationToken ct)
         where T : class
         {
+            Dictionary<string, string> header = null;
             if (signed && isProAccount) 
             {
-                parameters ??= new Dictionary<string, object>();
-                parameters.Add(ProParameter.Key, ProParameter.Value);
+                header = new() { [ProParameter.Key] = ProParameter.Value };
             }
-            var result = await SendRequestAsync<KunaV4BaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed).ConfigureAwait(false);
+            var result = await SendRequestAsync<KunaV4BaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed, additionalHeaders: header).ConfigureAwait(false);
             if (!result.Success)
             {
                 OnError?.Invoke(result.Error.Message);

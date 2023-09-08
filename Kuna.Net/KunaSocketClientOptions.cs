@@ -1,12 +1,8 @@
-﻿using CryptoExchange.Net.Objects;
+﻿using CryptoExchange.Net.Objects.Options;
 
 namespace Kuna.Net
 {
-    public class KunaSocketClientOptions : BaseSocketClientOptions
+    public class KunaSocketClientOptions : SocketApiOptions
     {
-        public KunaSocketClientOptions(string baseAddress) //: base(baseAddress)
-        {
-            
-        }
     }
 }
