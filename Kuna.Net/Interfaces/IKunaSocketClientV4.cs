@@ -1,7 +1,7 @@
 
 namespace Kuna.Net.Interfaces
 {
-    public interface IKunaSocketClientV3
+    public interface IKunaSocketClientStreamV4
     {
         
     }

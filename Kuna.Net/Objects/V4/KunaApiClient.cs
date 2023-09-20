@@ -372,7 +372,7 @@ namespace Kuna.Net.Objects.V4
             ApiOptions.RateLimiters.Add(
                     new RateLimiter()
                     .AddTotalRateLimit(TotalRateLimit.Value, TimeSpan.FromMinutes(1))
-                    .AddPartialEndpointLimit("public/", 60, TimeSpan.FromMinutes(1), ignoreOtherRateLimits: true)
+                    .AddPartialEndpointLimit("/public/", 60, TimeSpan.FromMinutes(1), ignoreOtherRateLimits: true)
             );
         }
 

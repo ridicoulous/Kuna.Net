@@ -25,4 +25,11 @@ namespace Kuna.Net.Objects.V4
         [ArrayProperty(1)]
         public decimal Quantity { get; set; }
     }
+
+    public class KunaSocketUpdateOrderBookV4 : KunaOrderBookV4
+    {
+        [JsonProperty("pair")]
+        public string Pair { get; set; }
+
+    }
 }
