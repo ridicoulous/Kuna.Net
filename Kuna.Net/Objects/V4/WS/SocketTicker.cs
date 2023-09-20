@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4.WS
 {
-    public class SocketTicker : KunaTickerV4
+    public class KunaSocketTicker : KunaTickerV4
     {
         [JsonProperty("p")]
         public string P { set => Pair = value; }
@@ -18,7 +18,7 @@ namespace Kuna.Net.Objects.V4.WS
         public decimal Pcp { set => PercentagePriceChange = value; }
 
         [JsonProperty("ftbp")]
-        public decimal Price24HoursAgo { get; set; }
+        public decimal Price24HoursAgo { get => base.Open; set => base.Open = value; }
 
         [JsonProperty("lp")]
         public decimal Lp { set => Price = value;}
@@ -30,37 +30,27 @@ namespace Kuna.Net.Objects.V4.WS
         public decimal Bbp { set => BestBidPrice = value; }
 
         [JsonProperty("bbq")]
-        public decimal Bbq { get; set; }
+        public decimal BestBidQuantity { get; set; }
 
         [JsonProperty("bap")]
-        public string Bap { get; set; }
+        public decimal Bap { set => BestAskPrice = value; }
 
         [JsonProperty("baq")]
-        public string Baq { get; set; }
-
-        [JsonProperty("o")]
-        public string O { get; set; }
-
-        [JsonProperty("h")]
-        public string H { get; set; }
-
-        [JsonProperty("l")]
-        public string L { get; set; }
+        public decimal BestAskQuantity { get; set; }
 
         [JsonProperty("ot")]
-        public DateTimeOffset Ot { get; set; }
+        public DateTimeOffset Ot { set => OpenTime = value; }
 
         [JsonProperty("ct")]
-        public DateTimeOffset Ct { get; set; }
+        public DateTimeOffset Ct { set => CloseTime = value; }
 
         [JsonProperty("n")]
-        public int N { get; set; }
-
+        public int TradesAmount { get; set; }
 
         [JsonProperty("ttbav")]
-        public string Ttbav { get; set; }
+        public decimal Ttbav { set => BaseVolume = value; }
 
         [JsonProperty("ttqav")]
-        public string Ttqav { get; set; }
+        public decimal Ttqav { set => QuoteVolume = value; }
     }
 }

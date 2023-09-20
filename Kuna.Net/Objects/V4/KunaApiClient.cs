@@ -437,7 +437,7 @@ namespace Kuna.Net.Objects.V4
                                                   HighPrice = t.High,
                                                   LowPrice = t.Low,
                                                   Price24H = t.Price - t.PriceChange,
-                                                  Volume = t.BaseVolume,
+                                                  Volume = t.Volume,
                                                   LastPrice = t.Price,
                                               }).FirstOrDefault());
         }
@@ -452,7 +452,7 @@ namespace Kuna.Net.Objects.V4
                                                  HighPrice = t.High,
                                                  LowPrice = t.Low,
                                                  Price24H = t.Price - t.PriceChange,
-                                                 Volume = t.BaseVolume,
+                                                 Volume = t.Volume,
                                                  LastPrice = t.Price,
                                              }));
         }

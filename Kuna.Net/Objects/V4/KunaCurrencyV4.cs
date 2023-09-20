@@ -12,7 +12,7 @@ namespace Kuna.Net.Objects.V4
         public string Name { get; set; }
 
         [JsonProperty("payload")]
-        public Payload Payload { get; set; }
+        public KunaCurrencyPayload Payload { get; set; }
 
         [JsonProperty("position")]
         public int Position { get; set; }
@@ -27,7 +27,7 @@ namespace Kuna.Net.Objects.V4
         public CurrencyType Type { get; set; }
     }
 
-    public class Payload
+    public class KunaCurrencyPayload
     {
         [JsonProperty("chart")]
         public Uri Chart { get; set; }
