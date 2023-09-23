@@ -10,6 +10,9 @@ namespace Kuna.Net.Objects.V4.WS
 
         public DateTimeOffset CloseTime { get; set; } = DateTimeOffset.UtcNow;
 
+        /// <summary>
+        /// price of the trade happenned after OpenTime
+        /// </summary>
         [JsonProperty("o")]
         public virtual decimal Open { get; set; }
 

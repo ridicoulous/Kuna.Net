@@ -13,6 +13,7 @@ namespace Kuna.Net
 {
     public class KunaSocketClient : BaseSocketClient, ISocketClient, IKunaSocketClientStreamV4
     {
+        internal ILogger Logger { get => _logger; }
         public KunaSocketClient(KunaSocketClientOptions options, ILoggerFactory logger = null) : base(logger, "KunaSocketClient")
         {
 

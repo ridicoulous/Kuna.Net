@@ -11,6 +11,7 @@ namespace Kuna.Net
     {
         private static readonly KunaApiClientOptions DefaultOptions = new();
         private static readonly KunaRestOptions DefaultBaseOptions = new(false);
+        internal ILogger Logger { get => _logger; }
 
         public KunaClient(KunaRestOptions exchangeOptions, ILoggerFactory logger = null, HttpClient httpClient = null) : base(logger, "Kuna")
         {

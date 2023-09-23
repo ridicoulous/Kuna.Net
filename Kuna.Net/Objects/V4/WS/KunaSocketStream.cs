@@ -20,87 +20,102 @@ namespace Kuna.Net.Objects.V4;
 
 public class KunaSocketStream : SocketApiClient
 {
-    // private readonly PureSocketClusterSocket socket;
-    // private readonly Dictionary<string,Channel> connections = new();
     private const string url = "wss://ws-pro.kuna.io/socketcluster/";
+
+    internal ILogger Logger { get => _logger; }
+
     public KunaSocketStream(ILogger logger, SocketExchangeOptions options, SocketApiOptions apiOptions) : base(logger,url , options, apiOptions)
     {
-        // var pscOptions = new PureSocketClusterOptions()
-        // {
-        //     DebugMode = true,
-        //     DisconnectWait = (int)options.RequestTimeout.TotalMilliseconds,
-        //     MyReconnectStrategy = options.AutoReconnect ? new((int)options.ReconnectInterval.TotalMilliseconds) : new(0),
-        //     Creds = options.ApiCredentials is null ? null : new() {ApiKey = options.ApiCredentials.Key.GetString(), ApiSecret = options.ApiCredentials.Secret.GetString() }
-        // };
-        // socket = new PureSocketClusterSocket(BaseAddress, pscOptions);
-        // socket.OnData += OnData;
-        // socket.OnMessage += OnMsg;
-        // socket.On
     }
 
-    private void OnData(object sender, byte[] data){
-        Console.WriteLine($"{data} comes with {sender}");
-    }
-    private void OnMsg(object sender, string data)
+
+    /// <summary>
+    /// The stream contains an array of KunaSocketTicker objects, each representing a different trading pair on the exchange.
+    /// Update Speed: 1000ms
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToAllTickers(Action<IEnumerable<KunaSocketTicker>> onData, CancellationToken ct = default)
     {
-        Console.WriteLine($"{data} comes with {sender}");
+        return await SubscribeInternal("arrTicker", onData, ct);
+    }
+    /// <summary>
+    /// The stream contains an array of KunaMiniTicker objects, each representing a different trading pair on the exchange.
+    /// Update Speed: 1000ms
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToAllMiniTickers(Action<IEnumerable<KunaMiniTicker>> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal("arrMiniTicker", onData, ct);
+    }
+    /// <summary>
+    ///  The real-time data stream that provides updates on the latest trading price and other market data for a specific trading pair.
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToTicker(string symbol, Action<KunaSocketTicker> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal(AddSymbolToTopic(symbol, "ticker"), onData, ct);
+    }
+    /// <summary>
+    ///  The real-time data stream that provides updates on the latest trading price and other market data for a specific trading pair.
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToMiniTicker(string symbol, Action<KunaMiniTicker> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal(AddSymbolToTopic(symbol, "miniTicker"), onData, ct);
+    }
+    /// <summary>
+    /// This is full order book depth stream.
+    /// Update Speed: 1000ms
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToSlowOrderBook(string symbol, Action<KunaOrderBookV4> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal(AddSymbolToTopic(symbol, "depth"), onData, ct);
+    }
+    /// <summary>
+    /// This is full order book depth stream.
+    /// Update Speed: 100ms
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToOrderBook(string symbol, Action<KunaOrderBookV4> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal(AddSymbolToTopic(symbol, "depth100ms"), onData, ct);
     }
 
     public async Task<CallResult<UpdateSubscription>> SubscribeInternal<TUpdate>(string topic, Action<TUpdate> onData, CancellationToken ct = default)
     where TUpdate : class
     {
         var req = new KunaSubscribeSocketRequest(topic);
-        // var req = new Dictionary<string, object>
-        // {
-        //     { "event", "#subscribe" },
-        //     { "data", new Dictionary<string, string>() {{"channel", "arrTicker"}} },
-        //     { "cid", 1 }
-        // };
-
         return await base.SubscribeAsync<KunaSocketSubscribtionIncomingUpdates<TUpdate>>
         (
             req,
             topic,
             // authenticated: ApiOptions.ApiCredentials != null,
-            authenticated: true,
+            authenticated: true,    //force to send auth payload
             dataHandler: updData => onData.Invoke(updData.Data.ActualData),
             ct: ct
-        );
-
-        // topic = topic.ToLower();
-        // while (socket.SocketState == WebSocketState.Connecting)
-        // {
-        //     await Task.Delay(1);
-        // }
-        // if (socket.SocketState != WebSocketState.Open && !await socket.ConnectAsync())
-        // {
-        //     _logger.LogError($"Can't connect to WebSocket");
-        //     return;
-        // }
-        // if (connections.TryGetValue(topic, out var channel))
-        // {
-        //     await channel.UnsubscribeAsync();
-        //     // connections.Remove(topic);
-        // }
-        // // socket.OnMessage += (sender, args) =>
-        // channel = socket.CreateChannel(topic);
-        // connections[topic] = channel;
-        // await channel.SubscribeAsync();
-
-
-        // await socket.SubscribeAsync(topic);
-        // // channel = socket.CreateChannel(topic);
-        // channel = socket.GetChannelByName(topic);
-        // connections[topic] = channel;
-        // await channel.SubscribeAsync();
+        ).ConfigureAwait(false);
     }
 
 
     protected override async Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection socketConnection)
     {
-        // if (socketConnection.ApiClient.AuthenticationProvider is null)
-        //     return new CallResult<bool>(false);
-
         ServerError serverError = null;
         bool isSuccess = false;
         var authRequest = new KunaAuthSocketRequest(ApiOptions.ApiCredentials?.Secret.GetString());
@@ -183,11 +198,9 @@ public class KunaSocketStream : SocketApiClient
             SendPeriodic("ping", TimeSpan.FromSeconds(8), connection => string.Empty);
         return result;
     }
-
-    // public override void Dispose()
-    // {
-    //     socket.Unsubscribe();
-    //     base.Dispose();
-    // }
+    private string AddSymbolToTopic(string symbol, string topic)
+    {
+        return $"{symbol.ToLower()}@{topic}";
+    }
 
 }

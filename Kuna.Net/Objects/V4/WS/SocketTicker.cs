@@ -17,8 +17,11 @@ namespace Kuna.Net.Objects.V4.WS
         [JsonProperty("pcp")]
         public decimal Pcp { set => PercentagePriceChange = value; }
 
+        /// <summary>
+        /// closing price of the previous frame, price of the last trade before OpenTime
+        /// </summary>
         [JsonProperty("ftbp")]
-        public decimal Price24HoursAgo { get => base.Open; set => base.Open = value; }
+        public decimal Price24HoursAgo { get; set; }
 
         [JsonProperty("lp")]
         public decimal Lp { set => Price = value;}
