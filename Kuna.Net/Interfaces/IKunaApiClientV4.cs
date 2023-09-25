@@ -138,7 +138,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of trades associated with the trading pair.</returns>
-        Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default);
 
         /// <summary>
         /// Gets all trades associated with an order asynchronously.
@@ -146,7 +146,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="orderId">The unique identifier of the order to retrieve trades for.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of trades associated with the order.</returns>
-        Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default);
 
         /// <summary>
         /// Gets the balances of all your wallets asynchronously.

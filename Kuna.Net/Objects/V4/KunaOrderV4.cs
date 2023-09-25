@@ -66,8 +66,12 @@ namespace Kuna.Net.Objects.V4
         [JsonProperty("closedAt")]
         public DateTimeOffset? ClosedAt { get; set; }
 
-
+        /// <summary>
+        /// Attention!
+        /// Non null only for KunaV4RestApiClient.GetOrderAsync(withTrades : true)!
+        /// For socket updates it will be null too!
+        /// </summary>
         [JsonProperty("trades")]
-        public List<KunaTradeV4> Trades { get; set; }
+        public List<KunaUserTradeV4> Trades { get; set; }
     }
 }

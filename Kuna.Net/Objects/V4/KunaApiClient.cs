@@ -313,7 +313,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
         {
             Dictionary<string, object> parameters = new();
             parameters.AddOptionalParameter("pair", market);
@@ -321,7 +321,7 @@ namespace Kuna.Net.Objects.V4
             if (!sortDesc)
                 parameters.AddOptionalParameter("sort", "asc");
 
-            return await SendRequestAsync<IEnumerable<KunaTradeV4>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaUserTradeV4>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -331,9 +331,9 @@ namespace Kuna.Net.Objects.V4
         /// <param name="orderId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
         {
-            return await SendRequestAsync<IEnumerable<KunaTradeV4>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaUserTradeV4>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
         }
         #endregion Trading API
 

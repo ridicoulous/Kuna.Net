@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CryptoExchange.Net;
 using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.CommonObjects;
 using CryptoExchange.Net.Interfaces;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Objects.Options;
@@ -98,7 +99,61 @@ public class KunaSocketStream : SocketApiClient
         return await SubscribeInternal(AddSymbolToTopic(symbol, "depth100ms"), onData, ct);
     }
 
-    public async Task<CallResult<UpdateSubscription>> SubscribeInternal<TUpdate>(string topic, Action<TUpdate> onData, CancellationToken ct = default)
+    /// <summary>
+    ///  The stream provides real-time updates for changes to a user's order.
+    ///  Each update includes information about the order, such as the order ID, 
+    ///  the symbol, the order side (buy or sell), the order type (limit, market, etc.),
+    ///  the order status (open, filled, cancelled, etc.), and the price and quantity of the order.
+    /// Update Speed: real-time
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToOrdersUpdates(Action<KunaOrderV4> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal("order", onData, ct);
+    }
+
+    /// <summary>
+    ///  The trade stream provides real-time updates for new trades executed by a user. 
+    ///  Each update includes information about the trade, such as the trade ID, the pair, 
+    ///  the trade side (buy or sell), the price and quantity of the trade, the timestamp of the trade, etc.
+    /// Update Speed: real-time
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToUserTrades(Action<KunaUserTradeV4> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal("trade", onData, ct);
+    }
+
+    /// <summary>
+    /// The stream provides real-time updates for changes to a user's account balances.
+    /// Each update includes information about the account balance, such as the asset and the available and blocked balance on it.
+    /// Update Speed: real-time
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToUserTrades(Action<SocketBalance> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal("accounts", onData, ct);
+    }
+
+    /// <summary>
+    /// The stream provides real-time updates for changes to a currencies rate. 
+    /// Each update includes information about changes reference currencies (for now they are USD, UAH, BTC, EUR) for each asset.
+    /// </summary>
+    /// <param name="onData"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<CallResult<UpdateSubscription>> SubscribeToCurenciesRates(Action<KunaCurrencyRate> onData, CancellationToken ct = default)
+    {
+        return await SubscribeInternal("rates", onData, ct);
+    }
+
+    internal async Task<CallResult<UpdateSubscription>> SubscribeInternal<TUpdate>(string topic, Action<TUpdate> onData, CancellationToken ct = default)
     where TUpdate : class
     {
         var req = new KunaSubscribeSocketRequest(topic);
