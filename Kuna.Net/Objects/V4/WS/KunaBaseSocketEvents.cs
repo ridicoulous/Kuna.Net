@@ -65,6 +65,14 @@ namespace Kuna.Net.Objects.V4.WS
             Data = channel;
         }
     }
+    internal class KunaLoginToSocketRequest : KunaBaseSocketData<string>
+    {
+        public KunaLoginToSocketRequest(string apiKey)
+        {
+            Topic = "login";
+            Data = apiKey;
+        }
+    }
     internal class KunaBaseSocketEventBody
     {
         public KunaBaseSocketEventBody()
@@ -110,5 +118,10 @@ namespace Kuna.Net.Objects.V4.WS
 
         [JsonProperty("name")]
         public string Name { get; set; }
+    }
+    internal class TokenData
+    {
+        [JsonProperty("token")]
+        public string JWT { get; set; }
     }
 }

@@ -22,9 +22,9 @@ namespace Kuna.Net.Objects.V4;
 public class KunaSocketStream : SocketApiClient
 {
     private const string url = "wss://ws-pro.kuna.io/socketcluster/";
+    private string jwt = null;
 
     internal ILogger Logger { get => _logger; }
-
     public KunaSocketStream(ILogger logger, SocketExchangeOptions options, SocketApiOptions apiOptions) : base(logger,url , options, apiOptions)
     {
     }
@@ -148,7 +148,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToCurenciesRates(Action<KunaCurrencyRate> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToCurenciesRates(Action<IEnumerable<KunaCurrencyRate>> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal("rates", onData, ct);
     }
@@ -161,7 +161,6 @@ public class KunaSocketStream : SocketApiClient
         (
             req,
             topic,
-            // authenticated: ApiOptions.ApiCredentials != null,
             authenticated: true,    //force to send auth payload
             dataHandler: updData => onData.Invoke(updData.Data.ActualData),
             ct: ct
@@ -171,24 +170,47 @@ public class KunaSocketStream : SocketApiClient
 
     protected override async Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection socketConnection)
     {
-        ServerError serverError = null;
-        bool isSuccess = false;
-        var authRequest = new KunaAuthSocketRequest(ApiOptions.ApiCredentials?.Secret.GetString());
-        await socketConnection.SendAndWaitAsync(authRequest, TimeSpan.FromSeconds(1), null, 1, token =>
+        bool wasSuccessful = await SendHandshakeReq(socketConnection);
+
+        if (jwt is null)
+        {
+            wasSuccessful = await SendLoginReq(socketConnection);
+        }
+        
+        return wasSuccessful ? new CallResult<bool>(true) : new CallResult<bool>(new ServerError("Auth request was not succesful"));
+    }
+
+    private async Task<bool> SendLoginReq(SocketConnection socketConnection)
+    {
+        var isSuccess = false;
+        var req = new KunaLoginToSocketRequest(ApiOptions.ApiCredentials?.Secret.GetString());
+        await socketConnection.SendAndWaitAsync(req, TimeSpan.FromSeconds(1), null, 1, token =>
         {
             if (string.IsNullOrEmpty(token.ToString()))
             {
                 isSuccess = false;
-                serverError = new ServerError("Auth request was not succesful");
+                return false;
             }
-            else
-            {
-                isSuccess = true;
-            }
+            jwt = token.ToObject<KunaBaseSocketData<TokenData>>()?.Data?.JWT;
+            isSuccess = true;
             return true;
 
         });
-        return isSuccess ? new CallResult<bool>(true) : new CallResult<bool>(serverError);
+        return isSuccess;
+
+    }
+
+    private async Task<bool> SendHandshakeReq(SocketConnection socketConnection)
+    {
+        var isSuccess = false;
+        var authRequest = new KunaAuthSocketRequest(jwt);
+        await socketConnection.SendAndWaitAsync(authRequest, TimeSpan.FromSeconds(1), null, 1, token =>
+        {
+            isSuccess = !string.IsNullOrEmpty(token.ToString());
+            return true;
+
+        });
+        return isSuccess;
     }
 
     protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)

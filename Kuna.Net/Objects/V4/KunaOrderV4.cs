@@ -34,7 +34,7 @@ namespace Kuna.Net.Objects.V4
         public KunaOrderStatusV4 Status { get; set; }
 
         [JsonProperty("createdAt")]
-        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
 
         [JsonProperty("updatedAt")]
         public DateTimeOffset UpdatedAt { get; set; }
