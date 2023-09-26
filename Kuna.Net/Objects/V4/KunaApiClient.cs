@@ -8,6 +8,7 @@ using Kuna.Net.Helpers;
 using Kuna.Net.Interfaces;
 using Kuna.Net.Objects.V4.Requests;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace Kuna.Net.Objects.V4
             UpdateRateLimiters();
             // OnError += HandleProAccountEndpointError; //unsuported with v4
             versionSuffix = "v4";
-            // useSingleApiKey = options.UseSingleApiKey;
+            manualParseError = true; //some responses came with status code 200 even if error occurred, handle them
         }
 
         /// <summary>
@@ -98,6 +99,16 @@ namespace Kuna.Net.Objects.V4
             return new KunaAuthenticationProvider(credentials, ((KunaRestOptions) ClientOptions).UseSingleApiKey);
         }
 
+        protected override async Task<ServerError?> TryParseErrorAsync(JToken data)
+        {
+            var errormsg = data.ToObject<KunaErrorResponse>();
+            if (errormsg?.Errors?.Any() != true)
+            {
+                return await Task.FromResult<ServerError>(null);
+            }
+            return await Task.FromResult(new ServerError(data.ToString()));
+        }
+
         #region Public API
         public async Task<WebCallResult<DateTime>> GetServerTimeAsync(CancellationToken ct = default)
         {
@@ -105,6 +116,7 @@ namespace Kuna.Net.Objects.V4
 
             return tmpResult.As(tmpResult.Data.CurrentTime);
         }
+
         /// <summary>
         /// Not implemented yet!!!
         /// </summary>

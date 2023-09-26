@@ -9,7 +9,7 @@ namespace Kuna.Net.Objects.V4.WS
     public class KunaSocketBalance : IEnumerable
     {
         [JsonProperty("userId")]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [JsonProperty("assets")]
         public IEnumerable<KunaAccountBalance> Assets { get; set; } = Array.Empty<KunaAccountBalance>();
