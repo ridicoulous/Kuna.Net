@@ -14,14 +14,20 @@ namespace Kuna.Net
     public class KunaSocketClient : BaseSocketClient, ISocketClient, IKunaSocketClientStreamV4
     {
         internal ILogger Logger { get => _logger; }
+        /// <summary>
+        /// Creates websocket client. Use MainSocketStreams property to work with websocket.
+        /// If you need authentication, use only so called single api key, provide it in options properties
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
         public KunaSocketClient(KunaSocketClientOptions options, ILoggerFactory logger = null) : base(logger, "KunaSocketClient")
         {
 
             Initialize(options.CommonStreamsOptions);
-            MainSocketStreams = AddApiClient(new KunaSocketStream(_logger, options.CommonStreamsOptions, options));
+            MainSocketStream = AddApiClient(new KunaSocketStream(_logger, options.CommonStreamsOptions, options));
         }
 
-        public KunaSocketStream MainSocketStreams { get; private set; }
+        public KunaSocketStream MainSocketStream { get; private set; }
 
 
     }

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaCurrencyV4
+    public class KunaCurrency
     {
         [JsonProperty("code")]
         public string Code { get; set; }

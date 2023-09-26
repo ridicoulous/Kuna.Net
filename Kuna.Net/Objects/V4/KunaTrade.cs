@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaUserTradeV4 : KunaPublicTradeV4
+    public class KunaUserTrade : KunaPublicTrade
     {
 
         /// <summary>

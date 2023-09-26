@@ -12,5 +12,11 @@ namespace Kuna.Net.Objects.V4
 
         [JsonProperty("lockBalance")]
         public decimal LockBalance { get; set; }
+
+        /// <summary>
+        /// the same as Currency, just for compability with socket update event object
+        /// </summary>
+        [JsonProperty("code")]
+        public string C { set => Currency = value; }
     }
 }

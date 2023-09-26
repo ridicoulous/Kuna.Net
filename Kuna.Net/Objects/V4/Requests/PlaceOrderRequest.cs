@@ -4,10 +4,10 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4.Requests
 {
-    public class PlaceOrderRequestV4
+    public class PlaceOrderRequest
     {
 
-        private PlaceOrderRequestV4(string symbol, KunaOrderSideV4 orderSide, Guid? id)
+        private PlaceOrderRequest(string symbol, KunaOrderSide orderSide, Guid? id)
         {
             Symbol = symbol;
             Side = orderSide;
@@ -30,7 +30,7 @@ namespace Kuna.Net.Objects.V4.Requests
         /// limit, market, market_by_quote, limit_stop_loss
         /// </summary>
         [JsonProperty("type")]
-        public KunaOrderTypeV4 Type { get; private set;}
+        public KunaOrderType Type { get; private set;}
 
         /// <summary>
         /// Quantity of the base asset to buy/sell (e.g. for BTC_USDT trading pair, BTC is the base asset).
@@ -61,13 +61,13 @@ namespace Kuna.Net.Objects.V4.Requests
         public string Price { get; private set;}
 
         [JsonProperty("orderSide")]
-        public KunaOrderSideV4 Side { get; private set; }
+        public KunaOrderSide Side { get; private set; }
 
-        public static PlaceOrderRequestV4 LimitOrder(string symbol, decimal amount, KunaOrderSideV4 orderSide, decimal price, Guid? id = null)
+        public static PlaceOrderRequest LimitOrder(string symbol, decimal amount, KunaOrderSide orderSide, decimal price, Guid? id = null)
         {
-            return new PlaceOrderRequestV4(symbol, orderSide, id)
+            return new PlaceOrderRequest(symbol, orderSide, id)
             {
-                Type = KunaOrderTypeV4.Limit,
+                Type = KunaOrderType.Limit,
                 Quantity = amount.ToString(CultureInfo.InvariantCulture),
                 Price = price.ToString(CultureInfo.InvariantCulture),
             };
@@ -82,11 +82,11 @@ namespace Kuna.Net.Objects.V4.Requests
         /// <param name="isAmountPerQuoteAsset"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static PlaceOrderRequestV4 MarketOrder(string symbol, decimal amount, KunaOrderSideV4 orderSide, bool isAmountPerQuoteAsset = false, Guid? id = null)
+        public static PlaceOrderRequest MarketOrder(string symbol, decimal amount, KunaOrderSide orderSide, bool isAmountPerQuoteAsset = false, Guid? id = null)
         {
-            var req =  new PlaceOrderRequestV4(symbol, orderSide, id)
+            var req =  new PlaceOrderRequest(symbol, orderSide, id)
             {
-                Type = KunaOrderTypeV4.Market,
+                Type = KunaOrderType.Market,
             };
             if (isAmountPerQuoteAsset)
                 req.QuoteQuantity = amount.ToString(CultureInfo.InvariantCulture);
@@ -96,22 +96,22 @@ namespace Kuna.Net.Objects.V4.Requests
             return req;
         }
         //TODO: improve with validation and choosing type between StopLossLimit/TakeProfitLimit depending on the price/stopprice
-        public static PlaceOrderRequestV4 StopLossLimit(string symbol, decimal amount, KunaOrderSideV4 orderSide, decimal price, decimal triggerPrice, Guid? id = null)
+        public static PlaceOrderRequest StopLossLimit(string symbol, decimal amount, KunaOrderSide orderSide, decimal price, decimal triggerPrice, Guid? id = null)
         {
-            return new PlaceOrderRequestV4(symbol, orderSide, id)
+            return new PlaceOrderRequest(symbol, orderSide, id)
             {
-                Type = KunaOrderTypeV4.StopLossLimit,
+                Type = KunaOrderType.StopLossLimit,
                 Price = price.ToString(CultureInfo.InvariantCulture),
                 StopPrice = triggerPrice.ToString(CultureInfo.InvariantCulture),
                 Quantity = amount.ToString(CultureInfo.InvariantCulture),
             };
         }
 
-        public static PlaceOrderRequestV4 TakeProfitLimit(string symbol, decimal amount, KunaOrderSideV4 orderSide, decimal price, decimal triggerPrice, Guid? id = null)
+        public static PlaceOrderRequest TakeProfitLimit(string symbol, decimal amount, KunaOrderSide orderSide, decimal price, decimal triggerPrice, Guid? id = null)
         {
-            return new PlaceOrderRequestV4(symbol, orderSide, id)
+            return new PlaceOrderRequest(symbol, orderSide, id)
             {
-                Type = KunaOrderTypeV4.TakeProfitLimit,
+                Type = KunaOrderType.TakeProfitLimit,
                 Price = price.ToString(CultureInfo.InvariantCulture),
                 StopPrice = triggerPrice.ToString(CultureInfo.InvariantCulture),
                 Quantity = amount.ToString(CultureInfo.InvariantCulture),

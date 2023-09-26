@@ -82,7 +82,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToSlowOrderBook(string symbol, Action<KunaOrderBookV4> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToSlowOrderBook(string symbol, Action<KunaOrderBook> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal(AddSymbolToTopic(symbol, "depth"), onData, ct);
     }
@@ -94,7 +94,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToOrderBook(string symbol, Action<KunaOrderBookV4> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToOrderBook(string symbol, Action<KunaOrderBook> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal(AddSymbolToTopic(symbol, "depth100ms"), onData, ct);
     }
@@ -109,7 +109,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToOrdersUpdates(Action<KunaOrderV4> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToOrdersUpdates(Action<KunaOrder> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal("order", onData, ct);
     }
@@ -123,7 +123,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToUserTrades(Action<KunaUserTradeV4> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToUserTrades(Action<KunaUserTrade> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal("trade", onData, ct);
     }
@@ -136,7 +136,7 @@ public class KunaSocketStream : SocketApiClient
     /// <param name="onData"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<CallResult<UpdateSubscription>> SubscribeToUserTrades(Action<SocketBalance> onData, CancellationToken ct = default)
+    public async Task<CallResult<UpdateSubscription>> SubscribeToBalances(Action<KunaSocketBalance> onData, CancellationToken ct = default)
     {
         return await SubscribeInternal("accounts", onData, ct);
     }

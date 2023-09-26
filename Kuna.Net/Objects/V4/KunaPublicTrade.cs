@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaPublicTradeV4
+    public class KunaPublicTrade
     {
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Kuna.Net.Objects.V4
         public DateTimeOffset CreatedAt { get; set; }
 
         [JsonProperty("side")]
-        public KunaOrderSideV4 Side { get; set; }
+        public KunaOrderSide Side { get; set; }
     }
 
 }

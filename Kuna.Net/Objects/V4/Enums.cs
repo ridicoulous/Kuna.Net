@@ -24,7 +24,7 @@ namespace Kuna.Net.Objects.V4
         Crypto
     }
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum KunaOrderTypeV4
+    public enum KunaOrderType
     {
         Limit,
         Market,
@@ -34,7 +34,7 @@ namespace Kuna.Net.Objects.V4
 
     // [JsonConverter(typeof(OrderSideConverter))]
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum KunaOrderSideV4
+    public enum KunaOrderSide
     {
         /// <summary>
         /// for buying base asset
@@ -47,7 +47,7 @@ namespace Kuna.Net.Objects.V4
         [EnumMember(Value = "Ask")]
         Sell
     }
-    public enum KunaOrderStatusV4
+    public enum KunaOrderStatus
     {
         Canceled, 
         Closed, 

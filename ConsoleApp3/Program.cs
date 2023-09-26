@@ -8,8 +8,10 @@ using Newtonsoft.Json.Linq;
 
 internal class Program
 {
-    private static KunaV4RestApiClient _apiClient;
-    private static KunaSocketStream _socketClient;
+//     private static KunaV4RestApiClient? _restSubClient;
+//     private static KunaSocketStream? _socketSubClient;
+    private static KunaRestClient? _restClient;
+    private static KunaSocketClient? _socketClient;
     private readonly static Guid ordId = Guid.NewGuid();
 
     private static async Task Main(string[] args)
@@ -30,21 +32,27 @@ internal class Program
         var topic = $"arrTicker";
         string pair;
         // Act
-        var s = await _socketClient.SubscribeInternal<JToken>(topic, ordBook =>
+        var s = await _socketClient.MainSocketStream.SubscribeToBalances(ordBook =>
         {
-            // Console.WriteLine(ordBook);
+            foreach(var e in ordBook)
+            {
+                Console.WriteLine(e.ToString());
+
+            }
             // Console.WriteLine($"ord book come for {ordBook.Pair}: asks {string.Join(",", JsonConvert.SerializeObject(ordBook.Asks))} bids {string.Join(",", JsonConvert.SerializeObject(ordBook.Bids))}");
             // pair = ordBook.Pair;
         });
+        // var orderbook = new KunaSymbolOrderBook("BTC_USDT", _socketClient, _restClient);
+        // await orderbook.StartAsync();
+        // orderbook.OnBestOffersChanged += book =>
+        // {
+        //     Console.WriteLine($"best ask: {JsonConvert.SerializeObject(book.BestAsk)}, best bid: {JsonConvert.SerializeObject(book.BestBid)}");
+        // };
+
+
         // await _socketClient.UnsubscribeAsync(s.Data);
         Thread.Sleep(Timeout.Infinite);
-        // Assert
-        // expect that all the responses were successfully completed
-        // Assert.True(done >= expectedSuccessfullyExecutedAmount);
-        // and that all the responses were sent in a minute (ratelimeter should allow 1200req/min)
-        // Assert.True(watch.ElapsedMilliseconds < 1000 * 60);
-        // }
-        // #endregion
+ 
     }
 
     private static void SetUpClients()
@@ -70,7 +78,7 @@ internal class Program
                 .SetMinimumLevel(LogLevel.Trace)
                 .AddProvider(new TraceLoggerProvider());
           });
-        _apiClient = (KunaV4RestApiClient)new KunaClient(
+        _restClient = new KunaRestClient(
             new KunaRestOptions()
             {
                 OutputOriginalData = true,
@@ -78,9 +86,9 @@ internal class Program
                 ApiCredentials = cred
             },
             loggerFactory
-        ).ClientV4;
+        );
 
-        _socketClient = new KunaSocketClient(new KunaSocketClientOptions(), loggerFactory).MainSocketStreams;
+        _socketClient = new KunaSocketClient(new KunaSocketClientOptions() {ApiCredentials = cred }, loggerFactory);
 
 
     }

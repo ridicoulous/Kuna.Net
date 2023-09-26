@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaTradingPairV4
+    public class KunaTradingPair
     {
         [JsonProperty("pair")]
         public string Pair { get; set; }

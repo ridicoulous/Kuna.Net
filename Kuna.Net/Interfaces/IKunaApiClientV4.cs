@@ -37,7 +37,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="ct">Cancellation token.</param>
         /// <param name="symbols">Trading symbols to filter the tickers (optional).</param>
         /// <returns>List of tickers.</returns>
-        Task<WebCallResult<IEnumerable<KunaTickerV4>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols);
+        Task<WebCallResult<IEnumerable<KunaTicker>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols);
 
         /// <summary>
         /// Gets the order book for a specified symbol asynchronously.
@@ -46,14 +46,14 @@ namespace Kuna.Net.Interfaces
         /// <param name="level">Amount of price levels for existing orders in the response. 1000 if not provided.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>Order book for the specified symbol.</returns>
-        Task<WebCallResult<KunaOrderBookV4>> GetOrderBookAsync(string symbol, OrderBookLevel? level = null, CancellationToken ct = default);
+        Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, OrderBookLevel? level = null, CancellationToken ct = default);
 
         /// <summary>
         /// Gets a list of trading pairs asynchronously.
         /// </summary>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of trading pairs.</returns>
-        Task<WebCallResult<IEnumerable<KunaTradingPairV4>>> GetTradingPairsAsync(CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync(CancellationToken ct = default);
 
         /// <summary>
         /// Gets available currencies and their information asynchronously.
@@ -61,7 +61,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="type">The currency type to filter (optional).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of currencies.</returns>
-        Task<WebCallResult<IEnumerable<KunaCurrencyV4>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaCurrency>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default);
 
         /// <summary>
         /// Gets a list of recent public trades asynchronously.
@@ -70,7 +70,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="limit">Number of trades to retrieve (1-100, default 25, maximum 100).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of recent public trades.</returns>
-        Task<WebCallResult<IEnumerable<KunaPublicTradeV4>>> GetRecentPublicTradesAsync(string symbol, int? limit = null, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaPublicTrade>>> GetRecentPublicTradesAsync(string symbol, int? limit = null, CancellationToken ct = default);
 
         /// <summary>
         /// Places an order asynchronously.
@@ -78,7 +78,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="parameters">Order placement request parameters.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>Information about the placed order.</returns>
-        Task<WebCallResult<KunaOrderOnPlacingV4>> PlaceOrderAsync(PlaceOrderRequestV4 parameters, CancellationToken ct = default);
+        Task<WebCallResult<KunaOrderOnPlacing>> PlaceOrderAsync(PlaceOrderRequest parameters, CancellationToken ct = default);
 
         /// <summary>
         /// Cancels an order asynchronously.
@@ -107,7 +107,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="status">Order status filter (optional).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of client orders.</returns>
-        Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatusV4? status = null, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaOrder>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatus? status = null, CancellationToken ct = default);
 
         /// <summary>
         /// Gets a list of client open orders asynchronously.
@@ -119,7 +119,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of client open orders.</returns>
-        Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaOrder>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default);
 
         /// <summary>
         /// Gets details of a client order asynchronously.
@@ -128,7 +128,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="withTrades">Include trades associated with the order (optional).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>Details of the client order.</returns>
-        Task<WebCallResult<KunaOrderV4>> GetOrderAsync(Guid id, bool withTrades = false, CancellationToken ct = default);
+        Task<WebCallResult<KunaOrder>> GetOrderAsync(Guid id, bool withTrades = false, CancellationToken ct = default);
 
         /// <summary>
         /// Gets a list of trades associated with a trading pair asynchronously.
@@ -138,7 +138,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of trades associated with the trading pair.</returns>
-        Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaUserTrade>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default);
 
         /// <summary>
         /// Gets all trades associated with an order asynchronously.
@@ -146,7 +146,7 @@ namespace Kuna.Net.Interfaces
         /// <param name="orderId">The unique identifier of the order to retrieve trades for.</param>
         /// <param name="ct">Cancellation token.</param>
         /// <returns>List of trades associated with the order.</returns>
-        Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default);
+        Task<WebCallResult<IEnumerable<KunaUserTrade>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default);
 
         /// <summary>
         /// Gets the balances of all your wallets asynchronously.

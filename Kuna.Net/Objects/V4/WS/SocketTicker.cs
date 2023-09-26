@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4.WS
 {
-    public class KunaSocketTicker : KunaTickerV4
+    public class KunaSocketTicker : KunaTicker
     {
         [JsonProperty("p")]
         public string P { set => Pair = value; }

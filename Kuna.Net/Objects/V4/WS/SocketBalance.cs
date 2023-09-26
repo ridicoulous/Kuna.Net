@@ -1,16 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4.WS
 {
-    public class SocketBalance : IEnumerable
+    [JsonObject] //add this to explicite deserialize as object, not array
+    public class KunaSocketBalance : IEnumerable
     {
         [JsonProperty("userId")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
 
         [JsonProperty("assets")]
         public IEnumerable<KunaAccountBalance> Assets { get; set; } = Array.Empty<KunaAccountBalance>();

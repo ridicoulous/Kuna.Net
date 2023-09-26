@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaTickerV4 : KunaOHLCVBase
+    public class KunaTicker : KunaOHLCVBase
     {
         [JsonProperty("pair")]
         public string Pair { get; set; }

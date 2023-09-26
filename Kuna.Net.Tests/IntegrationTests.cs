@@ -6,6 +6,7 @@ using Xunit;
 using System.Diagnostics;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Interfaces.CommonClients;
+using Newtonsoft.Json;
 
 namespace Kuna.Net.Tests
 {
@@ -15,6 +16,7 @@ namespace Kuna.Net.Tests
     public class KunaV4ApiClientIntegrationTests
     {
         private readonly KunaV4RestApiClient _apiClient;
+        private readonly KunaSocketStream _socketClient;
         private readonly static Guid ordId = Guid.NewGuid();
         public KunaV4ApiClientIntegrationTests()
         {
@@ -38,7 +40,7 @@ namespace Kuna.Net.Tests
                     .SetMinimumLevel(LogLevel.Trace)
                     .AddProvider(new TraceLoggerProvider());
               });
-            _apiClient = (KunaV4RestApiClient)new KunaClient(
+            _apiClient = (KunaV4RestApiClient)new KunaRestClient(
                 new KunaRestOptions()
                 {
                     OutputOriginalData = true,
@@ -47,6 +49,9 @@ namespace Kuna.Net.Tests
                 },
                 loggerFactory
             ).ClientV4;
+
+            _socketClient = new KunaSocketClient(new KunaSocketClientOptions(), loggerFactory).MainSocketStream;
+
         }
 
         #region auth unnecessary
@@ -77,7 +82,7 @@ namespace Kuna.Net.Tests
             // Assert
             Assert.True(result.Success);
             // Add more assertions based on the expected behavior of this method
-            Assert.IsType<KunaTickerV4>(result.Data.First());
+            Assert.IsType<KunaTicker>(result.Data.First());
         }
         [Fact]
         public async Task GetTickersAsyncForBTCUAH_BTCSUDT_Test()
@@ -195,8 +200,8 @@ namespace Kuna.Net.Tests
             var symbol = "BTC_UAH";
             var price = 10m;
             var amount = 0.1m;
-            var side = KunaOrderSideV4.Buy;
-            var req = PlaceOrderRequestV4.LimitOrder(symbol, amount, side, price, ordId);
+            var side = KunaOrderSide.Buy;
+            var req = PlaceOrderRequest.LimitOrder(symbol, amount, side, price, ordId);
 
             // Act
             var result = await _apiClient.PlaceOrderAsync(req);
@@ -285,7 +290,7 @@ namespace Kuna.Net.Tests
             // Arrange 
             var reqNumb = 400;
             var expectedSuccessfullyExecutedAmount = reqNumb;
-            var tasks = new Task<WebCallResult<IEnumerable<KunaTradeV4>>>[reqNumb];
+            var tasks = new Task<WebCallResult<IEnumerable<KunaUserTrade>>>[reqNumb];
             var watch = Stopwatch.StartNew();
             // Act
             _apiClient.SetProAccount(true);
@@ -306,5 +311,8 @@ namespace Kuna.Net.Tests
 
 
         #endregion auth required
+
+
+
     }
 }

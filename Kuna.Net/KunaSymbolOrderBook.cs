@@ -20,23 +20,23 @@ namespace Kuna.Net
         private readonly bool isRestClientOwner;
         public KunaSymbolOrderBook(string symbol, ILogger logger) : base(logger, id, symbol)
         {
-            _socketClient = new KunaSocketClient(new KunaSocketClientOptions()).MainSocketStreams;
-            _restClient = (KunaV4RestApiClient)new KunaClient().ClientV4;
+            _socketClient = new KunaSocketClient(new KunaSocketClientOptions()).MainSocketStream;
+            _restClient = (KunaV4RestApiClient)new KunaRestClient().ClientV4;
             isSocketClientOwner = true;
             isRestClientOwner = true;
         }
-        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaClient restClient) : base(socketClient?.Logger ?? restClient?.Logger, id, symbol)
+        public KunaSymbolOrderBook(string symbol, KunaSocketClient socketClient, KunaRestClient restClient) : base(socketClient?.Logger ?? restClient?.Logger, id, symbol)
         {
-            _socketClient = socketClient?.MainSocketStreams;
+            _socketClient = socketClient?.MainSocketStream;
             _restClient = (KunaV4RestApiClient)restClient?.ClientV4;
             if (_socketClient is null)
             {
-                _socketClient = new KunaSocketClient(new KunaSocketClientOptions()).MainSocketStreams;
+                _socketClient = new KunaSocketClient(new KunaSocketClientOptions()).MainSocketStream;
                 isSocketClientOwner = true;
             }
             if (_restClient is null)
             {
-                _restClient = (KunaV4RestApiClient)new KunaClient().ClientV4;
+                _restClient = (KunaV4RestApiClient)new KunaRestClient().ClientV4;
                 isRestClientOwner = true;
             }
         }

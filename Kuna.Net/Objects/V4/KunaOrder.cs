@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 
 namespace Kuna.Net.Objects.V4
 {
-    public class KunaOrderOnPlacingV4
+    public class KunaOrderOnPlacing
     {
         [JsonProperty("id")]
         public Guid Id { get; set; }
 
         [JsonProperty("type")]
-        public KunaOrderTypeV4 Type { get; set; }
+        public KunaOrderType Type { get; set; }
 
         /// <summary>
         /// Original order quantity
@@ -31,7 +31,7 @@ namespace Kuna.Net.Objects.V4
         public decimal Price { get; set; }
 
         [JsonProperty("status")]
-        public KunaOrderStatusV4 Status { get; set; }
+        public KunaOrderStatus Status { get; set; }
 
         [JsonProperty("createdAt")]
         public DateTimeOffset? CreatedAt { get; set; }
@@ -40,7 +40,7 @@ namespace Kuna.Net.Objects.V4
         public DateTimeOffset UpdatedAt { get; set; }
     }
 
-    public class KunaOrderV4 : KunaOrderOnPlacingV4
+    public class KunaOrder : KunaOrderOnPlacing
     {
         /// <summary>
         /// Traded quantity in money (>0 if traded)
@@ -58,7 +58,7 @@ namespace Kuna.Net.Objects.V4
         /// Bid for buying base asset, Ask for selling base asset.
         /// </summary>
         [JsonProperty("side")]
-        public KunaOrderSideV4 Side { get; set; }
+        public KunaOrderSide Side { get; set; }
 
         /// <summary>
         ///  Date-time of order finish time, UTC
@@ -72,6 +72,6 @@ namespace Kuna.Net.Objects.V4
         /// For socket updates it will be null too!
         /// </summary>
         [JsonProperty("trades")]
-        public List<KunaUserTradeV4> Trades { get; set; }
+        public List<KunaUserTrade> Trades { get; set; }
     }
 }

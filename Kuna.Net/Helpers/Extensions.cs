@@ -68,7 +68,7 @@ namespace Kuna.Net.Helpers
                 throw ex;
             }
         }
-        public static Order ConvertToCryptoExchangeOrder(this KunaOrderV4 source)
+        public static Order ConvertToCryptoExchangeOrder(this KunaOrder source)
         {
             if (source is null)
                 return null;
@@ -80,24 +80,24 @@ namespace Kuna.Net.Helpers
                 Price = source.Price,
                 Quantity = source.Quantity,
                 QuantityFilled = source.ExecutedQuantity,
-                Side = source.Side == KunaOrderSideV4.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
+                Side = source.Side == KunaOrderSide.Buy ? CommonOrderSide.Buy : CommonOrderSide.Sell,
                 Status = source.Status switch
                 {
-                    KunaOrderStatusV4.Canceled => CommonOrderStatus.Canceled,
-                    KunaOrderStatusV4.Expired => CommonOrderStatus.Canceled,
-                    KunaOrderStatusV4.Rejected => CommonOrderStatus.Canceled,
-                    KunaOrderStatusV4.Closed => CommonOrderStatus.Filled,
-                    KunaOrderStatusV4.Open => CommonOrderStatus.Active,
-                    KunaOrderStatusV4.Pending => CommonOrderStatus.Active,
-                    KunaOrderStatusV4.WaitStop => CommonOrderStatus.Active,
+                    KunaOrderStatus.Canceled => CommonOrderStatus.Canceled,
+                    KunaOrderStatus.Expired => CommonOrderStatus.Canceled,
+                    KunaOrderStatus.Rejected => CommonOrderStatus.Canceled,
+                    KunaOrderStatus.Closed => CommonOrderStatus.Filled,
+                    KunaOrderStatus.Open => CommonOrderStatus.Active,
+                    KunaOrderStatus.Pending => CommonOrderStatus.Active,
+                    KunaOrderStatus.WaitStop => CommonOrderStatus.Active,
                     _ => CommonOrderStatus.Canceled
                 },
                 Symbol = source.Pair,
                 Timestamp = source.UpdatedAt.DateTime,
                 Type = source.Type switch
                 {
-                    KunaOrderTypeV4.Limit => CommonOrderType.Limit,
-                    KunaOrderTypeV4.Market => CommonOrderType.Market,
+                    KunaOrderType.Limit => CommonOrderType.Limit,
+                    KunaOrderType.Market => CommonOrderType.Market,
                     _ => CommonOrderType.Other,
                 }
             };

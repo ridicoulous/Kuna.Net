@@ -116,11 +116,11 @@ namespace Kuna.Net.Objects.V4
             throw new NotSupportedException();
         }
 
-        public async Task<WebCallResult<IEnumerable<KunaTickerV4>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols)
+        public async Task<WebCallResult<IEnumerable<KunaTicker>>> GetTickersAsync(CancellationToken ct = default, params string[] symbols)
         {
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("pairs", symbols.AsStringParameterOrNull());
-            return await SendRequestAsync<IEnumerable<KunaTickerV4>>(CanBeSigned ? TickersEndpointAuth : TickersEndpoint, HttpMethod.Get, request, CanBeSigned, ct);
+            return await SendRequestAsync<IEnumerable<KunaTicker>>(CanBeSigned ? TickersEndpointAuth : TickersEndpoint, HttpMethod.Get, request, CanBeSigned, ct);
 
         }
 
@@ -131,12 +131,12 @@ namespace Kuna.Net.Objects.V4
         /// <param name="level">Amount of price levels for existing orders in the response. 1000 if not provided. </param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<KunaOrderBookV4>> GetOrderBookAsync(string symbol, OrderBookLevel? level = null, CancellationToken ct = default)
+        public async Task<WebCallResult<KunaOrderBook>> GetOrderBookAsync(string symbol, OrderBookLevel? level = null, CancellationToken ct = default)
         {
             string url = CanBeSigned ? OrderBookEndpointAuth : OrderBookEndpoint;
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("level", (int?) level);
-            return await SendRequestAsync<KunaOrderBookV4>(FillPathParameter(url, symbol), HttpMethod.Get, request, CanBeSigned, ct);
+            return await SendRequestAsync<KunaOrderBook>(FillPathParameter(url, symbol), HttpMethod.Get, request, CanBeSigned, ct);
         }
 
         /// <summary>
@@ -146,9 +146,9 @@ namespace Kuna.Net.Objects.V4
         /// </summary>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaTradingPairV4>>> GetTradingPairsAsync(CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaTradingPair>>> GetTradingPairsAsync(CancellationToken ct = default)
         {
-            return await SendRequestAsync<IEnumerable<KunaTradingPairV4>>(CanBeSigned ? TradingPairsEndpointAuth : TradingPairsEndpoint, HttpMethod.Get, null, CanBeSigned, ct);
+            return await SendRequestAsync<IEnumerable<KunaTradingPair>>(CanBeSigned ? TradingPairsEndpointAuth : TradingPairsEndpoint, HttpMethod.Get, null, CanBeSigned, ct);
         }
 
         /// <summary>
@@ -158,11 +158,11 @@ namespace Kuna.Net.Objects.V4
         /// <param name="type"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaCurrencyV4>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaCurrency>>> GetCurrenciesAsync(CurrencyType? type = null, CancellationToken ct = default)
         {
             var request = new Dictionary<string, object>();
             request.AddOptionalParameter("type", type);
-            return await SendRequestAsync<IEnumerable<KunaCurrencyV4>>(CurrenciesEndpoint, HttpMethod.Get, request, false, ct);
+            return await SendRequestAsync<IEnumerable<KunaCurrency>>(CurrenciesEndpoint, HttpMethod.Get, request, false, ct);
 
         }
 
@@ -174,21 +174,21 @@ namespace Kuna.Net.Objects.V4
         /// <param name="limit">1-100, default 25, maximum 100</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaPublicTradeV4>>> GetRecentPublicTradesAsync(string symbol, int? limit = null, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaPublicTrade>>> GetRecentPublicTradesAsync(string symbol, int? limit = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             parameters.AddOptionalParameter("limit", limit);
             var url = CanBeSigned? PublicTradesEndPointAuth : PublicTradesEndPoint;
-            return await SendRequestAsync<IEnumerable<KunaPublicTradeV4>>(FillPathParameter(url, symbol), HttpMethod.Get, parameters, CanBeSigned, ct);
+            return await SendRequestAsync<IEnumerable<KunaPublicTrade>>(FillPathParameter(url, symbol), HttpMethod.Get, parameters, CanBeSigned, ct);
 
         }
 
         #endregion Public API
         #region Trading API
-        public async Task<WebCallResult<KunaOrderOnPlacingV4>> PlaceOrderAsync(PlaceOrderRequestV4 parameters, CancellationToken ct = default)
+        public async Task<WebCallResult<KunaOrderOnPlacing>> PlaceOrderAsync(PlaceOrderRequest parameters, CancellationToken ct = default)
         {
 
-            var result = await SendRequestAsync<KunaOrderOnPlacingV4>(PlaceOrderEndpoint, HttpMethod.Post, parameters.AsDictionary(), true, ct);
+            var result = await SendRequestAsync<KunaOrderOnPlacing>(PlaceOrderEndpoint, HttpMethod.Post, parameters.AsDictionary(), true, ct);
             if (result.Success)
             {
                 OnOrderPlaced?.Invoke(new OrderId() { SourceObject = result.Data, Id = result.Data.Id.ToString() });
@@ -240,7 +240,7 @@ namespace Kuna.Net.Objects.V4
         /// To get active orders, please use GetActiveOrdersAsync() method.</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatusV4? status = null, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaOrder>>> GetOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, KunaOrderStatus? status = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             if (markets?.Any() == true)
@@ -253,7 +253,7 @@ namespace Kuna.Net.Objects.V4
             parameters.AddOptionalParameter("start", from);
             parameters.AddOptionalParameter("end", to);
             parameters.AddOptionalParameter("status", status);
-            return await SendRequestAsync<IEnumerable<KunaOrderV4>>(OrdersEndpoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaOrder>>(OrdersEndpoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -269,7 +269,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="sortDesc"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaOrderV4>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaOrder>>> GetActiveOrdersAsync(IEnumerable<string> markets = null, DateTime? from = null, DateTime? to = null, int? limit = null, bool sortDesc = true, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             if (markets?.Any() == true)
@@ -281,7 +281,7 @@ namespace Kuna.Net.Objects.V4
             parameters.AddOptionalParameter("limit", limit);
             parameters.AddOptionalParameter("start", from);
             parameters.AddOptionalParameter("end", to);
-            return await SendRequestAsync<IEnumerable<KunaOrderV4>>(ActiveOrdersEndpoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaOrder>>(ActiveOrdersEndpoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -293,7 +293,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="withTrades"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<KunaOrderV4>> GetOrderAsync(Guid id, bool withTrades = false, CancellationToken ct = default)
+        public async Task<WebCallResult<KunaOrder>> GetOrderAsync(Guid id, bool withTrades = false, CancellationToken ct = default)
         {
             Dictionary<string, object> parameters = null;
             if (withTrades == true)
@@ -301,7 +301,7 @@ namespace Kuna.Net.Objects.V4
                 new Dictionary<string, object>();
                 parameters.AddParameter("withTrades", "true");
             }
-            return await SendRequestAsync<KunaOrderV4>(FillPathParameter(OrderDetailsEndpoint, id.ToString()), HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<KunaOrder>(FillPathParameter(OrderDetailsEndpoint, id.ToString()), HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -313,7 +313,7 @@ namespace Kuna.Net.Objects.V4
         /// <param name="sortDesc">Sort the resulting list newest-on-top (true) or oldest-on-top (false).</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaUserTrade>>> GetTradesAsync(string market, Guid? orderId, bool sortDesc = true, CancellationToken ct = default)
         {
             Dictionary<string, object> parameters = new();
             parameters.AddOptionalParameter("pair", market);
@@ -321,7 +321,7 @@ namespace Kuna.Net.Objects.V4
             if (!sortDesc)
                 parameters.AddOptionalParameter("sort", "asc");
 
-            return await SendRequestAsync<IEnumerable<KunaUserTradeV4>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaUserTrade>>(UserTradesEndPoint, HttpMethod.Get, parameters, true, ct);
 
         }
 
@@ -331,9 +331,9 @@ namespace Kuna.Net.Objects.V4
         /// <param name="orderId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public async Task<WebCallResult<IEnumerable<KunaUserTradeV4>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
+        public async Task<WebCallResult<IEnumerable<KunaUserTrade>>> GetOrderTradesAsync(Guid orderId, CancellationToken ct = default)
         {
-            return await SendRequestAsync<IEnumerable<KunaUserTradeV4>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
+            return await SendRequestAsync<IEnumerable<KunaUserTrade>>(FillPathParameter(OrderTradesEndPoint, orderId.ToString()), HttpMethod.Get, null, true, ct);
         }
         #endregion Trading API
 
@@ -384,7 +384,7 @@ namespace Kuna.Net.Objects.V4
             {
                 header = new() { [ProParameter.Key] = ProParameter.Value };
             }
-            var result = await SendRequestAsync<KunaV4BaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed, additionalHeaders: header).ConfigureAwait(false);
+            var result = await SendRequestAsync<KunaBaseResponse<T>>(GetUrl(endpoint), method, ct, parameters, signed, additionalHeaders: header).ConfigureAwait(false);
             if (!result.Success)
             {
                 OnError?.Invoke(result.Error.Message);
@@ -394,11 +394,11 @@ namespace Kuna.Net.Objects.V4
 
         async Task<WebCallResult<OrderId>> ISpotClient.PlaceOrderAsync(string symbol, CommonOrderSide side, CommonOrderType type, decimal quantity, decimal? price, string accountId, string clientOrderId, CancellationToken ct)
         {
-            var kunaOrdSide = side == CommonOrderSide.Buy ? KunaOrderSideV4.Buy : KunaOrderSideV4.Sell;
-            PlaceOrderRequestV4 reqparam = type switch
+            var kunaOrdSide = side == CommonOrderSide.Buy ? KunaOrderSide.Buy : KunaOrderSide.Sell;
+            PlaceOrderRequest reqparam = type switch
             {
-                CommonOrderType.Limit => PlaceOrderRequestV4.LimitOrder(symbol, quantity, kunaOrdSide, price.Value, clientOrderId == null ? null : Guid.Parse(clientOrderId)),
-                CommonOrderType.Market => PlaceOrderRequestV4.MarketOrder(symbol, quantity, kunaOrdSide, id: clientOrderId == null ? null : Guid.Parse(clientOrderId)),
+                CommonOrderType.Limit => PlaceOrderRequest.LimitOrder(symbol, quantity, kunaOrdSide, price.Value, clientOrderId == null ? null : Guid.Parse(clientOrderId)),
+                CommonOrderType.Market => PlaceOrderRequest.MarketOrder(symbol, quantity, kunaOrdSide, id: clientOrderId == null ? null : Guid.Parse(clientOrderId)),
                 _ => throw new ArgumentException($"Unsupported order type {type}")
             };
             var result = await PlaceOrderAsync(reqparam, ct);
@@ -504,7 +504,7 @@ namespace Kuna.Net.Objects.V4
         async Task<WebCallResult<Order>> IBaseRestClient.GetOrderAsync(string orderId, string symbol, CancellationToken ct)
         {
             var order = await GetOrderAsync(Guid.Parse(orderId));
-            static Order map(WebCallResult<KunaOrderV4> x) => x.Data?.ConvertToCryptoExchangeOrder();
+            static Order map(WebCallResult<KunaOrder> x) => x.Data?.ConvertToCryptoExchangeOrder();
             return WebCallResultMappings.Map(order, map);
         }
 
@@ -538,7 +538,7 @@ namespace Kuna.Net.Objects.V4
         async Task<WebCallResult<IEnumerable<Order>>> IBaseRestClient.GetClosedOrdersAsync(string symbol, CancellationToken ct)
         {
             return WebCallResultMappings.Map(
-                await GetOrdersAsync(new[] { symbol }, status: KunaOrderStatusV4.Closed, ct: ct),
+                await GetOrdersAsync(new[] { symbol }, status: KunaOrderStatus.Closed, ct: ct),
                 resp => resp.Data?.Select(t => t.ConvertToCryptoExchangeOrder())
             );
         }
