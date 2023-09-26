@@ -1,48 +1,36 @@
-﻿using CryptoExchange.Net;
+﻿using System.Net.Http;
+using CryptoExchange.Net;
 using CryptoExchange.Net.Interfaces.CommonClients;
-using CryptoExchange.Net.Objects;
 using Kuna.Net.Interfaces;
-using Kuna.Net.Objects.V2;
-using Kuna.Net.Objects.V3;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Kuna.Net.Objects.V4;
+using Microsoft.Extensions.Logging;
 
 namespace Kuna.Net
 {
-    public class KunaClient : BaseRestClient, IKunaClient
+    public class KunaRestClient : BaseRestClient, IKunaClient
     {
-        private static KunaApiClientOptions DefaultOptions = new KunaApiClientOptions(false,true);
-        private static KunaApiClientOptions DefaultOptionsV2 = new KunaApiClientOptions(false,false);
-        private static KunaClientOptions DefaultBaseOptions = new KunaClientOptions(false);
+        private static readonly KunaApiClientOptions DefaultOptions = new();
+        private static readonly KunaRestOptions DefaultBaseOptions = new(false);
+        internal ILogger Logger { get => _logger; }
 
-        public KunaClient(KunaClientOptions exchangeOptions) : base("Kuna", exchangeOptions)
+        public KunaRestClient(KunaRestOptions exchangeOptions, ILoggerFactory logger = null, HttpClient httpClient = null) : base(logger, "Kuna")
         {
-            ClientV2 = AddApiClient(new KunaV2ApiClient(log, this, exchangeOptions, DefaultOptionsV2));
-            ClientV3 = AddApiClient(new KunaApiClient(log, this, exchangeOptions, DefaultOptions));
+            var options = exchangeOptions ?? DefaultBaseOptions;
+            Initialize(options);
+            ClientV4 = AddApiClient(new KunaV4RestApiClient(_logger, httpClient, "https://api.kuna.io/", options, DefaultOptions));
         }
 
-        public KunaClient() : base("Kuna", DefaultBaseOptions)
+        public KunaRestClient() : this(DefaultBaseOptions)
         {
-            ClientV2 = AddApiClient(new KunaV2ApiClient(log, this, DefaultBaseOptions, DefaultOptionsV2));
-            ClientV3 = AddApiClient(new KunaApiClient(log, this, DefaultBaseOptions, DefaultOptions));
         }
+
         public string ExchangeName => "Kuna";
 
-        public IKunaApiClientV2 ClientV2 { get; }
+        public IKunaApiClientV4 ClientV4 { get; }
 
-        public IKunaApiClientV3 ClientV3 { get; }
 
-        public ISpotClient CommonSpotClient => ClientV3;
+        public ISpotClient CommonSpotClient => ClientV4;
 
-        internal async Task<WebCallResult<T>> SendRequestInternal<T>(RestApiClient apiClient, Uri uri, HttpMethod method, CancellationToken cancellationToken,
-   Dictionary<string, object>? parameters = null, bool signed = false, HttpMethodParameterPosition? postPosition = null,
-   ArrayParametersSerialization? arraySerialization = null, int weight = 1) where T : class
-        {
-            return await base.SendRequestAsync<T>(apiClient, uri, method, cancellationToken, parameters, signed, postPosition, arraySerialization, requestWeight: weight);
-        }
 
     }
 }

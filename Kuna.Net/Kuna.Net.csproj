@@ -28,9 +28,12 @@ fixed / in base address</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="5.2.3" />
-    <PackageReference Include="Pusher.NetStandard" Version="0.5.9" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="CryptoExchange.Net" Version="6.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+        <_Parameter1>Kuna.Net.Tests</_Parameter1>
+      </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

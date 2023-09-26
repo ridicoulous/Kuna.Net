@@ -1,13 +1,28 @@
-﻿using CryptoExchange.Net.Objects;
+﻿using CryptoExchange.Net.Objects.Options;
 
 namespace Kuna.Net
 {
-    public class KunaClientOptions : BaseRestClientOptions 
+    public class KunaRestOptions : RestExchangeOptions 
     {
+        
         public bool IsProAccount { get; set; }
-        public KunaClientOptions(bool isPro = false)
+        internal bool UseSingleApiKey { get; private set; }
+
+        public new KunaApiCredentials ApiCredentials
+        {
+            set
+            {
+                base.ApiCredentials = value;
+                UseSingleApiKey = value?.UseSingleApiKey ?? false;
+            }
+        }
+        public KunaRestOptions(bool isPro)
         {
             IsProAccount = isPro;
-        }     
+        }
+
+        public KunaRestOptions()
+        {
+        }
     }
 }

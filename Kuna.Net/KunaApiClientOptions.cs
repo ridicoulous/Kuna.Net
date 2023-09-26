@@ -1,18 +1,13 @@
-﻿using CryptoExchange.Net.Objects;
-using System;
+﻿using CryptoExchange.Net.Objects.Options;
 
 namespace Kuna.Net
 {
-    public class KunaApiClientOptions : RestApiClientOptions
+    public class KunaApiClientOptions : RestApiOptions
     {
-        public bool IsProAccount { get; set; }
-        public KunaApiClientOptions(bool isPro = false, bool newVersion = true) : base(newVersion ? "https://api.kuna.io/v3/" : "https://kuna.io/api/v2/")
+        public KunaApiClientOptions() : base()
         {
-            IsProAccount = isPro;
-            if (newVersion)
-            {
-                RateLimiters.Add(new RateLimiter().AddTotalRateLimit(isPro ? 1200 : 600, TimeSpan.FromMinutes(1)));
-            }
+            // wait for aproving pull request
+            // IsRateLimitReplacingAllowed = true;
         }
     }
 }
